@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #101B2C;
+  --color-navy-deep: #0C1522;
+  --color-surface: #172234;
+  --color-surface-2: #1A2638;
+  --color-line: #2E3B52;
+  --color-line-2: #3A4760;
+  --color-slate: #49536F;
+  --color-plum: #2A1F39;
+  --color-plum-line: #3A3150;
+  --color-sage: #494E38;
+  --color-mist: #6A838A;
+  --color-gold: #B89567;
+  --color-gold-soft: #D2B488;
+  --color-gold-pale: #E6CDA6;
+  --color-ivory: #F6F1E8;
+  --color-ink: #F3ECDF;
+  --color-text: #EDE6DA;
+  --color-muted: #C4CBD7;
+  --color-subtle: #A9B4C6;
+  --color-faint: #7F8BA0;
+  --color-calm: #9FB5BA;
+  --color-calm-text: #B9CDD1;
+
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Manrope", system-ui, sans-serif;
+}
+
+@layer base {
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--color-navy-deep);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+a { color: var(--color-gold-soft); }
+a:hover { color: var(--color-gold-pale); }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--color-gold-soft); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+
+/* Intro portal animation */
+@keyframes xa-zoom {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(2.6); filter: blur(6px); }
+  55% { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
+}
+@keyframes xa-ring {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.4); }
+  40% { opacity: .6; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(2.2); }
+}
+@keyframes xa-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.xa-page { animation: xa-fade .45s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
