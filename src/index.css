@@ -49,7 +49,7 @@ button { font: inherit; }
 @keyframes xa-zoom {
   0% { opacity: 0; transform: translate(-50%, -50%) scale(2.6); filter: blur(6px); }
   55% { opacity: 1; filter: blur(0); }
-  100% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
 }
 @keyframes xa-ring {
   0% { opacity: 0; transform: translate(-50%, -50%) scale(.4); }
@@ -57,6 +57,12 @@ button { font: inherit; }
   100% { opacity: 0; transform: translate(-50%, -50%) scale(2.2); }
 }
 @keyframes xa-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+/* Emblem turns around its central star, like an orbit around a nucleus */
+@keyframes xa-orbit { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+@keyframes xa-glow {
+  0%, 100% { filter: drop-shadow(0 0 0 rgba(184, 149, 103, 0)); }
+  50% { filter: drop-shadow(0 0 7px rgba(184, 149, 103, .75)); }
+}
 .xa-page { animation: xa-fade .45s ease-out both; }
 
 @media (prefers-reduced-motion: reduce) {

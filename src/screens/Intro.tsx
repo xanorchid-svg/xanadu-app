@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { inputCls, Field } from '../components/ui'
+import Logo from '../components/Logo'
 import { ROLE_HOME, type Role } from '../data'
 
 const ROLES: { role: Role; sub: string }[] = [
@@ -44,31 +45,31 @@ export default function Intro() {
         </>
       )}
 
-      <img
+      <div
         key={`logo-${run}`}
-        src="/xanadu-logo.png"
-        alt="Xanadu — a network for awakening places"
-        className="absolute left-1/2 block h-auto"
+        className="absolute left-1/2 w-[320px]"
         style={intro
-          ? { top: '46%', width: 300, transform: 'translate(-50%,-50%) scale(1.12)', animation: `xa-zoom 1.8s ${ease} both` }
-          : { top: 116, width: 196, transform: 'translate(-50%,-50%) scale(1)', transition: `top 1.3s ${ease}, width 1.3s ${ease}, transform 1.3s ${ease}` }}
-      />
+          ? { top: '46%', transform: 'translate(-50%,-50%) scale(1.05)', animation: `xa-zoom 1.8s ${ease} both` }
+          : { top: 'calc(env(safe-area-inset-top) + 150px)', transform: 'translate(-50%,-50%) scale(1)', transition: `top 1.3s ${ease}, transform 1.3s ${ease}` }}
+      >
+        <Logo spinning={!intro} />
+      </div>
 
       <form
         onSubmit={(e) => { e.preventDefault(); navigate(ROLE_HOME[role]) }}
         aria-hidden={intro}
-        className="absolute inset-x-0 bottom-0 flex h-[min(636px,calc(100%-200px))] flex-col gap-3.5 overflow-y-auto rounded-t-[32px] bg-navy px-[22px] pt-[26px] pb-[max(22px,env(safe-area-inset-bottom))]"
+        className="absolute inset-x-0 bottom-0 flex h-[calc(100%-282px-env(safe-area-inset-top))] flex-col gap-2.5 overflow-y-auto rounded-t-[32px] bg-navy px-[22px] pt-5 pb-[max(22px,env(safe-area-inset-bottom))]"
         style={{ transform: intro ? 'translateY(102%)' : 'translateY(0)', transition: `transform 1.1s ${ease} .2s` }}
       >
         <div className="flex flex-col gap-1">
-          <h1 className="m-0 font-display text-[32px] leading-[1.05] font-medium text-ink">Xanadu begins <em className="text-gold-soft">with you.</em></h1>
+          <h1 className="m-0 font-display text-[30px] leading-[1.05] font-medium text-ink">Xanadu begins <em className="text-gold-soft">with you.</em></h1>
           <span className="text-sm text-subtle">Sign in as</span>
         </div>
 
         <div role="radiogroup" aria-label="Sign in as" className="grid grid-cols-3 gap-1.5 rounded-2xl bg-surface p-1">
           {ROLES.map(({ role: r, sub }) => (
             <button key={r} type="button" role="radio" aria-checked={role === r} onClick={() => setRole(r)}
-              className={`flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-xl transition-colors ${role === r ? 'bg-gold text-navy' : 'text-muted'}`}>
+              className={`flex min-h-12 flex-col items-center justify-center rounded-xl transition-colors ${role === r ? 'bg-gold text-navy' : 'text-muted'}`}>
               <span className="text-sm font-semibold">{r}</span>
               <span className="text-[11px] opacity-80">{sub}</span>
             </button>
@@ -92,7 +93,7 @@ export default function Intro() {
           <span>{join.lead}</span>
           <Link to={join.to} className="font-semibold no-underline">{join.label}</Link>
         </p>
-        <button type="button" onClick={() => setRun((n) => n + 1)} className="min-h-8 self-center text-xs text-[#5B6780]">Replay intro</button>
+        <button type="button" onClick={() => setRun((n) => n + 1)} className="min-h-6 self-center text-xs text-[#5B6780]">Replay intro</button>
       </form>
     </div>
   )
