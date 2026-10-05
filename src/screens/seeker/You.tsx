@@ -3,16 +3,36 @@ import { Link } from 'react-router-dom'
 import { Chip, EmptyState, H2, Page, PrimaryButton, Screen, SeekerTabs, Segmented, Switch } from '../../components/ui'
 import { IconChart, IconSettings } from '../../components/icons'
 import { CONTACT_EMAIL } from '../../data'
+import { AvatarPicker, EditFooter, SignOutButton, STORAGE_FULL, TextField } from '../../components/edit'
+import { useSeekerProfile, type SeekerProfile } from '../../store'
 
 const ALIGN = ['Yoga', 'Breathwork', 'Meditation', 'Sound', 'Ecstatic dance', 'Kirtan', 'Trainings', "Women's retreats", "Men's retreats", 'Permaculture']
 const JOURNEY_TABS = ['Upcoming', 'Past'] as const
 
 export default function You() {
-  const [prefs, setPrefs] = useState<string[]>([])
+  const [me, save] = useSeekerProfile()
   const [tab, setTab] = useState<(typeof JOURNEY_TABS)[number]>('Upcoming')
   const [chart, setChart] = useState(false)
-  const [notify, setNotify] = useState(true)
-  const toggle = (p: string) => setPrefs((xs) => (xs.includes(p) ? xs.filter((x) => x !== p) : [...xs, p]))
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState<SeekerProfile>(me)
+  const [error, setError] = useState('')
+  const prefs = me.prefs
+  const toggle = (p: string) => save({ ...me, prefs: prefs.includes(p) ? prefs.filter((x) => x !== p) : [...prefs, p] })
+  const set = <K extends keyof SeekerProfile>(k: K, v: SeekerProfile[K]) => setDraft((d) => ({ ...d, [k]: v }))
+
+  if (editing) {
+    const commit = () => { if (save(draft)) setEditing(false); else setError(STORAGE_FULL) }
+    return (
+      <Screen footer={<EditFooter onCancel={() => setEditing(false)} onSave={commit} error={error} />}>
+        <div className="flex flex-col gap-5 px-5 pt-[52px] pb-8">
+          <h1 className="m-0 font-display text-[32px] font-medium text-ink">Edit profile</h1>
+          <AvatarPicker photo={draft.photo} onChange={(p) => set('photo', p)} />
+          <TextField label="Your name" value={draft.name} onChange={(v) => set('name', v)} autoComplete="name" />
+          <TextField label="Home region" value={draft.region} onChange={(v) => set('region', v)} placeholder="e.g. Costa Rica" />
+        </div>
+      </Screen>
+    )
+  }
 
   const row = 'flex min-h-[52px] items-center justify-between border-b border-[#1F2B3E] text-[15px] text-text no-underline'
 
@@ -20,12 +40,14 @@ export default function You() {
     <Screen footer={<SeekerTabs />}>
       <Page className="gap-6 pb-7">
         <div className="flex items-center gap-4">
-          <div className="flex h-[72px] w-[72px] flex-none items-center justify-center rounded-full border border-gold bg-plum font-display text-3xl text-gold-pale">X</div>
+          <div className="flex h-[72px] w-[72px] flex-none items-center justify-center overflow-hidden rounded-full border border-gold bg-plum font-display text-3xl text-gold-pale">
+            {me.photo ? <img src={me.photo} alt="" className="h-full w-full object-cover" /> : (me.name.trim()[0] ?? 'X').toUpperCase()}
+          </div>
           <div className="flex flex-1 flex-col gap-1">
-            <h1 className="m-0 font-display text-3xl font-medium text-ink">[Your name]</h1>
+            <h1 className="m-0 font-display text-3xl font-medium text-ink">{me.name.trim() || '[Your name]'}</h1>
             <span className="text-[13px] text-subtle">Seeker · Joined October 2026</span>
           </div>
-          <button type="button" aria-label="Settings" className="flex h-11 w-11 items-center justify-center rounded-full border border-line text-muted"><IconSettings /></button>
+          <button type="button" aria-label="Edit profile" onClick={() => { setDraft(me); setError(''); setEditing(true) }} className="flex h-11 w-11 items-center justify-center rounded-full border border-line text-muted"><IconSettings /></button>
         </div>
 
         <section className="flex flex-col gap-3">
@@ -58,8 +80,9 @@ export default function You() {
         <section className="flex flex-col">
           <H2 className="mb-1.5 text-[22px]">Account</H2>
           <div className={row}>Membership <span className="text-[13px] text-gold-soft">Founding Seeker · Free</span></div>
-          <div className={row}>Home region <span className="text-[13px] text-subtle">Costa Rica</span></div>
-          <div className={row}>New aligned experiences <Switch on={notify} onChange={setNotify} label="Notify me about new aligned experiences" /></div>
+          <button type="button" onClick={() => { setDraft(me); setError(''); setEditing(true) }} className={`${row} w-full text-left`}>Profile <span className="text-[13px] text-gold-soft">Edit name, photo, region</span></button>
+          <div className={row}>Home region <span className="text-[13px] text-subtle">{me.region.trim() || 'Costa Rica'}</span></div>
+          <div className={row}>New aligned experiences <Switch on={me.notify} onChange={(v) => save({ ...me, notify: v })} label="Notify me about new aligned experiences" /></div>
           <div className={row}>Privacy &amp; data <span className="text-[13px] text-subtle">Coming soon</span></div>
           <div className={row}>Community guidelines <span className="text-[13px] text-subtle">Coming soon</span></div>
           <a href={`mailto:${CONTACT_EMAIL}`} className={`${row} border-b-0`}>Help <span className="text-[13px] text-subtle">{CONTACT_EMAIL}</span></a>
@@ -69,7 +92,7 @@ export default function You() {
           <span className="text-base font-semibold">Hold space on Xanadu</span>
           <span className="text-[13px]">List your retreat space or offer your practice →</span>
         </Link>
-        <Link to="/" className="flex min-h-11 items-center justify-center text-sm text-subtle no-underline">Sign out</Link>
+        <SignOutButton />
       </Page>
     </Screen>
   )

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useFacilitatorProfile } from '../../store'
 import { Badge, Checklist, EmptyState, FacilitatorTabs, H2, Page, Screen, Switch } from '../../components/ui'
 
 const SETUP = [
@@ -12,8 +13,17 @@ const SETUP = [
 
 export default function FacilitatorHome() {
   const [open, setOpen] = useState(true)
-  const [done, setDone] = useState<string[]>(['account'])
-  const toggle = (id: string) => setDone((d) => (d.includes(id) ? d.filter((x) => x !== id) : [...d, id]))
+  const [me] = useFacilitatorProfile()
+  const [manual, setManual] = useState<string[]>(['account'])
+  // items tick themselves off as the profile fills in
+  const auto = [
+    me.photo ? 'photo' : '',
+    me.about.trim() ? 'about' : '',
+    me.trainings.length ? 'training' : '',
+    me.references.length ? 'refs' : '',
+  ].filter(Boolean)
+  const done = Array.from(new Set([...manual, ...auto]))
+  const toggle = (id: string) => setManual((d) => (d.includes(id) ? d.filter((x) => x !== id) : [...d, id]))
 
   return (
     <Screen footer={<FacilitatorTabs />}>
@@ -21,10 +31,10 @@ export default function FacilitatorHome() {
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
             <span className="text-xs text-subtle">Pura vida</span>
-            <h1 className="m-0 font-display text-[32px] font-medium text-ink">[Your name]</h1>
+            <h1 className="m-0 font-display text-[32px] font-medium text-ink">{me.name.trim() || '[Your name]'}</h1>
             <div className="mt-1"><Badge>Founding Facilitator</Badge></div>
           </div>
-          <Link to="/facilitator/profile" aria-label="Your profile" className="flex h-12 w-12 flex-none items-center justify-center rounded-full border border-dashed border-slate text-xl text-subtle no-underline">+</Link>
+          <Link to="/facilitator/profile" aria-label="Your profile" className="flex h-12 w-12 flex-none items-center justify-center overflow-hidden rounded-full border border-dashed border-slate text-xl text-subtle no-underline">{me.photo ? <img src={me.photo} alt="" className="h-full w-full object-cover" /> : '+'}</Link>
         </div>
 
         <div className="flex items-center justify-between gap-3 rounded-2xl bg-surface px-4 py-3.5">

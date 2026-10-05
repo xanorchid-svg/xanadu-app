@@ -40,6 +40,8 @@ npm run build    # production build in dist/
 
 ## Where things live
 
+- `src/store.ts`: profile storage. Seeker, space and facilitator profiles (text and photos) are editable and saved on the device until Supabase accounts are connected; photos are resized before saving.
+- `src/components/edit.tsx`: edit controls (text fields, photo pickers, practice pickers, save bar, sign out).
 - `src/data.ts`: the data layer. `experiences` and `spaces` are empty lists today; screens already render cards when they contain items. Swap these for Supabase queries.
 - `src/components/ui.tsx`: shared pieces (tab bars, chips, empty states, checklists, reviews).
 - `src/screens/`: one file per screen, grouped by `seeker`, `host`, `container`, `facilitator`.

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Badge, Checklist, ContainerTabs, EmptyState, H2, Page, PrimaryLink, Screen } from '../../components/ui'
 import { IconPeople } from '../../components/icons'
+import { useSpaceProfile } from '../../store'
 
 const SETUP = [
   { id: 'account', title: 'Create your account', sub: 'Done when you were accepted', to: '/container' },
@@ -12,8 +13,16 @@ const SETUP = [
 ]
 
 export default function ContainerHome() {
-  const [done, setDone] = useState<string[]>(['account'])
-  const toggle = (id: string) => setDone((d) => (d.includes(id) ? d.filter((x) => x !== id) : [...d, id]))
+  const [space] = useSpaceProfile()
+  const [manual, setManual] = useState<string[]>(['account'])
+  // items tick themselves off as the space profile fills in
+  const auto = [
+    space.photos.length ? 'photos' : '',
+    space.about.trim() ? 'about' : '',
+    space.sleeps.trim() || space.kitchen.trim() || space.gettingHere.trim() ? 'details' : '',
+  ].filter(Boolean)
+  const done = Array.from(new Set([...manual, ...auto]))
+  const toggle = (id: string) => setManual((d) => (d.includes(id) ? d.filter((x) => x !== id) : [...d, id]))
 
   return (
     <Screen footer={<ContainerTabs />}>
@@ -21,10 +30,10 @@ export default function ContainerHome() {
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
             <span className="text-xs text-subtle">Welcome</span>
-            <h1 className="m-0 font-display text-[32px] font-medium text-ink">[Your space name]</h1>
+            <h1 className="m-0 font-display text-[32px] font-medium text-ink">{space.name.trim() || '[Your space name]'}</h1>
             <div className="mt-1"><Badge>Founding Container</Badge></div>
           </div>
-          <Link to="/container/space" aria-label="Your space profile" className="flex h-12 w-12 flex-none items-center justify-center rounded-[14px] border border-dashed border-slate text-xl text-subtle no-underline">+</Link>
+          <Link to="/container/space" aria-label="Your space profile" className="flex h-12 w-12 flex-none items-center justify-center overflow-hidden rounded-[14px] border border-dashed border-slate text-xl text-subtle no-underline">{space.photos[0] ? <img src={space.photos[0]} alt="" className="h-full w-full object-cover" /> : '+'}</Link>
         </div>
 
         <Checklist title="Set up your space" items={SETUP} done={done} onToggle={toggle} />
