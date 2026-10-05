@@ -12,10 +12,10 @@
 const NUCLEUS = { left: 45.077, top: 47.995, width: 8.077 } // % of the emblem layer
 const ORIGIN = '49.077% 56.283%' // the nucleus centre
 
-export default function Logo({ animated = false, className = '' }: { animated?: boolean; className?: string }) {
+export default function Logo({ animated = false, emblemOnly = false, className = '' }: { animated?: boolean; emblemOnly?: boolean; className?: string }) {
   const img = 'absolute inset-0 block w-full select-none'
   return (
-    <div className={`relative w-full ${className}`} role="img" aria-label="Xanadu — a network for awakening places">
+    <div className={`relative w-full ${className}`} role={emblemOnly ? undefined : 'img'} aria-label={emblemOnly ? undefined : 'Xanadu — a network for awakening places'} aria-hidden={emblemOnly || undefined}>
       <div className="relative" style={{ perspective: '1000px', aspectRatio: '900 / 518' }}>
         <img src="/logo-static.png" alt="" draggable={false} className={img} />
         <img src="/logo-orbit-outer.png" alt="" draggable={false} className={img}
@@ -25,7 +25,7 @@ export default function Logo({ animated = false, className = '' }: { animated?: 
         <img src="/logo-nucleus.png" alt="" draggable={false} className="absolute select-none"
           style={{ left: `${NUCLEUS.left}%`, top: `${NUCLEUS.top}%`, width: `${NUCLEUS.width}%`, animation: animated ? 'xa-glow 4.5s ease-in-out infinite' : 'none' }} />
       </div>
-      <img src="/logo-wordmark.png" alt="" draggable={false} className="block w-full select-none" />
+      {!emblemOnly && <img src="/logo-wordmark.png" alt="" draggable={false} className="block w-full select-none" />}
     </div>
   )
 }
