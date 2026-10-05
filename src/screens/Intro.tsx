@@ -52,7 +52,7 @@ export default function Intro() {
           ? { top: '46%', transform: 'translate(-50%,-50%) scale(1.05)', animation: `xa-zoom 1.8s ${ease} both` }
           : { top: 'calc(env(safe-area-inset-top) + 150px)', transform: 'translate(-50%,-50%) scale(1)', transition: `top 1.3s ${ease}, transform 1.3s ${ease}` }}
       >
-        <Logo spinning={!intro} />
+        <Logo animated={!intro} />
       </div>
 
       <form
