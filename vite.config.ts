@@ -9,7 +9,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'xanadu-logo.png', 'xanadu-mark.png', 'logo-mark.png', 'logo-nucleus.png', 'logo-wordmark.png'],
+      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'xanadu-logo.png', 'xanadu-mark.png', 'logo-static.png', 'logo-orbit-outer.png', 'logo-orbit-inner.png', 'logo-nucleus.png', 'logo-wordmark.png'],
       manifest: {
         name: 'Xanadu — A network for awakening places',
         short_name: 'Xanadu',

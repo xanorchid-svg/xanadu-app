@@ -57,7 +57,9 @@ button { font: inherit; }
   100% { opacity: 0; transform: translate(-50%, -50%) scale(2.2); }
 }
 @keyframes xa-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-@keyframes xa-fade-in { from { opacity: 0; } to { opacity: 1; } }
+/* Logo: the fine lines turn around the central star, like electrons around a nucleus */
+@keyframes xa-orbit-outer { from { transform: rotate3d(0.22, 1, 0, 0deg); } to { transform: rotate3d(0.22, 1, 0, 360deg); } }
+@keyframes xa-orbit-inner { from { transform: rotate3d(-0.3, 1, 0, 0deg); } to { transform: rotate3d(-0.3, 1, 0, -360deg); } }
 @keyframes xa-glow {
   0%, 100% { filter: drop-shadow(0 0 0 rgba(184, 149, 103, 0)); }
   50% { filter: drop-shadow(0 0 7px rgba(184, 149, 103, .75)); }

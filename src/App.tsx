@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { useLayoutEffect } from 'react'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import Intro from './screens/Intro'
 import Discover from './screens/seeker/Discover'
 import Calendar from './screens/seeker/Calendar'
@@ -16,12 +17,24 @@ import FacilitatorHome from './screens/facilitator/Home'
 import FindSpaces from './screens/facilitator/FindSpaces'
 import FacilitatorProfile from './screens/facilitator/Profile'
 
+/** Every page opens at the top: on navigation, on refresh, and when returning to a page. */
+function useScrollToTop() {
+  const location = useLocation()
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+    document.querySelectorAll('main, form').forEach((el) => { el.scrollTop = 0 })
+  }, [location.pathname, location.search])
+}
+
 export default function App() {
+  const location = useLocation()
+  useScrollToTop()
   return (
     <div className="flex h-dvh justify-center bg-navy-deep">
       {/* Phone-width column; fills the screen on mobile, centered on desktop */}
       <div className="relative h-full w-full max-w-[430px] overflow-hidden bg-navy shadow-[0_0_80px_rgba(0,0,0,0.45)]">
-        <Routes>
+        {/* keyed by path so each page mounts fresh, with its own scroll position and state */}
+        <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Intro />} />
 
           <Route path="/discover" element={<Discover />} />
