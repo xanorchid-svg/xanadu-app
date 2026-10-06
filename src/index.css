@@ -30,6 +30,14 @@
 
 @layer base {
 html, body, #root { height: 100%; }
+/* Screen is locked in place: no pinch or double-tap zoom, no sideways drift, no rubber-band bounce */
+html, body {
+  overflow-x: clip;
+  overscroll-behavior: none;
+  touch-action: pan-x pan-y;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
 body {
   margin: 0;
   background: var(--color-navy-deep);
