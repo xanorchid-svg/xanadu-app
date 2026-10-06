@@ -1,7 +1,6 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { HOME, useAuth } from '../auth'
-import { supabase } from '../lib/supabase'
 import { IconBack, IconCalendar, IconChat, IconCompass, IconHeart, IconHome, IconPeople, IconPin, IconPlus, IconUser } from './icons'
 
 /** Full-height screen: scrolling content plus an optional fixed footer (tab bar or action bar). */
@@ -20,53 +19,19 @@ export function Page({ children, className = '' }: { children: ReactNode; classN
   return <div className={`flex flex-col gap-6 px-5 pt-5 pb-8 ${className}`}>{children}</div>
 }
 
-/** Has the Xanadu team written since the member last opened their messages? */
-function useUnreadFromTeam() {
-  const { session } = useAuth()
-  const [unread, setUnread] = useState(false)
-  useEffect(() => {
-    if (!session) return
-    let live = true
-    supabase.from('messages').select('created_at').eq('user_id', session.user.id).eq('from_team', true).order('created_at', { ascending: false }).limit(1).then(({ data }) => {
-      let read = ''
-      try { read = localStorage.getItem('xa-inbox-read') ?? '' } catch { /* private mode */ }
-      if (live) setUnread(!!data?.[0] && data[0].created_at > read)
-    })
-    return () => { live = false }
-  }, [session])
-  return unread
-}
-
 /**
- * The app bar on every main screen: the Xanadu emblem (large) with the wordmark beside it,
- * and the member's messages and profile on the right. Clears the notch / Dynamic Island on every iPhone.
+ * The app bar on every main screen: a solid navy band locked to the top, holding only the
+ * Xanadu lockup (the app icon, exactly as on the home screen, with the wordmark beside it).
+ * Clears the notch / Dynamic Island on every iPhone.
  */
 export function AppHeader() {
   const { profile } = useAuth()
-  const unread = useUnreadFromTeam()
-  const role = profile?.role ?? 'seeker'
-  const profileTo = role === 'container' ? '/container/space' : role === 'facilitator' ? '/facilitator/profile' : '/you'
-  const messagesTo = role === 'container' ? '/container/inbox' : role === 'facilitator' ? '/facilitator/inbox' : '/messages'
-  const initial = (profile?.name.trim()[0] ?? 'X').toUpperCase()
   return (
-    <header className="pt-safe-bar relative z-20 flex flex-none items-center justify-between gap-3 border-b border-white/[0.06] bg-navy/90 px-4 pb-2 backdrop-blur-xl">
-      <Link to={HOME[role]} aria-label="Xanadu home" className="flex min-h-12 items-center gap-2.5 no-underline">
-        <img src="/logo-emblem-light.png" alt="" className="h-[52px] w-auto flex-none" />
-        <img src="/logo-xanadu-text.png" alt="Xanadu" className="h-[15px] w-auto opacity-95" />
+    <header className="pt-safe-bar relative z-20 flex flex-none items-center border-b border-white/[0.06] bg-navy px-4 pb-2.5">
+      <Link to={HOME[profile?.role ?? 'seeker']} aria-label="Xanadu home" className="flex min-h-12 items-center gap-3 no-underline">
+        <img src="/icon-192.png?v=2" alt="" className="h-11 w-11 flex-none rounded-[11px] shadow-[0_2px_10px_rgba(0,0,0,0.35)]" />
+        <img src="/logo-xanadu-text.png" alt="Xanadu" className="h-[16px] w-auto" />
       </Link>
-      <div className="flex items-center gap-1.5">
-        {role === 'seeker' && (
-          <Link to={messagesTo} aria-label={unread ? 'Messages, new reply' : 'Messages'} className="relative flex h-11 w-11 items-center justify-center rounded-full text-muted no-underline">
-            <IconChat />
-            {unread && <span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full border-2 border-navy bg-gold" />}
-          </Link>
-        )}
-        <Link to={profileTo} aria-label="Your profile" className="flex h-11 w-11 items-center justify-center no-underline">
-          <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-gold/60 bg-plum font-display text-[17px] text-gold-pale">
-            {profile?.photo_url ? <img src={profile.photo_url} alt="" className="h-full w-full object-cover" /> : initial}
-          </span>
-        </Link>
-      </div>
     </header>
   )
 }
