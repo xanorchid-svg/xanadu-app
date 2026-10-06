@@ -238,6 +238,7 @@ export default function Intro() {
                 : <><span>{join.lead}</span><button type="button" onClick={() => { setMode('signup'); setError(''); setInfo('') }} className="font-semibold text-gold-soft">{join.label}</button></>}
             </p>
             <button type="button" onClick={() => setRun((n) => n + 1)} style={rise(7)} className="min-h-7 self-center text-xs text-[#6B7790]">Replay intro</button>
+            <p className="m-0 text-center text-[11px] text-[#6B7790]" style={rise(7)}>By continuing you agree to our <a href="/terms" className="text-[#8A95AB]">Terms</a> and <a href="/privacy" className="text-[#8A95AB]">Privacy Policy</a>.</p>
           </div>
         )}
       </form>

@@ -5,6 +5,7 @@ import AuthCallback from './screens/AuthCallback'
 import ResetPassword from './screens/ResetPassword'
 import Welcome from './screens/Welcome'
 import Intro from './screens/Intro'
+import { Privacy, Terms } from './screens/Legal'
 import Discover from './screens/seeker/Discover'
 import Calendar from './screens/seeker/Calendar'
 import Experience from './screens/seeker/Experience'
@@ -50,6 +51,8 @@ export default function App() {
           <Route path="/" element={<Intro />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="/welcome" element={<Welcome />} />
 
           <Route path="/discover" element={<RequireRole role="seeker"><Discover /></RequireRole>} />
