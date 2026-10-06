@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useFacilitatorProfile } from '../../store'
+import { useAuth } from '../../auth'
+import ApplicationBanner from '../../components/ApplicationBanner'
 import { Badge, Checklist, EmptyState, FacilitatorTabs, H2, Page, Screen, Switch } from '../../components/ui'
 
 const SETUP = [
-  { id: 'account', title: 'Create your account', sub: 'Done when you were accepted', to: '/facilitator' },
+  { id: 'account', title: 'Create your account', sub: 'Done', to: '/facilitator' },
   { id: 'photo', title: 'Add a profile photo', sub: 'A clear photo of you helps Seekers feel safe', to: '/facilitator/profile' },
   { id: 'about', title: 'Write your story', sub: 'How you came to this work and what people can expect', to: '/facilitator/profile' },
   { id: 'training', title: 'Add your training', sub: 'Certifications and where you trained', to: '/facilitator/profile' },
@@ -12,7 +14,8 @@ const SETUP = [
 ]
 
 export default function FacilitatorHome() {
-  const [open, setOpen] = useState(true)
+  const { profile, updateProfile } = useAuth()
+  const open = profile?.open_to_spaces ?? true
   const [me] = useFacilitatorProfile()
   const [manual, setManual] = useState<string[]>(['account'])
   // items tick themselves off as the profile fills in
@@ -37,12 +40,14 @@ export default function FacilitatorHome() {
           <Link to="/facilitator/profile" aria-label="Your profile" className="flex h-12 w-12 flex-none items-center justify-center overflow-hidden rounded-full border border-dashed border-slate text-xl text-subtle no-underline">{me.photo ? <img src={me.photo} alt="" className="h-full w-full object-cover" /> : '+'}</Link>
         </div>
 
+        <ApplicationBanner />
+
         <div className="flex items-center justify-between gap-3 rounded-2xl bg-surface px-4 py-3.5">
           <div className="flex flex-col gap-0.5">
             <span className="text-[15px] font-semibold text-ink">Open to new spaces</span>
             <span className="text-xs text-subtle">{open ? 'Spaces can see you and request intros' : 'Hidden from new intro suggestions'}</span>
           </div>
-          <Switch on={open} onChange={setOpen} label="Open to new spaces" />
+          <Switch on={open} onChange={(v) => updateProfile({ open_to_spaces: v })} label="Open to new spaces" />
         </div>
 
         <Checklist title="Complete your profile" items={SETUP} done={done} onToggle={toggle} />

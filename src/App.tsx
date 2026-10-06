@@ -1,12 +1,15 @@
 import { useLayoutEffect } from 'react'
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom'
+import { RequireRole } from './auth'
+import AuthCallback from './screens/AuthCallback'
+import ResetPassword from './screens/ResetPassword'
+import Welcome from './screens/Welcome'
 import Intro from './screens/Intro'
 import Discover from './screens/seeker/Discover'
 import Calendar from './screens/seeker/Calendar'
 import Experience from './screens/seeker/Experience'
 import Saved from './screens/seeker/Saved'
 import You from './screens/seeker/You'
-import Apply from './screens/host/Apply'
 import Status from './screens/host/Status'
 import Inbox from './screens/host/Inbox'
 import ContainerHome from './screens/container/Home'
@@ -26,6 +29,12 @@ function useScrollToTop() {
   }, [location.pathname, location.search])
 }
 
+function ApplyRedirect() {
+  const [params] = useSearchParams()
+  const role = params.get('role') === 'Facilitator' ? 'Facilitator' : 'Container'
+  return <Navigate to={`/?mode=signup&role=${role}`} replace />
+}
+
 export default function App() {
   const location = useLocation()
   useScrollToTop()
@@ -36,26 +45,30 @@ export default function App() {
         {/* keyed by path so each page mounts fresh, with its own scroll position and state */}
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Intro />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/welcome" element={<Welcome />} />
 
-          <Route path="/discover" element={<Discover />} />
-          <Route path="/calendar" element={<Calendar />} />
-          <Route path="/experience/:id" element={<Experience />} />
-          <Route path="/saved" element={<Saved />} />
-          <Route path="/you" element={<You />} />
+          <Route path="/discover" element={<RequireRole role="seeker"><Discover /></RequireRole>} />
+          <Route path="/calendar" element={<RequireRole role="seeker"><Calendar /></RequireRole>} />
+          <Route path="/experience/:id" element={<RequireRole role="any"><Experience /></RequireRole>} />
+          <Route path="/saved" element={<RequireRole role="seeker"><Saved /></RequireRole>} />
+          <Route path="/you" element={<RequireRole role="seeker"><You /></RequireRole>} />
 
-          <Route path="/apply" element={<Apply />} />
-          <Route path="/apply/status" element={<Status />} />
+          {/* applying = creating a host account */}
+          <Route path="/apply" element={<ApplyRedirect />} />
+          <Route path="/apply/status" element={<RequireRole role="any"><Status /></RequireRole>} />
 
-          <Route path="/container" element={<ContainerHome />} />
-          <Route path="/container/new" element={<NewOffering />} />
-          <Route path="/container/offering" element={<ManageOffering />} />
-          <Route path="/container/space" element={<SpaceProfile />} />
-          <Route path="/container/inbox" element={<Inbox role="Container" />} />
+          <Route path="/container" element={<RequireRole role="container"><ContainerHome /></RequireRole>} />
+          <Route path="/container/new" element={<RequireRole role="container"><NewOffering /></RequireRole>} />
+          <Route path="/container/offering" element={<RequireRole role="container"><ManageOffering /></RequireRole>} />
+          <Route path="/container/space" element={<RequireRole role="container"><SpaceProfile /></RequireRole>} />
+          <Route path="/container/inbox" element={<RequireRole role="container"><Inbox role="Container" /></RequireRole>} />
 
-          <Route path="/facilitator" element={<FacilitatorHome />} />
-          <Route path="/facilitator/spaces" element={<FindSpaces />} />
-          <Route path="/facilitator/inbox" element={<Inbox role="Facilitator" />} />
-          <Route path="/facilitator/profile" element={<FacilitatorProfile />} />
+          <Route path="/facilitator" element={<RequireRole role="facilitator"><FacilitatorHome /></RequireRole>} />
+          <Route path="/facilitator/spaces" element={<RequireRole role="facilitator"><FindSpaces /></RequireRole>} />
+          <Route path="/facilitator/inbox" element={<RequireRole role="facilitator"><Inbox role="Facilitator" /></RequireRole>} />
+          <Route path="/facilitator/profile" element={<RequireRole role="facilitator"><FacilitatorProfile /></RequireRole>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

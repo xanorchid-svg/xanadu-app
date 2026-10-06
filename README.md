@@ -40,19 +40,36 @@ npm run build    # production build in dist/
 
 ## Where things live
 
-- `src/store.ts`: profile storage. Seeker, space and facilitator profiles (text and photos) are editable and saved on the device until Supabase accounts are connected; photos are resized before saving.
-- `src/components/edit.tsx`: edit controls (text fields, photo pickers, practice pickers, save bar, sign out).
-- `src/data.ts`: the data layer. `experiences` and `spaces` are empty lists today; screens already render cards when they contain items. Swap these for Supabase queries.
-- `src/components/ui.tsx`: shared pieces (tab bars, chips, empty states, checklists, reviews).
-- `src/screens/`: one file per screen, grouped by `seeker`, `host`, `container`, `facilitator`.
-- `src/index.css`: brand tokens (navy, star gold, plum, sage, mist teal, ivory) and the intro animation.
-- `public/`: logo, mark and app icons.
+- `src/lib/supabase.ts`: connection to the Supabase project ("DreamXanadu Website"). The publishable key is safe in the app; access is controlled by row-level security.
+- `src/auth.tsx`: sign-in state, the member's profile, and `RequireRole`, which protects every page by role.
+- `src/store.ts`: data hooks: profiles, spaces, private details, offerings, inbox messages and photo uploads.
+- `src/screens/Intro.tsx`: intro animation + sign in / create account (email, Google, Apple, password reset).
+- `src/screens/Welcome.tsx`: the setup flow after sign-up, different for Seekers, Containers and Facilitators.
+- `src/components/`: shared pieces (tab bars, chips, empty states, edit controls, logo).
+- `public/`: logo layers and app icons.
+
+## Database (Supabase)
+
+| Table | What it holds | Who can see it |
+|---|---|---|
+| `profiles` | One per member: role, status, name, photo, practices, preferences | Own row; approved hosts are visible to members |
+| `private_details` | References, insurance, reviews/referrals, phone | Only the member (and the Xanadu team) |
+| `spaces` | A Container's space | Owner; approved spaces visible to members |
+| `offerings` | Retreats, trainings, drop-ins | Owner; `live` offerings visible to members |
+| `messages` | Each member's thread with the Xanadu team | Only that member (and the team) |
+| storage `photos` | Uploaded photos, one folder per member | Public to view; only the owner can upload |
+
+Members can't approve themselves: `status` on profiles and offerings only changes when the Xanadu team sets it.
+
+### Running Xanadu (team tasks in the Supabase dashboard → Table Editor)
+- **Approve a host:** `profiles` → set `status` to `approved` (or `declined`).
+- **Publish an offering:** `offerings` → set `status` to `live`.
+- **Read and reply to members:** `messages` → add a row with the member's `user_id`, `from_team` = true and your reply in `body`.
 
 ## Next steps
 
-1. **Supabase:** auth (email + Google/Apple), tables for profiles, spaces, offerings, bookings, reviews and vouches, with row-level security.
-2. Connect the application form to the existing `container_applications` / `facilitator_applications` tables.
-3. Photo uploads (Supabase Storage).
-4. Booking requests and the guest flow.
+1. Booking requests and guest lists.
+2. A simple admin screen for approvals and replies.
+3. Show live offerings and approved spaces in Discover and Find spaces.
 
 Contact: networkxanadu@gmail.com

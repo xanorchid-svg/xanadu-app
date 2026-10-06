@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ContainerTabs, Reviews, Screen } from '../../components/ui'
-import { AddPhotosButton, EditFooter, PhotoGallery, PracticePicker, SignOutButton, STORAGE_FULL, TextArea, TextField } from '../../components/edit'
+import { AddPhotosButton, EditFooter, PhotoGallery, PracticePicker, SignOutButton, TextArea, TextField } from '../../components/edit'
+import { Loading } from '../../auth'
 import { IconPhoto } from '../../components/icons'
 import { useSpaceProfile, type SpaceProfile as SP } from '../../store'
 import { PRACTICES } from '../../data'
@@ -10,7 +11,8 @@ const h2 = 'm-0 font-display text-[22px] font-semibold text-ink'
 
 /** The Container's public space page, seen and edited by its owner. */
 export default function SpaceProfile() {
-  const [space, save] = useSpaceProfile()
+  const [space, save, loading] = useSpaceProfile()
+  const [busy, setBusy] = useState(false)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<SP>(space)
   const [error, setError] = useState('')
@@ -19,9 +21,9 @@ export default function SpaceProfile() {
   const startEdit = () => { setDraft(space); setError(''); setEditing(true) }
 
   if (editing) {
-    const commit = () => { if (save(draft)) setEditing(false); else setError(STORAGE_FULL) }
+    const commit = async () => { setBusy(true); const err = await save(draft); setBusy(false); if (err) setError(err); else setEditing(false) }
     return (
-      <Screen footer={<EditFooter onCancel={() => setEditing(false)} onSave={commit} error={error} />}>
+      <Screen footer={<EditFooter onCancel={() => setEditing(false)} onSave={commit} error={error} busy={busy} />}>
         <div className="flex flex-col gap-5 px-5 pt-[52px] pb-8">
           <h1 className="m-0 font-display text-[32px] font-medium text-ink">Edit space</h1>
           <PhotoGallery photos={draft.photos} onChange={(p) => set('photos', p)} />
@@ -45,7 +47,8 @@ export default function SpaceProfile() {
     )
   }
 
-  const addPhotos = (urls: string[]) => { if (!save({ ...space, photos: [...space.photos, ...urls].slice(0, 8) })) setError(STORAGE_FULL) }
+  const addPhotos = async (urls: string[]) => { setError(''); const err = await save({ ...space, photos: [...space.photos, ...urls].slice(0, 8) }); if (err) setError(err) }
+  if (loading) return <Loading label="Loading your space…" />
   const facts: [string, string][] = [
     [space.sleeps.trim() ? `Sleeps ${space.sleeps.trim()}` : 'Sleeps [N]', space.rooms.trim() || '[Room types]'],
     ['Practice space', space.mats.trim() ? `Holds ${space.mats.trim()}` : 'Holds [N] mats'],

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Chip, Field, inputCls } from './ui'
 import { IconClose, IconPhoto } from './icons'
 import { photoFromFile } from '../store'
+import { useAuth } from '../auth'
 
 export function TextField({ label, value, onChange, placeholder, type = 'text', autoComplete }: {
   label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string; autoComplete?: string
@@ -94,25 +95,25 @@ export function AddPhotosButton({ onAdd, children, className = '' }: { onAdd: (u
 }
 
 /** Fixed footer used while editing a profile. */
-export function EditFooter({ onCancel, onSave, error }: { onCancel: () => void; onSave: () => void; error?: string }) {
+export function EditFooter({ onCancel, onSave, error, busy = false }: { onCancel: () => void; onSave: () => void; error?: string; busy?: boolean }) {
   return (
     <div className="border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-[max(30px,env(safe-area-inset-bottom))]">
       {error && <p role="alert" className="m-0 mb-2 text-center text-[13px] text-gold-pale">{error}</p>}
       <div className="flex gap-2.5">
         <button type="button" onClick={onCancel} className="min-h-[54px] rounded-2xl border border-line-2 px-5 text-[15px] text-text">Cancel</button>
-        <button type="button" onClick={onSave} className="min-h-[54px] flex-1 rounded-2xl bg-gold text-[15px] font-semibold text-navy">Save changes</button>
+        <button type="button" disabled={busy} onClick={onSave} className="min-h-[54px] flex-1 rounded-2xl bg-gold text-[15px] font-semibold text-navy disabled:opacity-70">{busy ? 'Saving…' : 'Save changes'}</button>
       </div>
     </div>
   )
 }
 
-export const STORAGE_FULL = "Couldn't save: this phone is out of space for photos. Try removing a photo or two."
 
 /** Sign out, shown at the bottom of every profile page. */
 export function SignOutButton() {
   const navigate = useNavigate()
+  const { signOut } = useAuth()
   return (
-    <button type="button" onClick={() => navigate('/', { replace: true })}
+    <button type="button" onClick={async () => { await signOut(); navigate('/', { replace: true }) }}
       className="min-h-12 w-full rounded-2xl border border-line-2 text-[15px] text-muted">Sign out</button>
   )
 }

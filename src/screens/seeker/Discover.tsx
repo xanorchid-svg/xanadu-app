@@ -3,11 +3,13 @@ import { Chip, EmptyState, H1, H2, Page, PrimaryButton, RowLink, Screen, SeekerT
 import { IconSearch, IconStar } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
 import { CONTACT_EMAIL, experiences, PRACTICES } from '../../data'
+import { useAuth } from '../../auth'
 
 export default function Discover() {
   const [picked, setPicked] = useState<string>('All')
   const [query, setQuery] = useState('')
-  const [notified, setNotified] = useState(false)
+  const { profile, updateProfile } = useAuth()
+  const notified = profile?.launch_notify ?? false
 
   const q = query.trim().toLowerCase()
   const shown = experiences.filter((e) =>
@@ -43,7 +45,7 @@ export default function Discover() {
         ) : (
           <EmptyState icon={<span className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/50"><IconStar /></span>}
             title={emptyTitle}
-            action={<PrimaryButton done={notified} onClick={() => setNotified(true)} className="mt-1">{notified ? "We'll let you know ✓" : 'Notify me when they open'}</PrimaryButton>}>
+            action={<PrimaryButton done={notified} onClick={() => updateProfile({ launch_notify: true })} className="mt-1">{notified ? "We'll let you know ✓" : 'Notify me when they open'}</PrimaryButton>}>
             We're welcoming our founding retreat spaces and facilitators in Costa Rica. Their experiences will appear here as they join.
           </EmptyState>
         )}

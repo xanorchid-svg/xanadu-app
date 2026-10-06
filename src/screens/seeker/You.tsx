@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import { Chip, EmptyState, H2, Page, PrimaryButton, Screen, SeekerTabs, Segmented, Switch } from '../../components/ui'
 import { IconChart, IconSettings } from '../../components/icons'
 import { CONTACT_EMAIL } from '../../data'
-import { AvatarPicker, EditFooter, SignOutButton, STORAGE_FULL, TextField } from '../../components/edit'
+import { AvatarPicker, EditFooter, SignOutButton, TextField } from '../../components/edit'
+import { useAuth } from '../../auth'
 import { useSeekerProfile, type SeekerProfile } from '../../store'
 
 const ALIGN = ['Yoga', 'Breathwork', 'Meditation', 'Sound', 'Ecstatic dance', 'Kirtan', 'Trainings', "Women's retreats", "Men's retreats", 'Permaculture']
@@ -12,7 +13,9 @@ const JOURNEY_TABS = ['Upcoming', 'Past'] as const
 export default function You() {
   const [me, save] = useSeekerProfile()
   const [tab, setTab] = useState<(typeof JOURNEY_TABS)[number]>('Upcoming')
-  const [chart, setChart] = useState(false)
+  const { profile, updateProfile } = useAuth()
+  const chart = profile?.chart_early ?? false
+  const [busy, setBusy] = useState(false)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<SeekerProfile>(me)
   const [error, setError] = useState('')
@@ -21,9 +24,9 @@ export default function You() {
   const set = <K extends keyof SeekerProfile>(k: K, v: SeekerProfile[K]) => setDraft((d) => ({ ...d, [k]: v }))
 
   if (editing) {
-    const commit = () => { if (save(draft)) setEditing(false); else setError(STORAGE_FULL) }
+    const commit = async () => { setBusy(true); const err = await save(draft); setBusy(false); if (err) setError(err); else setEditing(false) }
     return (
-      <Screen footer={<EditFooter onCancel={() => setEditing(false)} onSave={commit} error={error} />}>
+      <Screen footer={<EditFooter onCancel={() => setEditing(false)} onSave={commit} error={error} busy={busy} />}>
         <div className="flex flex-col gap-5 px-5 pt-[52px] pb-8">
           <h1 className="m-0 font-display text-[32px] font-medium text-ink">Edit profile</h1>
           <AvatarPicker photo={draft.photo} onChange={(p) => set('photo', p)} />
@@ -74,7 +77,7 @@ export default function You() {
           <div className="flex items-center gap-2.5 text-gold-soft"><IconChart /><span className="text-[11px] tracking-[0.16em] uppercase">Coming soon</span></div>
           <h2 className="m-0 font-display text-2xl font-medium text-ink">Experiences aligned to your chart</h2>
           <p className="m-0 text-sm leading-relaxed text-muted">Add your birth details and we'll suggest places and practices using astrocartography.</p>
-          <PrimaryButton done={chart} onClick={() => setChart(true)} className="min-h-11 self-start px-[18px] text-sm">{chart ? 'On the early list ✓' : 'Join early access'}</PrimaryButton>
+          <PrimaryButton done={chart} onClick={() => updateProfile({ chart_early: true })} className="min-h-11 self-start px-[18px] text-sm">{chart ? 'On the early list ✓' : 'Join early access'}</PrimaryButton>
         </section>
 
         <section className="flex flex-col">
@@ -88,10 +91,10 @@ export default function You() {
           <a href={`mailto:${CONTACT_EMAIL}`} className={`${row} border-b-0`}>Help <span className="text-[13px] text-subtle">{CONTACT_EMAIL}</span></a>
         </section>
 
-        <Link to="/apply" className="flex flex-col gap-1 rounded-[20px] bg-gold p-[18px] text-navy no-underline hover:text-navy">
+        <a href={`mailto:${CONTACT_EMAIL}?subject=I'd%20like%20to%20hold%20space%20on%20Xanadu`} className="flex flex-col gap-1 rounded-[20px] bg-gold p-[18px] text-navy no-underline hover:text-navy">
           <span className="text-base font-semibold">Hold space on Xanadu</span>
-          <span className="text-[13px]">List your retreat space or offer your practice →</span>
-        </Link>
+          <span className="text-[13px]">Have a retreat space or a practice to share? Write to us and we'll set up your host account →</span>
+        </a>
         <SignOutButton />
       </Page>
     </Screen>

@@ -1,42 +1,69 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { BackButton, ContainerTabs, EmptyState, FacilitatorTabs, H1, Page, Screen } from '../../components/ui'
 import { IconSend } from '../../components/icons'
 import type { Role } from '../../data'
+import { useMessages } from '../../store'
 
-type Msg = { me: boolean; text: string }
+const READ_KEY = 'xa-inbox-read'
+const fmt = (iso: string) => {
+  const d = new Date(iso)
+  return d.toDateString() === new Date().toDateString()
+    ? d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+    : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
 
-const WELCOME: Msg[] = [
-  { me: false, text: "Welcome to Xanadu. We're so glad you're one of our founding members." },
-  { me: false, text: "Here's how it works: as spaces and facilitators join, we'll introduce you to the ones aligned with your work. Every intro lands right here in your inbox." },
-  { me: false, text: 'Questions? Reply here anytime, or write to networkxanadu@gmail.com.' },
-]
-
-/** Shared inbox for Containers and Facilitators. Starts with a welcome thread from Xanadu. */
+/** Inbox for Containers and Facilitators: their thread with the Xanadu team, saved in the database. */
 export default function Inbox({ role }: { role: Exclude<Role, 'Seeker'> }) {
+  const { messages, loading, send } = useMessages()
   const [open, setOpen] = useState(false)
-  const [read, setRead] = useState(false)
   const [draft, setDraft] = useState('')
-  const [msgs, setMsgs] = useState<Msg[]>(WELCOME)
+  const [error, setError] = useState('')
+  const [sending, setSending] = useState(false)
+  const [lastRead, setLastRead] = useState(() => { try { return localStorage.getItem(READ_KEY) ?? '' } catch { return '' } })
+  const endRef = useRef<HTMLDivElement>(null)
   const tabs = role === 'Container' ? <ContainerTabs /> : <FacilitatorTabs />
+  const latest = messages[messages.length - 1]
+  const unread = !!latest && latest.from_team && latest.created_at > lastRead
+
+  useEffect(() => { if (open) endRef.current?.scrollIntoView({ block: 'end' }) }, [open, messages.length])
+
+  const openThread = () => {
+    setOpen(true)
+    if (latest) { try { localStorage.setItem(READ_KEY, latest.created_at) } catch { /* private mode */ } setLastRead(latest.created_at) }
+  }
 
   if (open) {
-    const send = () => { if (!draft.trim()) return; setMsgs((m) => [...m, { me: true, text: draft.trim() }]); setDraft('') }
+    const submit = async () => {
+      const body = draft.trim()
+      if (!body || sending) return
+      setSending(true); setError('')
+      const err = await send(body)
+      setSending(false)
+      if (err) setError(err); else setDraft('')
+    }
     return (
       <div className="flex h-full flex-col">
         <div className="flex items-center gap-3 border-b border-[#1F2B3E] px-4 pt-[52px] pb-3">
           <BackButton onClick={() => setOpen(false)} />
-          <div className="flex flex-1 flex-col gap-0.5"><span className="text-[15px] font-semibold text-ink">Xanadu</span><span className="text-xs text-subtle">The Xanadu team</span></div>
+          <div className="flex flex-1 flex-col gap-0.5"><span className="text-[15px] font-semibold text-ink">Xanadu</span><span className="text-xs text-subtle">The Xanadu team · usually replies within a day</span></div>
         </div>
         <div className="flex flex-1 flex-col gap-2.5 overflow-y-auto p-4">
-          {msgs.map((m, i) => (
-            <div key={i} className={`max-w-[280px] px-3.5 py-2.5 text-sm leading-snug ${m.me ? 'self-end rounded-[18px_18px_4px_18px] bg-gold text-navy' : 'self-start rounded-[18px_18px_18px_4px] bg-[#22304A] text-text'}`}>{m.text}</div>
+          {messages.map((m) => (
+            <div key={m.id} className={`flex max-w-[280px] flex-col gap-1 px-3.5 py-2.5 text-sm leading-snug ${m.from_team ? 'self-start rounded-[18px_18px_18px_4px] bg-[#22304A] text-text' : 'self-end rounded-[18px_18px_4px_18px] bg-gold text-navy'}`}>
+              <span className="whitespace-pre-line">{m.body}</span>
+              <span className={`text-[10px] ${m.from_team ? 'text-subtle' : 'text-navy/70'}`}>{fmt(m.created_at)}</span>
+            </div>
           ))}
+          <div ref={endRef} />
         </div>
-        <form onSubmit={(e) => { e.preventDefault(); send() }} className="flex items-center gap-2 border-t border-[#1F2B3E] bg-navy-deep px-4 pt-2.5 pb-[max(30px,env(safe-area-inset-bottom))]">
-          <label className="flex flex-1"><span className="sr-only">Message</span>
-            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Write a message" className="min-h-[46px] flex-1 rounded-full border border-line bg-surface px-4 text-[15px] text-text outline-none placeholder:text-faint" />
-          </label>
-          <button type="submit" aria-label="Send" className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-gold text-navy"><IconSend /></button>
+        <form onSubmit={(e) => { e.preventDefault(); submit() }} className="flex flex-col gap-1.5 border-t border-[#1F2B3E] bg-navy-deep px-4 pt-2.5 pb-[max(30px,env(safe-area-inset-bottom))]">
+          {error && <p role="alert" className="m-0 text-[13px] text-gold-pale">{error}</p>}
+          <div className="flex items-center gap-2">
+            <label className="flex flex-1"><span className="sr-only">Message</span>
+              <input value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={4000} placeholder="Write a message" className="min-h-[46px] flex-1 rounded-full border border-line bg-surface px-4 text-[15px] text-text outline-none placeholder:text-faint" />
+            </label>
+            <button type="submit" disabled={sending || !draft.trim()} aria-label="Send" className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-gold text-navy disabled:opacity-60"><IconSend /></button>
+          </div>
         </form>
       </div>
     )
@@ -46,15 +73,16 @@ export default function Inbox({ role }: { role: Exclude<Role, 'Seeker'> }) {
     <Screen footer={tabs}>
       <Page className="gap-4">
         <H1>Inbox</H1>
-        <button type="button" onClick={() => { setOpen(true); setRead(true) }}
-          className="flex min-h-[72px] items-center gap-3 border-b border-[#1F2B3E] py-2.5 text-left text-text">
-          <span className="flex h-12 w-12 flex-none items-center justify-center overflow-hidden rounded-full bg-ivory"><img src="/xanadu-mark.png" alt="" className="h-9 w-auto" /></span>
-          <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="flex justify-between gap-2"><span className="text-[15px] font-semibold text-ink">Xanadu</span><span className="text-xs text-subtle">Today</span></span>
-            <span className="truncate text-[13px] text-subtle">Welcome, founding member. Here's how intros work.</span>
-          </span>
-          <span className={`h-2 w-2 flex-none rounded-full ${read ? 'bg-transparent' : 'bg-gold'}`} />
-        </button>
+        {loading ? <p className="m-0 text-sm text-subtle">Loading…</p> : (
+          <button type="button" onClick={openThread} className="flex min-h-[72px] items-center gap-3 border-b border-[#1F2B3E] py-2.5 text-left text-text">
+            <span className="flex h-12 w-12 flex-none items-center justify-center overflow-hidden rounded-full bg-ivory"><img src="/xanadu-mark.png" alt="" className="h-9 w-auto" /></span>
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <span className="flex justify-between gap-2"><span className="text-[15px] font-semibold text-ink">Xanadu</span><span className="text-xs text-subtle">{latest ? fmt(latest.created_at) : ''}</span></span>
+              <span className="truncate text-[13px] text-subtle">{latest ? `${latest.from_team ? '' : 'You: '}${latest.body}` : 'Say hello to the Xanadu team'}</span>
+            </span>
+            <span className={`h-2 w-2 flex-none rounded-full ${unread ? 'bg-gold' : 'bg-transparent'}`} />
+          </button>
+        )}
         <EmptyState title="No other conversations yet">Intros from Xanadu and messages with spaces and guests will appear here.</EmptyState>
       </Page>
     </Screen>

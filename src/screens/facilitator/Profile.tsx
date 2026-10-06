@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { FacilitatorTabs, Reviews, Screen } from '../../components/ui'
-import { AvatarPicker, EditFooter, PracticePicker, SignOutButton, STORAGE_FULL, TextArea, TextField } from '../../components/edit'
+import { AvatarPicker, EditFooter, PracticePicker, SignOutButton, TextArea, TextField } from '../../components/edit'
 import { IconClose } from '../../components/icons'
 import { useFacilitatorProfile, type FacilitatorProfile as FP } from '../../store'
 import { PRACTICES } from '../../data'
@@ -16,23 +16,27 @@ export default function FacilitatorProfile() {
   const [draft, setDraft] = useState<FP>(profile)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
+  const [busy, setBusy] = useState(false)
   const own = view === 'My profile'
 
   const startEdit = () => { setDraft(profile); setError(''); setEditing(true) }
   const set = <K extends keyof FP>(k: K, v: FP[K]) => setDraft((d) => ({ ...d, [k]: v }))
 
   if (editing) {
-    const commit = () => {
+    const commit = async () => {
       const clean: FP = {
         ...draft,
         trainings: draft.trainings.filter((t) => t.title.trim()),
         references: draft.references.filter((r) => r.name.trim()),
       }
-      if (save(clean)) setEditing(false)
-      else setError(STORAGE_FULL)
+      setBusy(true)
+      const err = await save(clean)
+      setBusy(false)
+      if (err) setError(err)
+      else setEditing(false)
     }
     return (
-      <Screen footer={<EditFooter onCancel={() => setEditing(false)} onSave={commit} error={error} />}>
+      <Screen footer={<EditFooter onCancel={() => setEditing(false)} onSave={commit} error={error} busy={busy} />}>
         <div className="flex flex-col gap-5 px-5 pt-[52px] pb-8">
           <h1 className="m-0 font-display text-[32px] font-medium text-ink">Edit profile</h1>
           <AvatarPicker photo={draft.photo} onChange={(p) => set('photo', p)} />
@@ -97,7 +101,7 @@ export default function FacilitatorProfile() {
 
         <div className="flex flex-col items-center gap-2.5 text-center">
           {own
-            ? <AvatarPicker photo={profile.photo} onChange={(p) => { if (!save({ ...profile, photo: p })) setError(STORAGE_FULL) }} />
+            ? <AvatarPicker photo={profile.photo} onChange={async (p) => { setError(''); const err = await save({ ...profile, photo: p }); if (err) setError(err) }} />
             : <div className="h-[104px] w-[104px] overflow-hidden rounded-full bg-plum">{profile.photo && <img src={profile.photo} alt="" className="h-full w-full object-cover" />}</div>}
           <h1 className="m-0 font-display text-[32px] font-medium text-ink">{name}</h1>
           <span className="text-sm text-muted">{meta}</span>
