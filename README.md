@@ -43,7 +43,7 @@ npm run build    # production build in dist/
 - `src/lib/supabase.ts`: connection to the Supabase project ("DreamXanadu Website"). The publishable key is safe in the app; access is controlled by row-level security.
 - `src/auth.tsx`: sign-in state, the member's profile, and `RequireRole`, which protects every page by role.
 - `src/store.ts`: data hooks: profiles, spaces, private details, offerings, inbox messages and photo uploads.
-- `src/screens/Intro.tsx`: intro animation + sign in / create account (email, Google, Apple, password reset).
+- `src/screens/Intro.tsx`: intro animation + sign in / create account (email, Google, password reset).
 - `src/screens/Welcome.tsx`: the setup flow after sign-up, different for Seekers, Containers and Facilitators.
 - `src/components/`: shared pieces (tab bars, chips, empty states, edit controls, logo).
 - `public/`: logo layers and app icons.
@@ -73,8 +73,8 @@ Members can't approve themselves: `status` on profiles and offerings only change
 ### AI matching (Seekers → spaces and experiences)
 Seekers describe what they're looking for in their own words (sign-up and their profile). The `match-embed` edge function (`supabase/functions/match-embed`) reads that text, picks out keywords (e.g. Volunteer exchange, Surf, Yoga) and creates an AI meaning vector with Supabase's built-in `gte-small` model (free, no API key). Hosts' spaces and offerings are processed the same way whenever they're saved. `my_matches()` ranks approved spaces and live offerings by meaning plus shared keywords, with an extra boost for volunteer exchange; Discover shows the top 6. Spaces can turn on *We welcome volunteers* and describe the exchange.
 
-### Google / Apple sign-in
-The buttons appear automatically once a provider is switched on in Supabase → Authentication → Sign In / Providers.
+### Google sign-in
+The "Continue with Google" button appears automatically once Google is switched on in Supabase → Authentication → Sign In / Providers. Sign-in is email or Google only; Apple sign-in was deliberately removed (it needs a $99/year Apple Developer account and a secret that expires every 6 months).
 
 ## Next steps
 

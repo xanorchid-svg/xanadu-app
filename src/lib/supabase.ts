@@ -14,13 +14,13 @@ export const supabase = createClient(URL, KEY, {
 
 export const PHOTO_BUCKET = 'photos'
 
-/** Which social sign-ins are switched on in Supabase (Authentication → Providers). */
-export async function enabledProviders(): Promise<{ google: boolean; apple: boolean }> {
+/** Whether Google sign-in is switched on in Supabase (Authentication → Providers). */
+export async function enabledProviders(): Promise<{ google: boolean }> {
   try {
     const r = await fetch(`${URL}/auth/v1/settings`, { headers: { apikey: KEY } })
     const s = await r.json()
-    return { google: !!s?.external?.google, apple: !!s?.external?.apple }
-  } catch { return { google: false, apple: false } }
+    return { google: !!s?.external?.google }
+  } catch { return { google: false } }
 }
 
 /** Turns Supabase's error messages into friendly ones. */

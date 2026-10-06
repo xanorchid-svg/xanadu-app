@@ -28,7 +28,7 @@ export function Privacy() {
       <p>Xanadu ("we") connects Seekers with retreat spaces (Containers) and guides (Facilitators). This policy explains what we collect, why, and the choices you have.</p>
       <h2>What we collect</h2>
       <ul>
-        <li><b>Account details:</b> your email address and, if you sign in with Google or Apple, your name and profile photo from that account.</li>
+        <li><b>Account details:</b> your email address and, if you sign in with Google, your name and profile photo from that account.</li>
         <li><b>Profile details you add:</b> name, photo, region, practices, what you're seeking, and for hosts, space or practice details, trainings, references and offerings.</li>
         <li><b>Messages</b> you send to other members or to the Xanadu team.</li>
         <li><b>Approximate location</b>, only if you join Community. It's rounded to about 1 km on your phone before it's sent, and other members only see a distance in miles, never your location.</li>
@@ -41,7 +41,7 @@ export function Privacy() {
         <li>To keep Xanadu safe, including acting on reports and blocks.</li>
       </ul>
       <h2>Who we share it with</h2>
-      <p>We don't sell your information. We use trusted providers to run the app: Supabase (database, sign-in and storage), Vercel (hosting), and Google or Apple if you choose to sign in with them. They process data only to provide their service to us.</p>
+      <p>We don't sell your information. We use trusted providers to run the app: Supabase (database, sign-in and storage), Vercel (hosting), and Google if you choose to sign in with it. They process data only to provide their service to us.</p>
       <h2>Your choices</h2>
       <ul>
         <li>Edit your profile at any time from the app.</li>

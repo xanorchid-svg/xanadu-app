@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { HOME, Loading, useAuth, type DbRole } from '../auth'
 
 /**
- * Where Google, Apple and email-confirmation links land.
+ * Where Google sign-in and email-confirmation links land.
  * Supabase finishes the sign-in from the link automatically; then we send the member
  * to set up their profile (new) or to their home (returning).
  */
@@ -20,7 +20,7 @@ export default function AuthCallback() {
     if (loading || !session || !profile) return
     const wanted = params.get('role') as DbRole | null
     ;(async () => {
-      // A brand-new Google/Apple account starts as a Seeker; switch it to the role they picked before onboarding
+      // A brand-new Google account starts as a Seeker; switch it to the role they picked before onboarding
       if (!profile.onboarded && wanted && ['seeker', 'container', 'facilitator'].includes(wanted) && wanted !== profile.role) {
         await updateProfile({ role: wanted })
       }
