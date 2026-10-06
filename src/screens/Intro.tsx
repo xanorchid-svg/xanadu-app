@@ -4,7 +4,7 @@ import { inputCls, Field } from '../components/ui'
 import Logo from '../components/Logo'
 import type { Role } from '../data'
 import { HOME, toDbRole, useAuth } from '../auth'
-import { friendlyError, supabase } from '../lib/supabase'
+import { friendlyError, supabase, enabledProviders } from '../lib/supabase'
 
 const ROLES: { role: Role; sub: string }[] = [
   { role: 'Seeker', sub: 'Explore' },
@@ -57,6 +57,8 @@ export default function Intro() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
+  const [providers, setProviders] = useState({ google: false, apple: false })
+  useEffect(() => { enabledProviders().then(setProviders) }, [])
 
   // Already signed in: go home (or finish setting up)
   useEffect(() => {
@@ -220,11 +222,15 @@ export default function Intro() {
               {busy ? 'One moment…' : signup ? `Create account as ${role}` : `Sign in as ${role}`}
             </button>
 
-            <div className="flex items-center gap-2.5 text-xs text-faint" style={rise(6)}><span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" /></div>
-            <div className="grid grid-cols-2 gap-2" style={rise(6)}>
-              <button type="button" onClick={() => oauth('google')} className="min-h-12 rounded-[14px] border border-line-2 bg-navy/60 text-sm text-text">Continue with Google</button>
-              <button type="button" onClick={() => oauth('apple')} className="min-h-12 rounded-[14px] border border-line-2 bg-navy/60 text-sm text-text">Continue with Apple</button>
-            </div>
+            {(providers.google || providers.apple) && (
+              <>
+                <div className="flex items-center gap-2.5 text-xs text-faint" style={rise(6)}><span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" /></div>
+                <div className={`grid gap-2 ${providers.google && providers.apple ? 'grid-cols-2' : 'grid-cols-1'}`} style={rise(6)}>
+                  {providers.google && <button type="button" onClick={() => oauth('google')} className="min-h-12 rounded-[14px] border border-line-2 bg-navy/60 text-sm text-text">Continue with Google</button>}
+                  {providers.apple && <button type="button" onClick={() => oauth('apple')} className="min-h-12 rounded-[14px] border border-line-2 bg-navy/60 text-sm text-text">Continue with Apple</button>}
+                </div>
+              </>
+            )}
 
             <p className="m-0 flex flex-wrap justify-center gap-x-1.5 pt-1 text-[13px] text-subtle" style={rise(7)}>
               {signup

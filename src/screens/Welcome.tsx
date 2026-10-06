@@ -4,11 +4,11 @@ import { AvatarPicker, PhotoGallery, PracticePicker, TextArea, TextField } from 
 import { IconClose } from '../components/icons'
 import { Field, inputCls } from '../components/ui'
 import { HOME, Loading, useAuth } from '../auth'
-import { PRACTICES } from '../data'
+import { PRACTICES, SEEKER_ALIGN } from '../data'
+import { refreshMatches } from '../matching'
 import { EMPTY_SPACE, savePrivateDetails, uploadPhotos, useSpaceProfile, type Reference, type SpaceProfile, type Training } from '../store'
 import { friendlyError } from '../lib/supabase'
 
-const ALIGN = ['Yoga', 'Breathwork', 'Meditation', 'Sound', 'Ecstatic dance', 'Kirtan', 'Trainings', "Women's retreats", "Men's retreats", 'Permaculture']
 const HOST_PRACTICES = PRACTICES.filter((p) => p !== 'Trainings')
 
 /** Shared frame for every setup flow: progress, a scrolling step, Back / Continue. */
@@ -73,6 +73,7 @@ function SeekerWelcome() {
   const [photo, setPhoto] = useState(profile?.photo_url ?? '')
   const [region, setRegion] = useState(profile?.region || 'Costa Rica')
   const [prefs, setPrefs] = useState<string[]>(profile?.prefs ?? [])
+  const [seeking, setSeeking] = useState(profile?.seeking ?? '')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -84,8 +85,9 @@ function SeekerWelcome() {
     setBusy(true); setError('')
     try {
       const [photoUrl] = await uploadPhotos(session!.user.id, photo ? [photo] : [])
-      const err = await updateProfile({ name: name.trim(), photo_url: photoUrl ?? '', region: region.trim() || 'Costa Rica', prefs, onboarded: true })
+      const err = await updateProfile({ name: name.trim(), photo_url: photoUrl ?? '', region: region.trim() || 'Costa Rica', prefs, seeking: seeking.trim().slice(0, 2000), onboarded: true })
       if (err) { setError(friendlyError(err)); setBusy(false); return }
+      await refreshMatches()
       navigate('/discover', { replace: true })
     } catch (e) { setError((e as Error).message); setBusy(false) }
   }
@@ -103,7 +105,10 @@ function SeekerWelcome() {
       {step === 1 && (
         <>
           <Title sub="Tap everything that calls to you. Discover will show what's aligned first.">What are you seeking?</Title>
-          <PracticePicker label="Practices" options={ALIGN} value={prefs} onChange={setPrefs} />
+          <PracticePicker label="Practices" options={SEEKER_ALIGN} value={prefs} onChange={setPrefs} />
+          <TextArea label="In your own words (optional)" value={seeking} onChange={setSeeking} rows={5}
+            placeholder="e.g. I'd love a month-long volunteer exchange near the ocean, helping in the garden or kitchen, with daily yoga and time to surf." />
+          <p className="m-0 rounded-xl bg-plum px-3.5 py-3 text-[13px] leading-normal text-muted">Xanadu's AI reads what you write and matches you with the spaces and experiences that fit best. You can change it any time from your profile.</p>
         </>
       )}
     </Wizard>

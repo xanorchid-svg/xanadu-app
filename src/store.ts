@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase, PHOTO_BUCKET, friendlyError } from './lib/supabase'
 import { useAuth, type Training } from './auth'
+import { refreshMatches } from './matching'
 
 /**
  * Data hooks backed by Supabase. Every save returns null on success, or a friendly error message.
@@ -11,11 +12,12 @@ import { useAuth, type Training } from './auth'
 export type { Training }
 export type Reference = { name: string; contact: string }
 
-export type SeekerProfile = { name: string; photo: string; region: string; prefs: string[]; notify: boolean }
+export type SeekerProfile = { name: string; photo: string; region: string; prefs: string[]; notify: boolean; seeking: string }
 
 export type SpaceProfile = {
   name: string; town: string; about: string; practices: string[]; photos: string[]
   sleeps: string; rooms: string; mats: string; kitchen: string; gettingHere: string
+  volunteerExchange: boolean; volunteerDetails: string
 }
 
 export type FacilitatorProfile = {
@@ -41,7 +43,7 @@ export type Offering = {
 
 export type Message = { id: string; from_team: boolean; body: string; created_at: string }
 
-export const EMPTY_SPACE: SpaceProfile = { name: '', town: '', about: '', practices: [], photos: [], sleeps: '', rooms: '', mats: '', kitchen: '', gettingHere: '' }
+export const EMPTY_SPACE: SpaceProfile = { name: '', town: '', about: '', practices: [], photos: [], sleeps: '', rooms: '', mats: '', kitchen: '', gettingHere: '', volunteerExchange: false, volunteerDetails: '' }
 
 /* ---------- photos ---------- */
 
@@ -82,14 +84,16 @@ export function useSeekerProfile() {
   const { session, profile, updateProfile } = useAuth()
   const value: SeekerProfile = {
     name: profile?.name ?? '', photo: profile?.photo_url ?? '', region: profile?.region || 'Costa Rica',
-    prefs: profile?.prefs ?? [], notify: profile?.notify ?? true,
+    prefs: profile?.prefs ?? [], notify: profile?.notify ?? true, seeking: profile?.seeking ?? '',
   }
   const save = useCallback(async (next: SeekerProfile): Promise<string | null> => {
     if (!session) return 'You are signed out. Please sign in again.'
     try {
       const [photo] = await uploadPhotos(session.user.id, next.photo ? [next.photo] : [])
-      const err = await updateProfile({ name: next.name.trim(), photo_url: photo ?? '', region: next.region.trim() || 'Costa Rica', prefs: next.prefs, notify: next.notify })
-      return err ? friendlyError(err) : null
+      const err = await updateProfile({ name: next.name.trim(), photo_url: photo ?? '', region: next.region.trim() || 'Costa Rica', prefs: next.prefs, notify: next.notify, seeking: next.seeking.trim().slice(0, 2000) })
+      if (err) return friendlyError(err)
+      refreshMatches()
+      return null
     } catch (e) { return (e as Error).message }
   }, [session, updateProfile])
   return [value, save] as const
@@ -97,8 +101,8 @@ export function useSeekerProfile() {
 
 /* ---------- container space ---------- */
 
-type SpaceRow = { name: string; town: string; about: string; practices: string[]; photos: string[]; sleeps: string; rooms: string; mats: string; kitchen: string; getting_here: string }
-const fromSpaceRow = (r: SpaceRow): SpaceProfile => ({ ...r, gettingHere: r.getting_here })
+type SpaceRow = { name: string; town: string; about: string; practices: string[]; photos: string[]; sleeps: string; rooms: string; mats: string; kitchen: string; getting_here: string; volunteer_exchange: boolean; volunteer_details: string }
+const fromSpaceRow = (r: SpaceRow): SpaceProfile => ({ ...r, gettingHere: r.getting_here, volunteerExchange: r.volunteer_exchange, volunteerDetails: r.volunteer_details })
 
 export function useSpaceProfile() {
   const { session } = useAuth()
@@ -123,10 +127,12 @@ export function useSpaceProfile() {
       const row = {
         owner_id: session.user.id, name: next.name.trim(), town: next.town.trim(), about: next.about.trim(), practices: next.practices,
         photos, sleeps: next.sleeps.trim(), rooms: next.rooms.trim(), mats: next.mats.trim(), kitchen: next.kitchen.trim(), getting_here: next.gettingHere.trim(),
+        volunteer_exchange: next.volunteerExchange, volunteer_details: next.volunteerDetails.trim(),
       }
       const { data, error } = await supabase.from('spaces').upsert(row, { onConflict: 'owner_id' }).select('*').single()
       if (error) return friendlyError(error.message)
       setSpace(fromSpaceRow(data as SpaceRow))
+      refreshMatches()
       return null
     } catch (e) { return (e as Error).message }
   }, [session])
@@ -202,6 +208,7 @@ export function useOfferings() {
     const { data, error } = await supabase.from('offerings').insert({ ...o, owner_id: session.user.id }).select('id').single()
     if (error) return { error: friendlyError(error.message) }
     await reload()
+    refreshMatches()
     return { id: data.id as string }
   }, [session, reload])
 
@@ -209,6 +216,7 @@ export function useOfferings() {
     const { error } = await supabase.from('offerings').update(patch).eq('id', id)
     if (error) return friendlyError(error.message)
     await reload()
+    if ('title' in patch || 'description' in patch || 'practices' in patch || 'format' in patch) refreshMatches()
     return null
   }, [reload])
 

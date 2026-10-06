@@ -27,6 +27,7 @@ export type Profile = {
   chart_early: boolean
   open_to_spaces: boolean
   community_visible: boolean
+  seeking: string
 }
 
 export const toDbRole = (r: Role): DbRole => r.toLowerCase() as DbRole

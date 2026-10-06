@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ContainerTabs, Reviews, Screen } from '../../components/ui'
+import { ContainerTabs, Reviews, Screen, Switch } from '../../components/ui'
 import { AddPhotosButton, EditFooter, PhotoGallery, PracticePicker, SignOutButton, TextArea, TextField } from '../../components/edit'
 import { Loading } from '../../auth'
 import { IconPhoto } from '../../components/icons'
@@ -41,6 +41,17 @@ export default function SpaceProfile() {
             <TextField label="Room types" value={draft.rooms} onChange={(v) => set('rooms', v)} placeholder="e.g. Private rooms and shared dorms" />
             <TextField label="Kitchen and meals" value={draft.kitchen} onChange={(v) => set('kitchen', v)} placeholder="e.g. Plant-based, on-site chef" />
             <TextField label="Getting here" value={draft.gettingHere} onChange={(v) => set('gettingHere', v)} placeholder="e.g. 5 min walk to the beach" />
+          </section>
+          <section className="flex flex-col gap-3.5">
+            <h2 className={h2}>Volunteer exchange</h2>
+            <div className="flex items-center justify-between gap-3 rounded-2xl bg-surface p-4">
+              <span className="flex flex-col gap-0.5"><span className="text-[15px] font-semibold text-ink">We welcome volunteers</span><span className="text-xs text-subtle">Seekers looking for a work exchange will be matched with you</span></span>
+              <Switch on={draft.volunteerExchange} onChange={(v) => set('volunteerExchange', v)} label="We welcome volunteers" />
+            </div>
+            {draft.volunteerExchange && (
+              <TextArea label="What volunteers do and receive" value={draft.volunteerDetails} onChange={(v) => set('volunteerDetails', v)} rows={4}
+                placeholder="e.g. 25 hours a week in the garden or kitchen, for a shared room, meals and free classes. 1 month minimum." />
+            )}
           </section>
         </div>
       </Screen>
@@ -97,6 +108,13 @@ export default function SpaceProfile() {
             ? <div className="flex flex-wrap gap-2">{space.practices.map((p) => <span key={p} className="rounded-full border border-line-2 px-3 py-1.5 text-[13px] text-text">{p}</span>)}</div>
             : <span className="text-[13px] text-subtle">[Practices you host, e.g. yoga, breathwork, sound]</span>}
         </section>
+
+        {space.volunteerExchange && (
+          <section className="flex flex-col gap-2 rounded-[18px] bg-plum p-4">
+            <h2 className={h2}>Volunteer exchange</h2>
+            <p className="m-0 text-[14px] leading-relaxed whitespace-pre-line text-muted">{space.volunteerDetails.trim() || '[What volunteers do and receive]'}</p>
+          </section>
+        )}
 
         <section className="flex flex-col gap-2.5">
           <h2 className={h2}>The space</h2>

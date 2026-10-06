@@ -5,6 +5,9 @@
  * Next step: replace these with Supabase queries (see README).
  */
 
+/** What a Seeker can say they're seeking (sign-up and profile). */
+export const SEEKER_ALIGN = ['Yoga', 'Breathwork', 'Meditation', 'Sound', 'Ecstatic dance', 'Kirtan', 'Trainings', 'Volunteer exchange', "Women's retreats", "Men's retreats", 'Permaculture']
+
 export type Role = 'Seeker' | 'Container' | 'Facilitator'
 
 export type Experience = {

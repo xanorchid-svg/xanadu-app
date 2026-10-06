@@ -4,12 +4,16 @@ import { IconSearch, IconStar } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
 import { CONTACT_EMAIL, experiences, PRACTICES } from '../../data'
 import { useAuth } from '../../auth'
+import { useMatches } from '../../matching'
+import { Link } from 'react-router-dom'
 
 export default function Discover() {
   const [picked, setPicked] = useState<string>('All')
   const [query, setQuery] = useState('')
   const { profile, updateProfile } = useAuth()
   const notified = profile?.launch_notify ?? false
+  const { matches } = useMatches(6)
+  const hasWords = !!profile?.seeking?.trim() || (profile?.prefs?.length ?? 0) > 0
 
   const q = query.trim().toLowerCase()
   const shown = experiences.filter((e) =>
@@ -36,6 +40,28 @@ export default function Discover() {
         <div className="flex flex-wrap gap-2">
           {['All', ...PRACTICES].map((p) => <Chip key={p} solid on={picked === p} onClick={() => setPicked(p)}>{p}</Chip>)}
         </div>
+
+        <section className="flex flex-col gap-3">
+          <div className="flex flex-col gap-0.5"><H2>Top matches for you</H2><span className="text-xs text-subtle">Chosen by Xanadu's AI from what you're seeking</span></div>
+          {matches.length > 0 ? (
+            <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">
+              {matches.map((m) => (
+                <Link key={`${m.kind}-${m.id}`} to={m.kind === 'offering' ? `/experience/${m.id}` : `/space/${m.id}`}
+                  className="flex w-[220px] flex-none flex-col overflow-hidden rounded-[18px] bg-surface text-text no-underline">
+                  <div className="h-[120px] bg-sage">{m.photo_url && <img src={m.photo_url} alt="" className="h-full w-full object-cover" />}</div>
+                  <div className="flex flex-col gap-1 p-3">
+                    <span className="text-[11px] tracking-[0.08em] text-gold-soft uppercase">{m.kind === 'offering' ? 'Experience' : 'Space'}{m.town ? ` · ${m.town}` : ''}</span>
+                    <span className="font-display text-[19px] leading-tight text-ink">{m.title || 'Untitled'}</span>
+                    {m.matched.length > 0 && <span className="text-xs text-subtle">{`Matches: ${m.matched.slice(0, 3).join(', ')}`}</span>}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <RowLink to="/you" title={hasWords ? 'Your matches will appear here' : "Tell us what you're seeking"}
+              sub={hasWords ? 'As spaces and experiences join, the ones that fit you best show up first.' : 'Describe it in your own words and Xanadu will find your best fits.'} />
+          )}
+        </section>
 
         {shown.length > 0 ? (
           <section className="flex flex-col gap-3">

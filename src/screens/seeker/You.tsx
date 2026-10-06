@@ -2,12 +2,12 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Chip, EmptyState, H2, Page, PrimaryButton, Screen, SeekerTabs, Segmented, Switch } from '../../components/ui'
 import { IconChart, IconSettings } from '../../components/icons'
-import { CONTACT_EMAIL } from '../../data'
-import { AvatarPicker, EditFooter, SignOutButton, TextField } from '../../components/edit'
+import { CONTACT_EMAIL, SEEKER_ALIGN as ALIGN } from '../../data'
+import { refreshMatches, useMyKeywords } from '../../matching'
+import { AvatarPicker, EditFooter, SignOutButton, TextArea, TextField } from '../../components/edit'
 import { useAuth } from '../../auth'
 import { useSeekerProfile, type SeekerProfile } from '../../store'
 
-const ALIGN = ['Yoga', 'Breathwork', 'Meditation', 'Sound', 'Ecstatic dance', 'Kirtan', 'Trainings', "Women's retreats", "Men's retreats", 'Permaculture']
 const JOURNEY_TABS = ['Upcoming', 'Past'] as const
 
 export default function You() {
@@ -19,7 +19,18 @@ export default function You() {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<SeekerProfile>(me)
   const [error, setError] = useState('')
+  const [keywords, setKeywords] = useMyKeywords()
+  const [words, setWords] = useState(me.seeking)
+  const [wordsState, setWordsState] = useState<'idle' | 'saving' | 'saved'>('idle')
   const prefs = me.prefs
+  const saveWords = async () => {
+    setWordsState('saving'); setError('')
+    const err = await save({ ...me, seeking: words })
+    if (err) { setError(err); setWordsState('idle'); return }
+    const kw = await refreshMatches()
+    if (kw) setKeywords(kw)
+    setWordsState('saved')
+  }
   const toggle = (p: string) => save({ ...me, prefs: prefs.includes(p) ? prefs.filter((x) => x !== p) : [...prefs, p] })
   const set = <K extends keyof SeekerProfile>(k: K, v: SeekerProfile[K]) => setDraft((d) => ({ ...d, [k]: v }))
 
@@ -57,6 +68,23 @@ export default function You() {
           <div className="flex items-baseline justify-between"><H2 className="text-[22px]">Your alignment</H2><span className="text-xs text-subtle">Tap all that call to you</span></div>
           <div className="flex flex-wrap gap-2">{ALIGN.map((p) => <Chip key={p} on={prefs.includes(p)} onClick={() => toggle(p)}>{p}</Chip>)}</div>
           <p className="m-0 text-[13px] text-subtle">{prefs.length ? 'Discover will show experiences aligned with these first.' : 'Pick a few practices so Discover can show you what fits.'}</p>
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <div className="flex flex-col gap-0.5"><H2 className="text-[22px]">What you're looking for</H2><span className="text-xs text-subtle">In your own words. Xanadu's AI uses this to find your best matches.</span></div>
+          <TextArea label="Your words" value={words} onChange={(v) => { setWords(v); setWordsState('idle') }} rows={4}
+            placeholder="e.g. A volunteer exchange near the ocean where I can help in the garden, practice yoga daily and meet like-minded people." />
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-[13px] text-subtle">{wordsState === 'saved' ? 'Saved. Your matches are updated.' : ''}</span>
+            <button type="button" onClick={saveWords} disabled={wordsState === 'saving'}
+              className="min-h-10 rounded-xl bg-gold px-4 text-[13px] font-semibold text-navy disabled:opacity-60">{wordsState === 'saving' ? 'Matching…' : 'Save and match'}</button>
+          </div>
+          {keywords.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <span className="text-xs text-subtle">We picked up on</span>
+              <div className="flex flex-wrap gap-1.5">{keywords.map((k) => <span key={k} className="rounded-full bg-plum px-2.5 py-1 text-xs text-gold-pale">{k}</span>)}</div>
+            </div>
+          )}
         </section>
 
         <section className="flex flex-col gap-3">

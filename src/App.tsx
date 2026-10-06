@@ -10,6 +10,7 @@ import Calendar from './screens/seeker/Calendar'
 import Experience from './screens/seeker/Experience'
 import Saved from './screens/seeker/Saved'
 import You from './screens/seeker/You'
+import Space from './screens/seeker/Space'
 import Status from './screens/host/Status'
 import Inbox from './screens/host/Inbox'
 import ContainerHome from './screens/container/Home'
@@ -54,6 +55,7 @@ export default function App() {
           <Route path="/discover" element={<RequireRole role="seeker"><Discover /></RequireRole>} />
           <Route path="/calendar" element={<RequireRole role="seeker"><Calendar /></RequireRole>} />
           <Route path="/experience/:id" element={<RequireRole role="any"><Experience /></RequireRole>} />
+          <Route path="/space/:id" element={<RequireRole role="any"><Space /></RequireRole>} />
           <Route path="/saved" element={<RequireRole role="seeker"><Saved /></RequireRole>} />
           <Route path="/you" element={<RequireRole role="seeker"><You /></RequireRole>} />
 

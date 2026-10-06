@@ -14,6 +14,15 @@ export const supabase = createClient(URL, KEY, {
 
 export const PHOTO_BUCKET = 'photos'
 
+/** Which social sign-ins are switched on in Supabase (Authentication → Providers). */
+export async function enabledProviders(): Promise<{ google: boolean; apple: boolean }> {
+  try {
+    const r = await fetch(`${URL}/auth/v1/settings`, { headers: { apikey: KEY } })
+    const s = await r.json()
+    return { google: !!s?.external?.google, apple: !!s?.external?.apple }
+  } catch { return { google: false, apple: false } }
+}
+
 /** Turns Supabase's error messages into friendly ones. */
 export function friendlyError(message: string | undefined): string {
   if (!message) return 'Something went wrong. Please try again.'
