@@ -29,7 +29,7 @@ export function Privacy() {
       <p>Xanadu ("we") connects Seekers with retreat spaces (Containers) and guides (Facilitators). This policy explains what we collect, why, and the choices you have.</p>
       <h2>What we collect</h2>
       <ul>
-        <li><b>Account details:</b> your email address and, if you sign in with Google, your name and profile photo from that account.</li>
+        <li><b>Account details:</b> your email address and, if you sign in with Google or Apple, your name (and, with Google, your profile photo) from that account. With Apple you can choose to hide your email; we then receive a private relay address.</li>
         <li><b>Profile details you add:</b> name, photo, region, practices, what you're seeking, and for hosts, space or practice details, trainings, references and offerings.</li>
         <li><b>Messages</b> you send to other members or to the Xanadu team.</li>
         <li><b>Approximate location</b>, only if you join Community. It's rounded to about 1 km on your phone before it's sent, and other members only see a distance in miles, never your location.</li>
@@ -42,13 +42,13 @@ export function Privacy() {
         <li>To keep Xanadu safe, including acting on reports and blocks.</li>
       </ul>
       <h2>Who we share it with</h2>
-      <p>We don't sell your information. We use trusted providers to run the app: Supabase (database, sign-in and storage), Vercel (hosting), and Google if you choose to sign in with it. They process data only to provide their service to us.</p>
+      <p>We don't sell your information. We use trusted providers to run the app: Supabase (database, sign-in and storage), Vercel (hosting), and Google or Apple if you choose to sign in with them. They process data only to provide their service to us.</p>
       <h2>Your choices</h2>
       <ul>
         <li>Edit your profile at any time from the app.</li>
         <li>Hide yourself from Community and delete your saved location with one switch.</li>
         <li>Block or report any member.</li>
-        <li>Ask us to delete your account and data by emailing us. We'll do it within 30 days.</li>
+        <li>Delete your account and all your data yourself, any time, from your profile (Delete my account). It happens straight away and can't be undone. You can also email us and we'll do it for you.</li>
       </ul>
       <h2>Changes</h2>
       <p>If we change this policy, we'll update the date above and tell you in the app when the change matters.</p>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Chip, Field, inputCls } from './ui'
 import { IconClose, IconPhoto } from './icons'
 import { photoFromFile } from '../store'
+import { supabase } from '../lib/supabase'
 import { useAuth } from '../auth'
 
 export function TextField({ label, value, onChange, placeholder, type = 'text', autoComplete }: {
@@ -108,12 +109,43 @@ export function EditFooter({ onCancel, onSave, error, busy = false }: { onCancel
 }
 
 
-/** Sign out, shown at the bottom of every profile page. */
+/** Sign out and Delete my account, shown at the bottom of every profile page. */
 export function SignOutButton() {
   const navigate = useNavigate()
   const { signOut } = useAuth()
+  const [step, setStep] = useState<'idle' | 'confirm' | 'deleting'>('idle')
+  const [typed, setTyped] = useState('')
+  const [error, setError] = useState('')
+
+  const remove = async () => {
+    setStep('deleting'); setError('')
+    const { error } = await supabase.functions.invoke('delete-account', { body: { confirm: 'DELETE' } })
+    if (error) { setError("We couldn't delete your account. Please try again, or write to us and we'll do it for you."); setStep('confirm'); return }
+    await signOut()
+    navigate('/', { replace: true })
+  }
+
   return (
-    <button type="button" onClick={async () => { await signOut(); navigate('/', { replace: true }) }}
-      className="min-h-12 w-full rounded-2xl border border-line-2 text-[15px] text-muted">Sign out</button>
+    <div className="flex flex-col gap-3">
+      <button type="button" onClick={async () => { await signOut(); navigate('/', { replace: true }) }}
+        className="min-h-12 w-full rounded-2xl border border-line-2 text-[15px] text-muted">Sign out</button>
+      {step === 'idle' ? (
+        <button type="button" onClick={() => setStep('confirm')} className="min-h-10 self-center text-[13px] text-subtle">Delete my account</button>
+      ) : (
+        <div className="flex flex-col gap-2.5 rounded-2xl border border-gold/50 p-4">
+          <span className="text-[15px] font-semibold text-ink">Delete your account?</span>
+          <span className="text-[13px] leading-normal text-muted">This permanently removes your profile, photos, messages, saved items and connections, and any space or offerings you host. It can't be undone.</span>
+          <label className="flex flex-col gap-1.5 text-[13px] text-muted">Type DELETE to confirm
+            <input value={typed} onChange={(e) => setTyped(e.target.value)} autoCapitalize="characters" autoComplete="off" className={inputCls} />
+          </label>
+          {error && <span role="alert" className="text-[13px] text-gold-pale">{error}</span>}
+          <div className="flex gap-2">
+            <button type="button" onClick={() => { setStep('idle'); setTyped(''); setError('') }} className="min-h-11 flex-1 rounded-xl border border-line-2 text-[13px] text-muted">Keep my account</button>
+            <button type="button" disabled={typed.trim().toUpperCase() !== 'DELETE' || step === 'deleting'} onClick={remove}
+              className="min-h-11 flex-1 rounded-xl bg-gold text-[13px] font-semibold text-navy disabled:opacity-50">{step === 'deleting' ? 'Deleting…' : 'Delete forever'}</button>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }

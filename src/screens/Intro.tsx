@@ -57,7 +57,7 @@ export default function Intro() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
-  const [providers, setProviders] = useState({ google: false })
+  const [providers, setProviders] = useState({ google: false, apple: false })
   useEffect(() => { enabledProviders().then(setProviders) }, [])
 
   // Already signed in: go home (or finish setting up)
@@ -114,7 +114,7 @@ export default function Intro() {
     setBusy(false)
   }
 
-  const oauth = async (provider: 'google') => {
+  const oauth = async (provider: 'google' | 'apple') => {
     setError(''); setInfo('')
     const { error } = await supabase.auth.signInWithOAuth({
       provider, options: { redirectTo: `${origin}/auth/callback?role=${toDbRole(role)}` },
@@ -222,11 +222,12 @@ export default function Intro() {
               {busy ? 'One moment…' : signup ? `Create account as ${role}` : `Sign in as ${role}`}
             </button>
 
-            {providers.google && (
+            {(providers.google || providers.apple) && (
               <>
                 <div className="flex items-center gap-2.5 text-xs text-faint" style={rise(6)}><span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" /></div>
-                <div className="grid grid-cols-1 gap-2" style={rise(6)}>
-                  <button type="button" onClick={() => oauth('google')} className="min-h-12 rounded-[14px] border border-line-2 bg-navy/60 text-sm text-text">Continue with Google</button>
+                <div className={`grid gap-2 ${providers.google && providers.apple ? 'grid-cols-2' : 'grid-cols-1'}`} style={rise(6)}>
+                  {providers.apple && <button type="button" onClick={() => oauth('apple')} className="min-h-12 rounded-[14px] border border-line-2 bg-navy/60 text-sm text-text">Continue with Apple</button>}
+                  {providers.google && <button type="button" onClick={() => oauth('google')} className="min-h-12 rounded-[14px] border border-line-2 bg-navy/60 text-sm text-text">Continue with Google</button>}
                 </div>
               </>
             )}
