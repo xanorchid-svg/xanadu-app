@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { AppHeader, BackButton, ContainerTabs, EmptyState, FacilitatorTabs, H1, Page, Screen, SeekerTabs } from '../../components/ui'
+import { BackButton, ContainerTabs, EmptyState, FacilitatorTabs, H1, Page, Screen, SeekerTabs } from '../../components/ui'
 import { IconSend } from '../../components/icons'
 import type { Role } from '../../data'
 import { useMessages } from '../../store'
@@ -76,7 +76,7 @@ export default function Inbox({ role }: { role: Role }) {
   }
 
   return (
-    <Screen header={<AppHeader />} footer={tabs}>
+    <Screen footer={tabs}>
       <Page className="gap-4">
         <H1>{role === 'Seeker' ? 'Messages' : 'Inbox'}</H1>
         {loading ? <p className="m-0 text-sm text-subtle">Loading…</p> : (

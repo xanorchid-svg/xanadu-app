@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AppHeader, Chip, EmptyState, H1, H2, Page, PrimaryButton, RowLink, Screen, SeekerTabs } from '../../components/ui'
+import { Chip, EmptyState, H1, H2, Page, PrimaryButton, RowLink, Screen, SeekerTabs } from '../../components/ui'
 import { IconSearch, IconStar } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
 import FilterSheet from '../../components/FilterSheet'
@@ -65,7 +65,7 @@ export default function Discover() {
   const emptyTitle = q ? `Nothing matches "${query.trim()}" yet` : volunteering ? 'No volunteer exchanges here yet' : picked === 'All' && !nFilters ? 'The first experiences are on their way' : 'Nothing matches these filters yet'
 
   return (
-    <Screen header={<AppHeader />} footer={<SeekerTabs />}>
+    <Screen footer={<SeekerTabs />}>
       <Page>
         <div className="flex flex-col gap-1">
           <button type="button" onClick={() => setSheet(true)} className="self-start text-xs tracking-[0.08em] text-subtle">{`${where} ▾`}</button>

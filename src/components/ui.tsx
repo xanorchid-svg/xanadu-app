@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-import { HOME, useAuth } from '../auth'
 import { IconBack, IconCalendar, IconChat, IconCompass, IconHeart, IconHome, IconPeople, IconPin, IconPlus, IconUser } from './icons'
 
 /** Full-height screen: scrolling content plus an optional fixed footer (tab bar or action bar). */
@@ -14,27 +13,11 @@ export function Screen({ children, footer, header, className = '' }: { children:
   )
 }
 
-/** Content of a main (tab) screen; sits under the AppHeader. */
+/** Content of a main (tab) screen; clears the status bar / Dynamic Island on every iPhone. */
 export function Page({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`flex flex-col gap-6 px-5 pt-5 pb-8 ${className}`}>{children}</div>
+  return <div className={`pt-safe flex flex-col gap-6 px-5 pb-8 ${className}`}>{children}</div>
 }
 
-/**
- * The app bar on every main screen: a solid navy band locked to the top, holding only the
- * Xanadu lockup, centred: the emblem (transparent background) with the wordmark beside it.
- * Clears the notch / Dynamic Island on every iPhone.
- */
-export function AppHeader() {
-  const { profile } = useAuth()
-  return (
-    <header className="pt-safe-bar relative z-20 flex flex-none items-center justify-center border-b border-white/[0.06] bg-navy px-4 pb-2">
-      <Link to={HOME[profile?.role ?? 'seeker']} aria-label="Xanadu home" className="flex min-h-12 items-center gap-2.5 no-underline">
-        <img src="/logo-emblem-light.png?v=3" alt="" className="h-[54px] w-auto flex-none" />
-        <img src="/logo-xanadu-text.png" alt="Xanadu" className="h-[16px] w-auto" />
-      </Link>
-    </header>
-  )
-}
 
 export const H1 = ({ children, className = '' }: { children: ReactNode; className?: string }) => (
   <h1 className={`m-0 font-display text-[34px] leading-[1.05] font-medium text-ink ${className}`}>{children}</h1>

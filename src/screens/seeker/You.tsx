@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AppHeader, Chip, EmptyState, H2, Page, PrimaryButton, Screen, SeekerTabs, Segmented, Switch } from '../../components/ui'
+import { Chip, EmptyState, H2, Page, PrimaryButton, Screen, SeekerTabs, Segmented, Switch } from '../../components/ui'
 import { IconChart, IconSettings } from '../../components/icons'
 import { CONTACT_EMAIL, SEEKER_ALIGN as ALIGN } from '../../data'
 import { refreshMatches, useMyKeywords } from '../../matching'
@@ -52,7 +52,7 @@ export default function You() {
   const row = 'flex min-h-[52px] items-center justify-between border-b border-[#1F2B3E] text-[15px] text-text no-underline'
 
   return (
-    <Screen header={<AppHeader />} footer={<SeekerTabs />}>
+    <Screen footer={<SeekerTabs />}>
       <Page className="gap-6 pb-7">
         <div className="flex items-center gap-4">
           <div className="flex h-[72px] w-[72px] flex-none items-center justify-center overflow-hidden rounded-full border border-gold bg-plum font-display text-3xl text-gold-pale">

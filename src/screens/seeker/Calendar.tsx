@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AppHeader, Chip, EmptyState, H1, Page, Screen, SeekerTabs } from '../../components/ui'
+import { Chip, EmptyState, H1, Page, Screen, SeekerTabs } from '../../components/ui'
 import { IconBack, IconCalendar, IconNext } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
 import { useListings } from '../../store'
@@ -35,7 +35,7 @@ export default function Calendar() {
   const onDay = inPlace.filter((e) => runs(e, day))
 
   return (
-    <Screen header={<AppHeader />} footer={<SeekerTabs />}>
+    <Screen footer={<SeekerTabs />}>
       <Page className="gap-5">
         <H1>Calendar</H1>
         <div className="-mx-5 flex gap-2 overflow-x-auto px-5">

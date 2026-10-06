@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useFacilitatorProfile } from '../../store'
 import { useAuth } from '../../auth'
 import ApplicationBanner from '../../components/ApplicationBanner'
-import { AppHeader, Badge, Checklist, EmptyState, FacilitatorTabs, H2, Page, Screen, Switch } from '../../components/ui'
+import { Badge, Checklist, EmptyState, FacilitatorTabs, H2, Page, Screen, Switch } from '../../components/ui'
 
 const SETUP = [
   { id: 'account', title: 'Create your account', sub: 'Done', to: '/facilitator' },
@@ -26,7 +26,7 @@ export default function FacilitatorHome() {
   ].filter(Boolean)
 
   return (
-    <Screen header={<AppHeader />} footer={<FacilitatorTabs />}>
+    <Screen footer={<FacilitatorTabs />}>
       <Page className="gap-[22px]">
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">

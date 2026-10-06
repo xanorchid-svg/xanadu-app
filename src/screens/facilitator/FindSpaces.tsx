@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AppHeader, Chip, EmptyState, FacilitatorTabs, H1, Page, RowLink, Screen } from '../../components/ui'
+import { Chip, EmptyState, FacilitatorTabs, H1, Page, RowLink, Screen } from '../../components/ui'
 import { IconPin, IconSearch } from '../../components/icons'
 import { CONTACT_EMAIL, placeLabel, PRACTICES } from '../../data'
 import { useSpaces } from '../../store'
@@ -25,7 +25,7 @@ export default function FindSpaces() {
     && (!q || `${s.name} ${placeLabel(s)} ${s.about}`.toLowerCase().includes(q)))
 
   return (
-    <Screen header={<AppHeader />} footer={<FacilitatorTabs />}>
+    <Screen footer={<FacilitatorTabs />}>
       <Page className="gap-[18px]">
         <div className="flex flex-col gap-1">
           <H1>Spaces to hold in</H1>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AppHeader, FacilitatorTabs, Reviews, Screen } from '../../components/ui'
+import { FacilitatorTabs, Reviews, Screen } from '../../components/ui'
 import { AvatarPicker, EditFooter, PracticePicker, SignOutButton, TextArea, TextField } from '../../components/edit'
 import { IconClose } from '../../components/icons'
 import { useFacilitatorProfile, type FacilitatorProfile as FP } from '../../store'
@@ -89,8 +89,8 @@ export default function FacilitatorProfile() {
   const privRow = 'flex min-h-11 items-center justify-between border-b border-[#1F2B3E] text-sm text-text'
 
   return (
-    <Screen header={<AppHeader />} footer={<FacilitatorTabs />}>
-      <div className="flex flex-col gap-6 px-5 pt-5 pb-7">
+    <Screen footer={<FacilitatorTabs />}>
+      <div className="flex flex-col gap-6 px-5 pt-safe pb-7">
         <div role="tablist" aria-label="View" className="grid w-[300px] grid-cols-2 gap-1 self-center rounded-full bg-surface p-1">
           {VIEWS.map((v) => (
             <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => setView(v)}

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AppHeader, ContainerTabs, Reviews, Screen, Switch } from '../../components/ui'
+import { ContainerTabs, Reviews, Screen, Switch } from '../../components/ui'
 import { AddPhotosButton, EditFooter, LocationFields, PhotoGallery, PracticePicker, SignOutButton, TextArea, TextField } from '../../components/edit'
 import { Loading, useAuth } from '../../auth'
 import { IconPhoto } from '../../components/icons'
@@ -85,8 +85,8 @@ export default function SpaceProfile() {
   const cover = space.photos[0]
 
   return (
-    <Screen header={<AppHeader />} footer={<ContainerTabs />}>
-      <div className={`relative flex h-[260px] flex-col justify-between px-4 pt-4 pb-4 ${cover ? '' : 'border-b border-dashed border-line-2 bg-surface-2'}`}>
+    <Screen footer={<ContainerTabs />}>
+      <div className={`relative flex h-[260px] flex-col justify-between px-4 pt-safe pb-4 ${cover ? '' : 'border-b border-dashed border-line-2 bg-surface-2'}`}>
         {cover && <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover" />}
         <div className="relative flex justify-end gap-2">
           <button type="button" onClick={share} className="min-h-10 rounded-full bg-navy/75 px-3.5 text-[13px] text-text">Share</button>
