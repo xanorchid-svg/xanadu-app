@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-import { IconBack, IconCalendar, IconChat, IconCompass, IconHeart, IconHome, IconPin, IconPlus, IconUser } from './icons'
+import { IconBack, IconCalendar, IconChat, IconCompass, IconHeart, IconHome, IconPeople, IconPin, IconPlus, IconUser } from './icons'
 
 /** Full-height screen: scrolling content plus an optional fixed footer (tab bar or action bar). */
 export function Screen({ children, footer, header, className = '' }: { children: ReactNode; footer?: ReactNode; header?: ReactNode; className?: string }) {
@@ -123,7 +123,7 @@ type Tab = { to: string; label: string; icon: ReactNode; end?: boolean }
 function TabBar({ tabs, center, label }: { tabs: Tab[]; center?: Tab; label: string }) {
   const item = (t: Tab) => (
     <NavLink key={t.to} to={t.to} end={t.end ?? true}
-      className={({ isActive }) => `flex min-h-11 min-w-15 flex-col items-center gap-1 text-[11px] no-underline ${isActive ? 'text-gold-soft' : 'text-subtle'}`}>
+      className={({ isActive }) => `flex min-h-11 min-w-14 flex-col items-center gap-1 text-[11px] no-underline ${isActive ? 'text-gold-soft' : 'text-subtle'}`}>
       {t.icon}{t.label}
     </NavLink>
   )
@@ -144,6 +144,7 @@ export const SeekerTabs = () => (
   <TabBar label="Main" tabs={[
     { to: '/discover', label: 'Discover', icon: <IconCompass /> },
     { to: '/calendar', label: 'Calendar', icon: <IconCalendar /> },
+    { to: '/community', label: 'Community', icon: <IconPeople size={22} />, end: false },
     { to: '/saved', label: 'Saved', icon: <IconHeart /> },
     { to: '/you', label: 'You', icon: <IconUser /> },
   ]} />
@@ -162,6 +163,7 @@ export const FacilitatorTabs = () => (
   <TabBar label="Facilitator" tabs={[
     { to: '/facilitator', label: 'Home', icon: <IconHome /> },
     { to: '/facilitator/spaces', label: 'Spaces', icon: <IconPin /> },
+    { to: '/community', label: 'Community', icon: <IconPeople size={22} />, end: false },
     { to: '/facilitator/inbox', label: 'Inbox', icon: <IconChat /> },
     { to: '/facilitator/profile', label: 'Profile', icon: <IconUser /> },
   ]} />

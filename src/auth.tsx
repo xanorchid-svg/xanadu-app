@@ -13,7 +13,6 @@ export type Profile = {
   role: DbRole
   status: 'active' | 'pending' | 'approved' | 'declined'
   onboarded: boolean
-  email: string | null
   name: string
   photo_url: string
   town: string
@@ -27,6 +26,7 @@ export type Profile = {
   launch_notify: boolean
   chart_early: boolean
   open_to_spaces: boolean
+  community_visible: boolean
 }
 
 export const toDbRole = (r: Role): DbRole => r.toLowerCase() as DbRole

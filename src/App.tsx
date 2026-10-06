@@ -19,6 +19,8 @@ import SpaceProfile from './screens/container/SpaceProfile'
 import FacilitatorHome from './screens/facilitator/Home'
 import FindSpaces from './screens/facilitator/FindSpaces'
 import FacilitatorProfile from './screens/facilitator/Profile'
+import Community from './screens/community/Community'
+import Chat from './screens/community/Chat'
 
 /** Every page opens at the top: on navigation, on refresh, and when returning to a page. */
 function useScrollToTop() {
@@ -54,6 +56,10 @@ export default function App() {
           <Route path="/experience/:id" element={<RequireRole role="any"><Experience /></RequireRole>} />
           <Route path="/saved" element={<RequireRole role="seeker"><Saved /></RequireRole>} />
           <Route path="/you" element={<RequireRole role="seeker"><You /></RequireRole>} />
+
+          {/* Community: Seekers and Facilitators (Containers are sent to their home) */}
+          <Route path="/community" element={<RequireRole role="any"><Community /></RequireRole>} />
+          <Route path="/community/chat/:id" element={<RequireRole role="any"><Chat /></RequireRole>} />
 
           {/* applying = creating a host account */}
           <Route path="/apply" element={<ApplyRedirect />} />

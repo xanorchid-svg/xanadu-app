@@ -65,6 +65,10 @@ Members can't approve themselves: `status` on profiles and offerings only change
 - **Approve a host:** `profiles` → set `status` to `approved` (or `declined`).
 - **Publish an offering:** `offerings` → set `status` to `live`.
 - **Read and reply to members:** `messages` → add a row with the member's `user_id`, `from_team` = true and your reply in `body`.
+- **Community reports:** `reports` → each row is a member reporting another (`reporter`, `reported`, `reason`). Blocks are in `blocks`.
+
+### Community
+`/community` (Seekers and approved Facilitators). Opt-in: a member appears only after turning on *Show me in Community* and sharing their location, which is rounded to about 1 km on the phone and never shown to anyone. Others see name, photo, practices and distance in whole miles (5, 10 or 25 mi circles). Chat (`/community/chat/:id`) opens only after both people accept a connection; messages arrive live. Members can report, remove or block from the chat menu.
 
 ## Next steps
 
