@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { Chip, EmptyState, H1, Page, Screen, SeekerTabs } from '../../components/ui'
 import { IconBack, IconCalendar, IconNext } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
-import { REGIONS } from '../../data'
 import { useListings } from '../../store'
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -17,7 +16,7 @@ function startOfWeek(d: Date) {
 
 export default function Calendar() {
   const today = useMemo(() => new Date(), [])
-  const [place, setPlace] = useState<string>(REGIONS[0])
+  const [place, setPlace] = useState<string>('Everywhere')
   const [weekStart, setWeekStart] = useState(() => startOfWeek(today))
   const [day, setDay] = useState(() => iso(today))
   const { listings } = useListings()
@@ -26,10 +25,11 @@ export default function Calendar() {
   const monthLabel = days[3].toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
   const selected = new Date(day + 'T12:00:00')
   const heading = selected.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-  const where = place === REGIONS[0] ? 'Costa Rica' : place
+  const where = place === 'Everywhere' ? 'the world' : place
 
   const shiftWeek = (n: number) => { const d = new Date(weekStart); d.setDate(d.getDate() + 7 * n); setWeekStart(d); setDay(iso(d)) }
-  const inPlace = listings.filter((e) => e.start_date && (place === REGIONS[0] || (e.space?.town ?? '').toLowerCase().includes(place.toLowerCase())))
+  const countries = Array.from(new Set(listings.map((e) => e.space?.country.trim()).filter(Boolean) as string[])).sort()
+  const inPlace = listings.filter((e) => e.start_date && (place === 'Everywhere' || e.space?.country === place))
   const runs = (e: (typeof listings)[number], d: string) => e.start_date! <= d && (e.end_date || e.start_date)! >= d
   const busy = new Set(days.map(iso).filter((d) => inPlace.some((e) => runs(e, d))))
   const onDay = inPlace.filter((e) => runs(e, day))
@@ -39,7 +39,7 @@ export default function Calendar() {
       <Page className="gap-5">
         <H1>Calendar</H1>
         <div className="-mx-5 flex gap-2 overflow-x-auto px-5">
-          {REGIONS.map((r) => <Chip key={r} solid on={place === r} onClick={() => setPlace(r)}>{r}</Chip>)}
+          {['Everywhere', ...countries].map((r) => <Chip key={r} solid on={place === r} onClick={() => setPlace(r)}>{r}</Chip>)}
         </div>
 
         <div className="flex flex-col gap-3 rounded-[20px] bg-surface p-4">

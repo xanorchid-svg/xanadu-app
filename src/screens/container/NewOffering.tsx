@@ -12,7 +12,7 @@ const INCLUDED = [
   ['meals', 'Meals', 'Guests share dietary needs at sign-up'],
   ['schedule', 'Daily schedule', 'Sessions, rest and free time by day'],
   ['outings', 'Outings', 'Hikes, surf or beach trips that guests opt into'],
-  ['transport', 'Airport transport', 'From Liberia or San José'],
+  ['transport', 'Airport transport', 'From the nearest airport'],
 ] as const
 
 /** Four-step builder for a new retreat, training or drop-in. */

@@ -4,6 +4,7 @@ import { Chip, Field, inputCls } from './ui'
 import { IconClose, IconPhoto } from './icons'
 import { photoFromFile } from '../store'
 import { supabase } from '../lib/supabase'
+import { DESTINATIONS } from '../data'
 import { useAuth } from '../auth'
 
 export function TextField({ label, value, onChange, placeholder, type = 'text', autoComplete }: {
@@ -146,6 +147,35 @@ export function SignOutButton() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+/** Where a space is: country (from the destinations list, or typed), region and town. */
+export function LocationFields({ value, onChange }: { value: { country: string; region: string; town: string }; onChange: (v: { country: string; region: string; town: string }) => void }) {
+  const known = DESTINATIONS.find((d) => d.country === value.country)
+  const [other, setOther] = useState(!!value.country && !known)
+  const regions = known?.regions ?? []
+  const listId = `regions-${(value.country || 'other').replace(/\s+/g, '-')}`
+  return (
+    <div className="flex flex-col gap-3">
+      <Field label="Country">
+        <select value={other ? '__other' : value.country}
+          onChange={(e) => { const v = e.target.value; if (v === '__other') { setOther(true); onChange({ ...value, country: '' }) } else { setOther(false); onChange({ ...value, country: v }) } }}
+          className={`${inputCls} [color-scheme:dark]`}>
+          <option value="" disabled>Choose a country</option>
+          {DESTINATIONS.map((d) => <option key={d.country} value={d.country}>{d.country}</option>)}
+          <option value="__other">Another country…</option>
+        </select>
+      </Field>
+      {other && <TextField label="Which country?" value={value.country} onChange={(v) => onChange({ ...value, country: v })} placeholder="e.g. Thailand" />}
+      <div className="grid grid-cols-2 gap-2.5">
+        <Field label="State, province or island">
+          <input list={listId} value={value.region} onChange={(e) => onChange({ ...value, region: e.target.value })} placeholder={regions[0] ? `e.g. ${regions[0]}` : 'e.g. Bali'} className={inputCls} />
+          <datalist id={listId}>{regions.map((r) => <option key={r} value={r} />)}</datalist>
+        </Field>
+        <TextField label="Town" value={value.town} onChange={(v) => onChange({ ...value, town: v })} placeholder="e.g. Nosara" />
+      </div>
     </div>
   )
 }

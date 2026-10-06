@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { AvatarPicker, PhotoGallery, PracticePicker, TextArea, TextField } from '../components/edit'
+import { AvatarPicker, LocationFields, PhotoGallery, PracticePicker, TextArea, TextField } from '../components/edit'
 import { IconClose } from '../components/icons'
 import { Field, inputCls } from '../components/ui'
 import { HOME, Loading, takeReturn, useAuth } from '../auth'
@@ -71,7 +71,7 @@ function SeekerWelcome() {
   const [step, setStep] = useState(0)
   const [name, setName] = useState(profile?.name ?? '')
   const [photo, setPhoto] = useState(profile?.photo_url ?? '')
-  const [region, setRegion] = useState(profile?.region || 'Costa Rica')
+  const [region, setRegion] = useState(profile?.region ?? '')
   const [prefs, setPrefs] = useState<string[]>(profile?.prefs ?? [])
   const [seeking, setSeeking] = useState(profile?.seeking ?? '')
   const [busy, setBusy] = useState(false)
@@ -85,7 +85,7 @@ function SeekerWelcome() {
     setBusy(true); setError('')
     try {
       const [photoUrl] = await uploadPhotos(session!.user.id, photo ? [photo] : [])
-      const err = await updateProfile({ name: name.trim(), photo_url: photoUrl ?? '', region: region.trim() || 'Costa Rica', prefs, seeking: seeking.trim().slice(0, 2000), onboarded: true })
+      const err = await updateProfile({ name: name.trim(), photo_url: photoUrl ?? '', region: region.trim(), prefs, seeking: seeking.trim().slice(0, 2000), onboarded: true })
       if (err) { setError(friendlyError(err)); setBusy(false); return }
       await refreshMatches()
       navigate(takeReturn('/discover'), { replace: true })
@@ -99,7 +99,7 @@ function SeekerWelcome() {
           <Title sub="A few details so Xanadu feels like yours.">Welcome, Seeker</Title>
           <AvatarPicker photo={photo} onChange={setPhoto} label="Add a photo (optional)" />
           <TextField label="Your name" value={name} onChange={setName} autoComplete="name" />
-          <TextField label="Home region" value={region} onChange={setRegion} placeholder="e.g. Costa Rica" />
+          <TextField label="Where you live (optional)" value={region} onChange={setRegion} placeholder="e.g. Denver, Colorado" />
         </>
       )}
       {step === 1 && (
@@ -131,7 +131,7 @@ function ContainerWelcome() {
   const set = <K extends keyof SpaceProfile>(k: K, v: SpaceProfile[K]) => setSpace((s) => ({ ...s, [k]: v }))
 
   const go = (n: number) => {
-    if (n > step && step === 0 && (!space.name.trim() || !space.town.trim())) { setError('Please add your space name and town.'); return }
+    if (n > step && step === 0 && (!space.name.trim() || !space.country.trim() || !space.town.trim())) { setError('Please add your space name, country and town.'); return }
     if (n > step && step === 1 && !space.about.trim()) { setError('Please describe your space in a few sentences.'); return }
     setError(''); setStep(n)
   }
@@ -152,7 +152,7 @@ function ContainerWelcome() {
         <>
           <Title sub="Founding Containers join free. Let's set up your space.">Welcome, Container</Title>
           <TextField label="Space name" value={space.name} onChange={(v) => set('name', v)} />
-          <TextField label="Town" value={space.town} onChange={(v) => set('town', v)} placeholder="e.g. Nosara" />
+          <LocationFields value={space} onChange={(v) => setSpace((s) => ({ ...s, ...v }))} />
           <TextField label="Phone (private, for your intro call)" value={phone} onChange={setPhone} type="tel" autoComplete="tel" />
         </>
       )}
@@ -208,7 +208,7 @@ function FacilitatorWelcome() {
   const [error, setError] = useState('')
 
   const go = (n: number) => {
-    if (n > step && step === 0 && (!name.trim() || !town.trim())) { setError('Please add your name and town.'); return }
+    if (n > step && step === 0 && (!name.trim() || !town.trim())) { setError("Please add your name and where you're based."); return }
     if (n > step && step === 1 && (!practices.length || !about.trim())) { setError('Please choose your practices and write a few words about your work.'); return }
     setError(''); setStep(n)
   }
@@ -240,7 +240,7 @@ function FacilitatorWelcome() {
           <Title sub="Founding Facilitators join free. Let's introduce you.">Welcome, Facilitator</Title>
           <AvatarPicker photo={photo} onChange={setPhoto} />
           <TextField label="Your name" value={name} onChange={setName} autoComplete="name" />
-          <TextField label="Town" value={town} onChange={setTown} placeholder="e.g. Nosara" />
+          <TextField label="Where you're based" value={town} onChange={setTown} placeholder="e.g. Ubud, Bali" />
         </>
       )}
       {step === 1 && (

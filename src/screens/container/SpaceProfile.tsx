@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ContainerTabs, Reviews, Screen, Switch } from '../../components/ui'
-import { AddPhotosButton, EditFooter, PhotoGallery, PracticePicker, SignOutButton, TextArea, TextField } from '../../components/edit'
+import { AddPhotosButton, EditFooter, LocationFields, PhotoGallery, PracticePicker, SignOutButton, TextArea, TextField } from '../../components/edit'
 import { Loading, useAuth } from '../../auth'
 import { IconPhoto } from '../../components/icons'
 import { StatusPill, dateRange } from '../../components/OfferingCard'
 import { useOfferings, useSpaceProfile, type SpaceProfile as SP } from '../../store'
-import { PRACTICES } from '../../data'
+import { placeLabel, PRACTICES } from '../../data'
 
 const h2 = 'm-0 font-display text-[22px] font-semibold text-ink'
 
@@ -32,7 +32,7 @@ export default function SpaceProfile() {
           <h1 className="m-0 font-display text-[32px] font-medium text-ink">Edit space</h1>
           <PhotoGallery photos={draft.photos} onChange={(p) => set('photos', p)} />
           <TextField label="Space name" value={draft.name} onChange={(v) => set('name', v)} />
-          <TextField label="Town" value={draft.town} onChange={(v) => set('town', v)} placeholder="e.g. Nosara" />
+          <LocationFields value={draft} onChange={(v) => setDraft((d) => ({ ...d, ...v }))} />
           <TextArea label="About your space" value={draft.about} onChange={(v) => set('about', v)} rows={5}
             placeholder="The land, the spirit of the place and who it's for." />
           <PracticePicker label="Practices you host" options={PRACTICES} value={draft.practices} onChange={(v) => set('practices', v)} />
@@ -112,7 +112,7 @@ export default function SpaceProfile() {
             <h1 className="m-0 font-display text-[32px] font-medium text-ink">{space.name.trim() || '[Your space name]'}</h1>
             <span className="rounded-full border border-gold px-2 py-1 text-xs text-gold-pale">Founding member</span>
           </div>
-          <span className="text-sm text-muted">{`Retreat space · ${space.town.trim() || '[Town]'}, Costa Rica`}</span>
+          <span className="text-sm text-muted">{`Retreat space · ${placeLabel(space) || '[Town, country]'}`}</span>
           <span className="flex flex-wrap gap-x-3 text-[13px]">
             <a href="#reviews" className="text-subtle no-underline">No reviews yet</a>
             {space.id && <Link to={`/space/${space.id}`} className="no-underline">Preview as guests see it ›</Link>}

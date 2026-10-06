@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom'
 import type { Listing } from '../store'
 import { dateRange } from './OfferingCard'
+import { placeLabel } from '../data'
 
 /** One live experience in a list: cover photo from its space, practice, title, host and dates. */
 export default function ExperienceCard({ e }: { e: Listing }) {
   const cover = e.space?.photos[0]
   const kicker = [e.practices[0], e.format].filter(Boolean).join(' · ')
-  const where = [e.space?.name, e.space?.town].filter(Boolean).join(', ')
+  const where = [e.space?.name, e.space ? placeLabel({ town: e.space.town, region: e.space.region }) || e.space.country : ''].filter(Boolean).join(' · ')
   return (
     <Link to={`/experience/${e.id}`} className="flex items-center gap-3.5 rounded-[18px] bg-surface p-2.5 text-text no-underline">
       <div className="h-[76px] w-[76px] flex-none overflow-hidden rounded-[14px] bg-sage">

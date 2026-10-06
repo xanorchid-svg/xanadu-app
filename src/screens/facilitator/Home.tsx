@@ -30,7 +30,7 @@ export default function FacilitatorHome() {
       <Page className="gap-[22px]">
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-subtle">Pura vida</span>
+            <span className="text-xs text-subtle">Welcome</span>
             <h1 className="m-0 font-display text-[32px] font-medium text-ink">{me.name.trim() || '[Your name]'}</h1>
             <div className="mt-1"><Badge>Founding Facilitator</Badge></div>
           </div>

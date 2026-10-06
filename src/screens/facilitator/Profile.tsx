@@ -40,7 +40,7 @@ export default function FacilitatorProfile() {
           <h1 className="m-0 font-display text-[32px] font-medium text-ink">Edit profile</h1>
           <AvatarPicker photo={draft.photo} onChange={(p) => set('photo', p)} />
           <TextField label="Your name" value={draft.name} onChange={(v) => set('name', v)} autoComplete="name" />
-          <TextField label="Town" value={draft.town} onChange={(v) => set('town', v)} placeholder="e.g. Nosara" />
+          <TextField label="Where you're based" value={draft.town} onChange={(v) => set('town', v)} placeholder="e.g. Ubud, Bali" />
           <PracticePicker label="Your practices" options={FAC_PRACTICES} value={draft.practices} onChange={(v) => set('practices', v)} />
           <TextField label="Languages" value={draft.languages} onChange={(v) => set('languages', v)} placeholder="e.g. English, Español" />
           <TextArea label="About" value={draft.about} onChange={(v) => set('about', v)} rows={5}
@@ -85,7 +85,7 @@ export default function FacilitatorProfile() {
   }
 
   const name = profile.name.trim() || '[Your name]'
-  const meta = [profile.practices.length ? profile.practices.slice(0, 3).join(' · ') : '[Your practices]', `${profile.town.trim() || '[Town]'}, Costa Rica`].join(' · ')
+  const meta = [profile.practices.length ? profile.practices.slice(0, 3).join(' · ') : '[Your practices]', profile.town.trim() || '[Where you\'re based]'].join(' · ')
   const privRow = 'flex min-h-11 items-center justify-between border-b border-[#1F2B3E] text-sm text-text'
 
   return (

@@ -5,10 +5,11 @@ import { IconBack, IconHeart } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
 import { Loading, useAuth } from '../../auth'
 import { supabase } from '../../lib/supabase'
+import { placeLabel } from '../../data'
 import { fetchListings, useSaved, type Listing } from '../../store'
 
 type Row = {
-  id: string; owner_id: string; name: string; town: string; about: string; practices: string[]; photos: string[]
+  id: string; owner_id: string; name: string; town: string; region: string; country: string; about: string; practices: string[]; photos: string[]
   sleeps: string; rooms: string; mats: string; kitchen: string; getting_here: string; volunteer_exchange: boolean; volunteer_details: string
 }
 
@@ -76,7 +77,7 @@ export default function Space() {
       <div className="flex flex-col gap-6 px-5 pt-5 pb-8">
         <div className="flex flex-col gap-1.5">
           <h1 className="m-0 font-display text-[32px] font-medium text-ink">{space.name}</h1>
-          <span className="text-sm text-muted">{`Retreat space · ${space.town}, Costa Rica`}</span>
+          <span className="text-sm text-muted">{`Retreat space · ${placeLabel(space)}`}</span>
           {own && <span className="text-[13px] text-subtle">This is how members see your space.</span>}
           {error && <span role="alert" className="text-[13px] text-gold-pale">{error}</span>}
         </div>

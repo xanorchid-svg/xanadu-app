@@ -72,6 +72,9 @@ Members can't approve themselves: `status` on profiles and offerings only change
 ### Community
 `/community` (Seekers and approved Facilitators). Opt-in: a member appears only after turning on *Show me in Community* and sharing their location, which is rounded to about 1 km on the phone and never shown to anyone. Others see name, photo, practices and distance in whole miles (5, 10 or 25 mi circles). Chat (`/community/chat/:id`) opens only after both people accept a connection; messages arrive live. Members can report, remove or block from the chat menu.
 
+### Discover filters and destinations
+Xanadu is global. Spaces have `country`, `region` (state, province or island) and `town`; hosts pick a country from `DESTINATIONS` in `src/data.ts` or type another. Discover has a Filters sheet (`src/components/FilterSheet.tsx`, logic in `src/filters.ts`): Type (Retreat, Training, Drop-in, Volunteer exchange), Where (countries and regions that actually have listings), When, Price, Length and Sort. Options that would show nothing are hidden, and filters are kept for the session. Calendar and Facilitator Spaces filter by country.
+
 ### AI matching (Seekers → spaces and experiences)
 Seekers describe what they're looking for in their own words (sign-up and their profile). The `match-embed` edge function (`supabase/functions/match-embed`) reads that text, picks out keywords (e.g. Volunteer exchange, Surf, Yoga) and creates an AI meaning vector with Supabase's built-in `gte-small` model (free, no API key). Hosts' spaces and offerings are processed the same way whenever they're saved. `my_matches()` ranks approved spaces and live offerings by meaning plus shared keywords, with an extra boost for volunteer exchange; Discover shows the top 6. Spaces can turn on *We welcome volunteers* and describe the exchange.
 

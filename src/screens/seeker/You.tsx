@@ -43,7 +43,7 @@ export default function You() {
           <h1 className="m-0 font-display text-[32px] font-medium text-ink">Edit profile</h1>
           <AvatarPicker photo={draft.photo} onChange={(p) => set('photo', p)} />
           <TextField label="Your name" value={draft.name} onChange={(v) => set('name', v)} autoComplete="name" />
-          <TextField label="Home region" value={draft.region} onChange={(v) => set('region', v)} placeholder="e.g. Costa Rica" />
+          <TextField label="Where you live" value={draft.region} onChange={(v) => set('region', v)} placeholder="e.g. Denver, Colorado" />
         </div>
       </Screen>
     )
@@ -114,7 +114,7 @@ export default function You() {
           <Link to="/messages" className={row}>Messages <span className="text-[13px] text-gold-soft">Your thread with the Xanadu team ›</span></Link>
           <div className={row}>Membership <span className="text-[13px] text-gold-soft">Founding Seeker · Free</span></div>
           <button type="button" onClick={() => { setDraft(me); setError(''); setEditing(true) }} className={`${row} w-full text-left`}>Profile <span className="text-[13px] text-gold-soft">Edit name, photo, region</span></button>
-          <div className={row}>Home region <span className="text-[13px] text-subtle">{me.region.trim() || 'Costa Rica'}</span></div>
+          <div className={row}>Where you live <span className="text-[13px] text-subtle">{me.region.trim() || 'Not added'}</span></div>
           <div className={row}>New aligned experiences <Switch on={me.notify} onChange={(v) => save({ ...me, notify: v })} label="Notify me about new aligned experiences" /></div>
           <Link to="/privacy" className={row}>Privacy &amp; data <span className="text-[13px] text-subtle">Read our policy ›</span></Link>
           <Link to="/terms" className={row}>Terms &amp; guidelines <span className="text-[13px] text-subtle">Read the terms ›</span></Link>

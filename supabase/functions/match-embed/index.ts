@@ -38,6 +38,15 @@ const VOCAB: Record<string, string[]> = {
   Budget: ['budget', 'affordable', 'cheap', 'low cost', 'low-cost', 'free'],
   Solo: ['solo', 'alone', 'by myself', 'on my own'],
   Couples: ['couple', 'couples', 'partner', 'my boyfriend', 'my girlfriend', 'my husband', 'my wife'],
+  // destinations
+  'Costa Rica': ['costa rica', 'nosara', 'santa teresa', 'puerto viejo', 'uvita', 'guanacaste', 'pura vida'],
+  Bali: ['bali', 'ubud', 'canggu', 'uluwatu', 'indonesia'],
+  Peru: ['peru', 'sacred valley', 'cusco', 'cuzco', 'machu picchu', 'pisac'],
+  'Buenos Aires': ['buenos aires', 'argentina', 'patagonia'],
+  Portugal: ['portugal', 'lisbon', 'lisboa', 'algarve', 'sintra', 'madeira', 'ericeira'],
+  Colorado: ['colorado', 'boulder', 'denver', 'rocky mountains', 'rockies'],
+  California: ['california', 'big sur', 'ojai', 'joshua tree', 'san diego', 'los angeles', 'bay area'],
+  Mexico: ['mexico', 'tulum', 'oaxaca', 'baja'],
 }
 
 function keywordsOf(text: string): string[] {
@@ -73,13 +82,13 @@ Deno.serve(async (req) => {
   } else if (profile.role === 'container') {
     const { data: space } = await admin.from('spaces').select('*').eq('owner_id', user.id).maybeSingle()
     if (space) {
-      await add('space', space.id, [space.name, space.town, space.about, (space.practices ?? []).join(', '), space.kitchen, space.getting_here,
+      await add('space', space.id, [space.name, [space.town, space.region, space.country].filter(Boolean).join(', '), space.about, (space.practices ?? []).join(', '), space.kitchen, space.getting_here,
         space.volunteer_exchange ? `Volunteer work exchange available. ${space.volunteer_details}` : ''].join('. '),
         [...(space.practices ?? []), ...(space.volunteer_exchange ? ['Volunteer exchange'] : [])])
     }
     const { data: offerings } = await admin.from('offerings').select('id, title, format, practices, description').eq('owner_id', user.id)
     for (const o of offerings ?? []) {
-      await add('offering', o.id, [o.title, o.format, (o.practices ?? []).join(', '), o.description].join('. '), o.practices ?? [])
+      await add('offering', o.id, [o.title, o.format, (o.practices ?? []).join(', '), o.description, space ? [space.town, space.region, space.country].filter(Boolean).join(', ') : ''].join('. '), o.practices ?? [])
     }
   }
 
