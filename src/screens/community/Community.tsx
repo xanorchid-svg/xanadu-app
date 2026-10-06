@@ -73,6 +73,15 @@ export default function Community() {
     reload(); cReload()
   }
 
+  const [inviteNote, setInviteNote] = useState('')
+  const invite = async () => {
+    const url = window.location.origin
+    try {
+      if (navigator.share) { await navigator.share({ title: 'Xanadu', text: 'Join me on Xanadu, a network for awakening places.', url }); return }
+      await navigator.clipboard.writeText(url); setInviteNote('Link copied ✓')
+    } catch (e) { if ((e as Error).name !== 'AbortError') setInviteNote(url) }
+  }
+
   const pending = connections.filter((c) => c.status === 'pending' && c.incoming)
 
   const header = (
@@ -160,8 +169,9 @@ export default function Community() {
               : members.length
                 ? <div className="flex flex-col gap-2.5">{members.map((m) => <MemberCard key={m.id} m={m} act={act} me={userId} />)}</div>
                 : (
-                  <EmptyState icon={<IconPeople size={32} />} title={`No one within ${radius} miles yet`}>
-                    {radius < 25 ? 'Try a wider circle. ' : ''}Xanadu is just opening, so Community grows as people join. Invite a friend from your profile.
+                  <EmptyState icon={<IconPeople size={32} />} title={`No one within ${radius} miles yet`}
+                    action={<button type="button" onClick={invite} className="flex min-h-11 items-center text-sm font-semibold text-gold-soft">{inviteNote || 'Invite a friend'}</button>}>
+                    {radius < 25 ? 'Try a wider circle. ' : ''}Xanadu is just opening, so Community grows as people join.
                   </EmptyState>
                 )}
           </>

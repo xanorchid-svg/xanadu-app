@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useOfferings, useSpaceProfile } from '../../store'
 import { Chip, Field, inputCls, Switch } from '../../components/ui'
 import { IconClose } from '../../components/icons'
@@ -56,6 +56,11 @@ export default function NewOffering() {
     navigate(`/container/offering?id=${id}`, { replace: true })
   }
 
+  // don't lose a half-written offering by accident
+  const close = () => {
+    const started = title.trim() || description.trim() || practices.length || start || price
+    if (!started || window.confirm('Leave without submitting? What you\'ve written here won\'t be saved.')) { if (window.history.length > 1) navigate(-1); else navigate('/container') }
+  }
   const togglePractice = (p: string) => setPractices((xs) => (xs.includes(p) ? xs.filter((x) => x !== p) : [...xs, p]))
   const box = (on: boolean) => `min-h-12 rounded-xl border text-sm ${on ? 'border-gold bg-gold font-semibold text-navy' : 'border-line-2 text-text'}`
   const kicker = [format, ...(practices.length ? practices.slice(0, 2) : ['[Practices]'])].join(' · ')
@@ -65,7 +70,7 @@ export default function NewOffering() {
     <div className="flex h-full flex-col">
       <header className="flex flex-col gap-3.5 border-b border-[#1F2B3E] px-5 pt-[52px] pb-3.5">
         <div className="flex items-center justify-between">
-          <Link to="/container" aria-label="Close" className="flex h-11 w-11 items-center justify-center rounded-full bg-surface text-text"><IconClose /></Link>
+          <button type="button" aria-label="Close" onClick={close} className="flex h-11 w-11 items-center justify-center rounded-full bg-surface text-text"><IconClose /></button>
           <span className="text-[13px] text-subtle">{`Step ${step} of 4 · ${STEP_NAMES[step - 1]}`}</span>
           <span className="w-11 text-right text-[13px] text-subtle">Draft</span>
         </div>

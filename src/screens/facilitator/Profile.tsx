@@ -15,7 +15,6 @@ export default function FacilitatorProfile() {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<FP>(profile)
   const [error, setError] = useState('')
-  const [saved, setSaved] = useState(false)
   const [busy, setBusy] = useState(false)
   const own = view === 'My profile'
 
@@ -109,7 +108,7 @@ export default function FacilitatorProfile() {
           <a href="#reviews" className="text-[13px] text-subtle no-underline">No reviews yet</a>
           {own
             ? <button type="button" onClick={startEdit} className="min-h-11 rounded-full border border-gold px-[18px] text-[13px] font-semibold text-gold-pale">Edit profile</button>
-            : <button type="button" aria-pressed={saved} onClick={() => setSaved(!saved)} className="min-h-11 rounded-full border border-line-2 px-[18px] text-sm text-text">{saved ? 'Saved ♥' : 'Save'}</button>}
+            : <span className="text-[13px] text-subtle">This is how your profile reads to Seekers.</span>}
           {error && <span role="alert" className="text-xs text-gold-pale">{error}</span>}
         </div>
 

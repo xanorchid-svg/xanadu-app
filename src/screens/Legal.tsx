@@ -1,14 +1,15 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { CONTACT_EMAIL } from '../data'
 
 const UPDATED = 'October 5, 2026'
 
 function LegalPage({ title, children }: { title: string; children: ReactNode }) {
+  const navigate = useNavigate()
   return (
     <div className="xa-page h-full overflow-y-auto bg-navy">
       <div className="flex flex-col gap-5 px-5 pt-14 pb-12">
-        <Link to="/" className="self-start text-[13px] text-gold-soft no-underline">‹ Xanadu</Link>
+        <button type="button" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))} className="min-h-10 self-start text-[13px] text-gold-soft">‹ Back</button>
         <div className="flex flex-col gap-1">
           <h1 className="m-0 font-display text-[34px] leading-[1.05] font-medium text-ink">{title}</h1>
           <span className="text-xs text-subtle">{`Last updated ${UPDATED}`}</span>

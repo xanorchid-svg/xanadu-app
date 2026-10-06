@@ -1,6 +1,6 @@
 import { useLayoutEffect } from 'react'
 import { Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom'
-import { RequireRole } from './auth'
+import { RequireRole, useAuth } from './auth'
 import AuthCallback from './screens/AuthCallback'
 import ResetPassword from './screens/ResetPassword'
 import Welcome from './screens/Welcome'
@@ -33,6 +33,12 @@ function useScrollToTop() {
   }, [location.pathname, location.search])
 }
 
+/** /messages: everyone's thread with the Xanadu team, with their own tab bar. */
+function MessagesFor() {
+  const { profile } = useAuth()
+  return <Inbox role={profile?.role === 'container' ? 'Container' : profile?.role === 'facilitator' ? 'Facilitator' : 'Seeker'} />
+}
+
 function ApplyRedirect() {
   const [params] = useSearchParams()
   const role = params.get('role') === 'Facilitator' ? 'Facilitator' : 'Container'
@@ -61,6 +67,7 @@ export default function App() {
           <Route path="/space/:id" element={<RequireRole role="any"><Space /></RequireRole>} />
           <Route path="/saved" element={<RequireRole role="seeker"><Saved /></RequireRole>} />
           <Route path="/you" element={<RequireRole role="seeker"><You /></RequireRole>} />
+          <Route path="/messages" element={<RequireRole role="any"><MessagesFor /></RequireRole>} />
 
           {/* Community: Seekers and Facilitators (Containers are sent to their home) */}
           <Route path="/community" element={<RequireRole role="any"><Community /></RequireRole>} />

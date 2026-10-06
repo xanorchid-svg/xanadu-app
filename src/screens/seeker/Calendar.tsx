@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import { Chip, EmptyState, H1, Page, Screen, SeekerTabs } from '../../components/ui'
 import { IconBack, IconCalendar, IconNext } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
-import { experiences, REGIONS } from '../../data'
+import { REGIONS } from '../../data'
+import { useListings } from '../../store'
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 
@@ -19,6 +20,7 @@ export default function Calendar() {
   const [place, setPlace] = useState<string>(REGIONS[0])
   const [weekStart, setWeekStart] = useState(() => startOfWeek(today))
   const [day, setDay] = useState(() => iso(today))
+  const { listings } = useListings()
 
   const days = Array.from({ length: 7 }, (_, i) => { const d = new Date(weekStart); d.setDate(d.getDate() + i); return d })
   const monthLabel = days[3].toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
@@ -27,8 +29,10 @@ export default function Calendar() {
   const where = place === REGIONS[0] ? 'Costa Rica' : place
 
   const shiftWeek = (n: number) => { const d = new Date(weekStart); d.setDate(d.getDate() + 7 * n); setWeekStart(d); setDay(iso(d)) }
-  const busy = new Set(experiences.filter((e) => place === REGIONS[0] || e.town === place).map((e) => e.startDate))
-  const onDay = experiences.filter((e) => e.startDate <= day && e.endDate >= day && (place === REGIONS[0] || e.town === place))
+  const inPlace = listings.filter((e) => e.start_date && (place === REGIONS[0] || (e.space?.town ?? '').toLowerCase().includes(place.toLowerCase())))
+  const runs = (e: (typeof listings)[number], d: string) => e.start_date! <= d && (e.end_date || e.start_date)! >= d
+  const busy = new Set(days.map(iso).filter((d) => inPlace.some((e) => runs(e, d))))
+  const onDay = inPlace.filter((e) => runs(e, day))
 
   return (
     <Screen footer={<SeekerTabs />}>
@@ -64,9 +68,9 @@ export default function Calendar() {
 
         <span className="text-xs tracking-[0.14em] text-subtle uppercase">{heading}</span>
         {onDay.length ? onDay.map((e) => <ExperienceCard key={e.id} e={e} />) : (
-          <EmptyState icon={<IconCalendar size={36} />} title={`Nothing scheduled in ${where} yet`}
+          <EmptyState icon={<IconCalendar size={36} />} title={inPlace.length ? 'Nothing on this day' : `Nothing scheduled in ${where} yet`}
             action={<Link to="/discover" className="flex min-h-11 items-center text-sm no-underline">Back to Discover</Link>}>
-            When spaces and facilitators publish retreats, trainings and drop-ins, they'll show up here by day.
+            {inPlace.length ? 'Days with a gold dot have something on. Tap one, or try another week.' : "When spaces and facilitators publish retreats, trainings and drop-ins, they'll show up here by day."}
           </EmptyState>
         )}
       </Page>

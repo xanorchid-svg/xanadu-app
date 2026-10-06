@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { BackButton, ContainerTabs, EmptyState, FacilitatorTabs, H1, Page, Screen } from '../../components/ui'
+import { useSearchParams } from 'react-router-dom'
+import { BackButton, ContainerTabs, EmptyState, FacilitatorTabs, H1, Page, Screen, SeekerTabs } from '../../components/ui'
 import { IconSend } from '../../components/icons'
 import type { Role } from '../../data'
 import { useMessages } from '../../store'
@@ -12,20 +13,25 @@ const fmt = (iso: string) => {
     : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-/** Inbox for Containers and Facilitators: their thread with the Xanadu team, saved in the database. */
-export default function Inbox({ role }: { role: Exclude<Role, 'Seeker'> }) {
+/** Inbox for every member: their thread with the Xanadu team, saved in the database. ?draft= opens it with a message started. */
+export default function Inbox({ role }: { role: Role }) {
   const { messages, loading, send } = useMessages()
-  const [open, setOpen] = useState(false)
-  const [draft, setDraft] = useState('')
+  const [params] = useSearchParams()
+  const [open, setOpen] = useState(() => !!params.get('draft'))
+  const [draft, setDraft] = useState(() => params.get('draft') ?? '')
   const [error, setError] = useState('')
   const [sending, setSending] = useState(false)
   const [lastRead, setLastRead] = useState(() => { try { return localStorage.getItem(READ_KEY) ?? '' } catch { return '' } })
   const endRef = useRef<HTMLDivElement>(null)
-  const tabs = role === 'Container' ? <ContainerTabs /> : <FacilitatorTabs />
+  const tabs = role === 'Container' ? <ContainerTabs /> : role === 'Facilitator' ? <FacilitatorTabs /> : <SeekerTabs />
   const latest = messages[messages.length - 1]
   const unread = !!latest && latest.from_team && latest.created_at > lastRead
 
   useEffect(() => { if (open) endRef.current?.scrollIntoView({ block: 'end' }) }, [open, messages.length])
+  // reading the thread marks it read, including replies that arrive while it's open
+  useEffect(() => {
+    if (open && latest && latest.created_at > lastRead) { try { localStorage.setItem(READ_KEY, latest.created_at) } catch { /* private mode */ } setLastRead(latest.created_at) }
+  }, [open, latest, lastRead])
 
   const openThread = () => {
     setOpen(true)
@@ -72,7 +78,7 @@ export default function Inbox({ role }: { role: Exclude<Role, 'Seeker'> }) {
   return (
     <Screen footer={tabs}>
       <Page className="gap-4">
-        <H1>Inbox</H1>
+        <H1>{role === 'Seeker' ? 'Messages' : 'Inbox'}</H1>
         {loading ? <p className="m-0 text-sm text-subtle">Loading…</p> : (
           <button type="button" onClick={openThread} className="flex min-h-[72px] items-center gap-3 border-b border-[#1F2B3E] py-2.5 text-left text-text">
             <span className="flex h-12 w-12 flex-none items-center justify-center overflow-hidden rounded-full bg-ivory"><img src="/xanadu-mark.png" alt="" className="h-9 w-auto" /></span>
@@ -83,7 +89,9 @@ export default function Inbox({ role }: { role: Exclude<Role, 'Seeker'> }) {
             <span className={`h-2 w-2 flex-none rounded-full ${unread ? 'bg-gold' : 'bg-transparent'}`} />
           </button>
         )}
-        <EmptyState title="No other conversations yet">Intros from Xanadu and messages with spaces and guests will appear here.</EmptyState>
+        <EmptyState title="No other conversations yet">{role === 'Seeker'
+          ? 'Replies about the spots you request, and chats with your Community connections, live here and in Community.'
+          : 'Intros from Xanadu and messages with spaces and guests will appear here.'}</EmptyState>
       </Page>
     </Screen>
   )

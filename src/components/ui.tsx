@@ -169,8 +169,8 @@ export const FacilitatorTabs = () => (
   ]} />
 )
 
-/** Checklist used on Container and Facilitator home screens. */
-export function Checklist({ title, items, done, onToggle }: { title: string; items: { id: string; title: string; sub: string; to: string }[]; done: string[]; onToggle: (id: string) => void }) {
+/** Checklist used on Container and Facilitator home screens. Items tick themselves off as the profile fills in. */
+export function Checklist({ title, items, done }: { title: string; items: { id: string; title: string; sub: string; to: string }[]; done: string[] }) {
   return (
     <section className="flex flex-col gap-3 rounded-[20px] bg-plum p-[18px]">
       <div className="flex items-baseline justify-between"><H2>{title}</H2><span className="text-[13px] text-gold-pale">{`${done.length} of ${items.length}`}</span></div>
@@ -179,9 +179,8 @@ export function Checklist({ title, items, done, onToggle }: { title: string; ite
         const d = done.includes(t.id)
         return (
           <div key={t.id} className="flex items-center gap-3 py-2.5">
-            <button type="button" onClick={() => onToggle(t.id)} aria-label={d ? `Mark ${t.title} as not done` : `Mark ${t.title} as done`}
-              className={`h-7 w-7 flex-none rounded-lg text-sm font-bold ${d ? 'bg-gold text-navy' : 'border-[1.5px] border-slate text-transparent'}`}>✓</button>
-            <Link to={t.to} className="flex min-w-0 flex-1 flex-col gap-0.5 no-underline">
+            <span aria-hidden className={`flex h-7 w-7 flex-none items-center justify-center rounded-lg text-sm font-bold ${d ? 'bg-gold text-navy' : 'border-[1.5px] border-slate text-transparent'}`}>✓</span>
+            <Link to={t.to} aria-label={`${t.title}${d ? ' (done)' : ''}`} className="flex min-w-0 flex-1 flex-col gap-0.5 no-underline">
               <span className={`text-[15px] font-semibold ${d ? 'text-faint line-through' : 'text-ink'}`}>{t.title}</span>
               <span className="text-xs text-subtle">{t.sub}</span>
             </Link>

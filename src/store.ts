@@ -15,7 +15,7 @@ export type Reference = { name: string; contact: string }
 export type SeekerProfile = { name: string; photo: string; region: string; prefs: string[]; notify: boolean; seeking: string }
 
 export type SpaceProfile = {
-  name: string; town: string; about: string; practices: string[]; photos: string[]
+  id: string; name: string; town: string; about: string; practices: string[]; photos: string[]
   sleeps: string; rooms: string; mats: string; kitchen: string; gettingHere: string
   volunteerExchange: boolean; volunteerDetails: string
 }
@@ -43,7 +43,7 @@ export type Offering = {
 
 export type Message = { id: string; from_team: boolean; body: string; created_at: string }
 
-export const EMPTY_SPACE: SpaceProfile = { name: '', town: '', about: '', practices: [], photos: [], sleeps: '', rooms: '', mats: '', kitchen: '', gettingHere: '', volunteerExchange: false, volunteerDetails: '' }
+export const EMPTY_SPACE: SpaceProfile = { id: '', name: '', town: '', about: '', practices: [], photos: [], sleeps: '', rooms: '', mats: '', kitchen: '', gettingHere: '', volunteerExchange: false, volunteerDetails: '' }
 
 /* ---------- photos ---------- */
 
@@ -101,7 +101,7 @@ export function useSeekerProfile() {
 
 /* ---------- container space ---------- */
 
-type SpaceRow = { name: string; town: string; about: string; practices: string[]; photos: string[]; sleeps: string; rooms: string; mats: string; kitchen: string; getting_here: string; volunteer_exchange: boolean; volunteer_details: string }
+type SpaceRow = { id: string; name: string; town: string; about: string; practices: string[]; photos: string[]; sleeps: string; rooms: string; mats: string; kitchen: string; getting_here: string; volunteer_exchange: boolean; volunteer_details: string }
 const fromSpaceRow = (r: SpaceRow): SpaceProfile => ({ ...r, gettingHere: r.getting_here, volunteerExchange: r.volunteer_exchange, volunteerDetails: r.volunteer_details })
 
 export function useSpaceProfile() {
@@ -236,16 +236,113 @@ export function useMessages() {
     supabase.from('messages').select('id, from_team, body, created_at').eq('user_id', session.user.id).order('created_at').then(({ data }) => {
       if (live) { setMessages((data as Message[]) ?? []); setLoading(false) }
     })
-    return () => { live = false }
+    // replies from the Xanadu team arrive live
+    const channel = supabase.channel(`inbox-${session.user.id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `user_id=eq.${session.user.id}` }, (payload) => {
+        const m = payload.new as Message
+        setMessages((ms) => (ms.some((x) => x.id === m.id) ? ms : [...ms, { id: m.id, from_team: m.from_team, body: m.body, created_at: m.created_at }]))
+      })
+      .subscribe()
+    return () => { live = false; supabase.removeChannel(channel) }
   }, [session])
 
   const send = useCallback(async (body: string): Promise<string | null> => {
     if (!session) return 'You are signed out. Please sign in again.'
     const { data, error } = await supabase.from('messages').insert({ user_id: session.user.id, body }).select('id, from_team, body, created_at').single()
     if (error) return friendlyError(error.message)
-    setMessages((m) => [...m, data as Message])
+    setMessages((m) => (m.some((x) => x.id === (data as Message).id) ? m : [...m, data as Message]))
     return null
   }, [session])
 
   return { messages, loading, send }
+}
+
+/* ---------- what Seekers and Facilitators can browse ---------- */
+
+/** A space as members see it (approved hosts only, enforced by the database). */
+export type PublicSpace = {
+  id: string; owner_id: string; name: string; town: string; about: string; practices: string[]; photos: string[]
+  sleeps: string; kitchen: string; volunteer_exchange: boolean
+}
+
+/** A live offering plus the space that hosts it (when that space is approved). */
+export type Listing = Offering & { owner_id: string; space: PublicSpace | null }
+
+const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
+
+/** Live offerings that haven't ended yet, soonest first, each with its host space. */
+export async function fetchListings(filter?: { ids?: string[]; ownerId?: string; includePast?: boolean }): Promise<Listing[]> {
+  let q = supabase.from('offerings').select('*').eq('status', 'live')
+  if (filter?.ids) q = q.in('id', filter.ids.length ? filter.ids : ['00000000-0000-0000-0000-000000000000'])
+  if (filter?.ownerId) q = q.eq('owner_id', filter.ownerId)
+  const { data } = await q.order('start_date', { ascending: true, nullsFirst: false })
+  const today = todayIso()
+  const rows = ((data as (Offering & { owner_id: string })[]) ?? [])
+    .filter((o) => filter?.includePast || !(o.end_date || o.start_date) || (o.end_date || o.start_date)! >= today)
+  const owners = Array.from(new Set(rows.map((o) => o.owner_id)))
+  const spaces = owners.length ? ((await supabase.from('spaces').select('*').in('owner_id', owners)).data as PublicSpace[] | null) ?? [] : []
+  return rows.map((o) => ({ ...o, space: spaces.find((s) => s.owner_id === o.owner_id) ?? null }))
+}
+
+export function useListings() {
+  const [listings, setListings] = useState<Listing[]>([])
+  const [loading, setLoading] = useState(true)
+  useEffect(() => {
+    let live = true
+    fetchListings().then((l) => { if (live) { setListings(l); setLoading(false) } })
+    return () => { live = false }
+  }, [])
+  return { listings, loading }
+}
+
+/** Approved retreat spaces (the database only returns spaces whose host has been welcomed). */
+export function useSpaces() {
+  const { session } = useAuth()
+  const [spaces, setSpaces] = useState<PublicSpace[]>([])
+  const [loading, setLoading] = useState(true)
+  useEffect(() => {
+    let live = true
+    supabase.from('spaces').select('*').neq('owner_id', session?.user.id ?? '').order('updated_at', { ascending: false }).then(({ data }) => {
+      if (live) { setSpaces(((data as PublicSpace[]) ?? []).filter((s) => s.name.trim())); setLoading(false) }
+    })
+    return () => { live = false }
+  }, [session])
+  return { spaces, loading }
+}
+
+/* ---------- saved (hearts) ---------- */
+
+export type SavedKind = 'offering' | 'space' | 'facilitator'
+
+/** The member's hearts. toggle() saves or un-saves straight away. */
+export function useSaved() {
+  const { session } = useAuth()
+  const [saved, setSaved] = useState<{ kind: SavedKind; ref_id: string }[]>([])
+  const [loading, setLoading] = useState(true)
+  useEffect(() => {
+    if (!session) return
+    let live = true
+    supabase.from('saved_items').select('kind, ref_id').eq('user_id', session.user.id).order('created_at', { ascending: false }).then(({ data }) => {
+      if (live) { setSaved((data as { kind: SavedKind; ref_id: string }[]) ?? []); setLoading(false) }
+    })
+    return () => { live = false }
+  }, [session])
+
+  const isSaved = useCallback((kind: SavedKind, id: string) => saved.some((s) => s.kind === kind && s.ref_id === id), [saved])
+
+  const toggle = useCallback(async (kind: SavedKind, id: string): Promise<string | null> => {
+    if (!session) return 'You are signed out. Please sign in again.'
+    const was = saved.some((s) => s.kind === kind && s.ref_id === id)
+    setSaved((xs) => (was ? xs.filter((s) => !(s.kind === kind && s.ref_id === id)) : [{ kind, ref_id: id }, ...xs]))
+    const { error } = was
+      ? await supabase.from('saved_items').delete().eq('user_id', session.user.id).eq('kind', kind).eq('ref_id', id)
+      : await supabase.from('saved_items').insert({ user_id: session.user.id, kind, ref_id: id })
+    if (error && error.code !== '23505') {
+      setSaved((xs) => (was ? [{ kind, ref_id: id }, ...xs] : xs.filter((s) => !(s.kind === kind && s.ref_id === id))))
+      return friendlyError(error.message)
+    }
+    return null
+  }, [session, saved])
+
+  return { saved, loading, isSaved, toggle }
 }

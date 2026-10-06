@@ -17,7 +17,7 @@ export default function Chat() {
   const { messages, loading, send } = useChat(id)
   const [text, setText] = useState('')
   const [error, setError] = useState('')
-  const [menu, setMenu] = useState<'closed' | 'open' | 'report'>('closed')
+  const [menu, setMenu] = useState<'closed' | 'open' | 'report' | 'block' | 'remove'>('closed')
   const [reason, setReason] = useState('')
   const [notice, setNotice] = useState('')
   const end = useRef<HTMLDivElement>(null)
@@ -77,8 +77,19 @@ export default function Chat() {
       {menu === 'open' && (
         <div className="flex flex-col rounded-2xl bg-surface p-1.5 text-[14px]">
           <button type="button" onClick={() => setMenu('report')} className="min-h-11 rounded-xl px-3 text-left text-text">Report</button>
-          <button type="button" onClick={disconnect} className="min-h-11 rounded-xl px-3 text-left text-text">Remove connection</button>
-          <button type="button" onClick={block} className="min-h-11 rounded-xl px-3 text-left text-gold-pale">Block</button>
+          <button type="button" onClick={() => setMenu('remove')} className="min-h-11 rounded-xl px-3 text-left text-text">Remove connection</button>
+          <button type="button" onClick={() => setMenu('block')} className="min-h-11 rounded-xl px-3 text-left text-gold-pale">Block</button>
+        </div>
+      )}
+      {(menu === 'block' || menu === 'remove') && (
+        <div className="flex flex-col gap-2 rounded-2xl bg-surface p-3">
+          <span className="text-[13px] leading-normal text-muted">{menu === 'block'
+            ? `Block ${c.name.trim() || 'this member'}? You'll stop seeing each other in Community and this chat closes.`
+            : `Remove ${c.name.trim() || 'this member'} as a connection? This chat closes. You can connect again later.`}</span>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setMenu('closed')} className="min-h-10 flex-1 rounded-xl border border-line-2 text-[13px] text-muted">Cancel</button>
+            <button type="button" onClick={menu === 'block' ? block : disconnect} className="min-h-10 flex-1 rounded-xl bg-gold text-[13px] font-semibold text-navy">{menu === 'block' ? 'Block' : 'Remove'}</button>
+          </div>
         </div>
       )}
       {menu === 'report' && (

@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { inputCls, Field } from '../components/ui'
 import Logo from '../components/Logo'
 import type { Role } from '../data'
-import { HOME, toDbRole, useAuth } from '../auth'
+import { HOME, takeReturn, toDbRole, useAuth } from '../auth'
 import { friendlyError, supabase, enabledProviders } from '../lib/supabase'
 
 const ROLES: { role: Role; sub: string }[] = [
@@ -63,7 +63,7 @@ export default function Intro() {
   // Already signed in: go home (or finish setting up)
   useEffect(() => {
     if (loading || !session || !profile) return
-    navigate(profile.onboarded ? HOME[profile.role] : '/welcome', { replace: true })
+    navigate(profile.onboarded ? takeReturn(HOME[profile.role]) : '/welcome', { replace: true })
   }, [loading, session, profile, navigate])
 
   useLayoutEffect(() => {

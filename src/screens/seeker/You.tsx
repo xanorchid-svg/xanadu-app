@@ -13,7 +13,8 @@ const JOURNEY_TABS = ['Upcoming', 'Past'] as const
 export default function You() {
   const [me, save] = useSeekerProfile()
   const [tab, setTab] = useState<(typeof JOURNEY_TABS)[number]>('Upcoming')
-  const { profile, updateProfile } = useAuth()
+  const { profile, session, updateProfile } = useAuth()
+  const joined = new Date(session?.user.created_at ?? Date.now()).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
   const chart = profile?.chart_early ?? false
   const [busy, setBusy] = useState(false)
   const [editing, setEditing] = useState(false)
@@ -59,7 +60,7 @@ export default function You() {
           </div>
           <div className="flex flex-1 flex-col gap-1">
             <h1 className="m-0 font-display text-3xl font-medium text-ink">{me.name.trim() || '[Your name]'}</h1>
-            <span className="text-[13px] text-subtle">Seeker · Joined October 2026</span>
+            <span className="text-[13px] text-subtle">{`Seeker · Joined ${joined}`}</span>
           </div>
           <button type="button" aria-label="Edit profile" onClick={() => { setDraft(me); setError(''); setEditing(true) }} className="flex h-11 w-11 items-center justify-center rounded-full border border-line text-muted"><IconSettings /></button>
         </div>
@@ -110,12 +111,13 @@ export default function You() {
 
         <section className="flex flex-col">
           <H2 className="mb-1.5 text-[22px]">Account</H2>
+          <Link to="/messages" className={row}>Messages <span className="text-[13px] text-gold-soft">Your thread with the Xanadu team ›</span></Link>
           <div className={row}>Membership <span className="text-[13px] text-gold-soft">Founding Seeker · Free</span></div>
           <button type="button" onClick={() => { setDraft(me); setError(''); setEditing(true) }} className={`${row} w-full text-left`}>Profile <span className="text-[13px] text-gold-soft">Edit name, photo, region</span></button>
           <div className={row}>Home region <span className="text-[13px] text-subtle">{me.region.trim() || 'Costa Rica'}</span></div>
           <div className={row}>New aligned experiences <Switch on={me.notify} onChange={(v) => save({ ...me, notify: v })} label="Notify me about new aligned experiences" /></div>
-          <div className={row}>Privacy &amp; data <span className="text-[13px] text-subtle">Coming soon</span></div>
-          <div className={row}>Community guidelines <span className="text-[13px] text-subtle">Coming soon</span></div>
+          <Link to="/privacy" className={row}>Privacy &amp; data <span className="text-[13px] text-subtle">Read our policy ›</span></Link>
+          <Link to="/terms" className={row}>Terms &amp; guidelines <span className="text-[13px] text-subtle">Read the terms ›</span></Link>
           <a href={`mailto:${CONTACT_EMAIL}`} className={`${row} border-b-0`}>Help <span className="text-[13px] text-subtle">{CONTACT_EMAIL}</span></a>
         </section>
 

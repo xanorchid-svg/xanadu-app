@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { HOME, Loading, useAuth, type DbRole } from '../auth'
+import { HOME, Loading, takeReturn, useAuth, type DbRole } from '../auth'
 
 /**
  * Where Google sign-in and email-confirmation links land.
@@ -24,7 +24,7 @@ export default function AuthCallback() {
       if (!profile.onboarded && wanted && ['seeker', 'container', 'facilitator'].includes(wanted) && wanted !== profile.role) {
         await updateProfile({ role: wanted })
       }
-      navigate(profile.onboarded ? HOME[profile.role] : '/welcome', { replace: true })
+      navigate(profile.onboarded ? takeReturn(HOME[profile.role]) : '/welcome', { replace: true })
     })()
   }, [loading, session, profile, params, navigate, updateProfile])
 

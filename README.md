@@ -26,6 +26,7 @@ npm run build    # production build in dist/
 | Seeker | Experience listing (template) | `/experience/preview` |
 | Seeker | Saved | `/saved` |
 | Seeker | You (alignment, journeys, account) | `/you` |
+| Everyone | Messages: thread with the Xanadu team (`?draft=` starts a message) | `/messages` |
 | Hosts | Apply as a founding Container or Facilitator | `/apply?role=Container` |
 | Hosts | Application status (`?stage=review\|call\|accepted`) | `/apply/status` |
 | Container | Home (setup checklist) | `/container` |
@@ -56,10 +57,11 @@ npm run build    # production build in dist/
 | `private_details` | References, insurance, reviews/referrals, phone | Only the member (and the Xanadu team) |
 | `spaces` | A Container's space | Owner; approved spaces visible to members |
 | `offerings` | Retreats, trainings, drop-ins | Owner; `live` offerings visible to members |
-| `messages` | Each member's thread with the Xanadu team | Only that member (and the team) |
+| `messages` | Each member's thread with the Xanadu team (replies arrive live) | Only that member (and the team) |
+| `saved_items` | Hearts: saved experiences and spaces | Only that member |
 | storage `photos` | Uploaded photos, one folder per member | Public to view; only the owner can upload |
 
-Members can't approve themselves: `status` on profiles and offerings only changes when the Xanadu team sets it.
+Members can't approve themselves: `status` on profiles and offerings only changes when the Xanadu team sets it. The one exception: a host can resubmit an offering the team marked `declined` ("Needs changes"), which moves it back to `in_review`.
 
 ### Running Xanadu (team tasks in the Supabase dashboard → Table Editor)
 - **Approve a host:** `profiles` → set `status` to `approved` (or `declined`).
@@ -80,6 +82,6 @@ The "Continue with Google" button appears automatically once Google is switched 
 
 1. Booking requests and guest lists.
 2. A simple admin screen for approvals and replies.
-3. Show live offerings and approved spaces in Discover and Find spaces.
+3. Public facilitator profiles for Seekers (the Saved → Guides tab is ready for them).
 
 Contact: networkxanadu@gmail.com

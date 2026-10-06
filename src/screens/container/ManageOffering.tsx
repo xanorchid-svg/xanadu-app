@@ -1,10 +1,104 @@
 import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import { BackButton, ContainerTabs, EmptyState, Field, inputCls, PrimaryLink, Screen } from '../../components/ui'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { BackButton, Chip, ContainerTabs, EmptyState, Field, inputCls, PrimaryLink, Screen, Switch } from '../../components/ui'
 import { IconPeople } from '../../components/icons'
-import { StatusPill, dateRange } from '../../components/OfferingCard'
+import OfferingCard, { StatusPill, dateRange } from '../../components/OfferingCard'
+import { EditFooter } from '../../components/edit'
 import { Loading } from '../../auth'
+import { friendlyError, supabase } from '../../lib/supabase'
+import { PRACTICES } from '../../data'
 import { useOfferings, type Offering } from '../../store'
+
+const FORMATS = ['Retreat', 'Training', 'Drop-in'] as const
+const INCLUDED = [['stay', 'Stay'], ['meals', 'Meals'], ['schedule', 'Daily schedule'], ['outings', 'Outings'], ['transport', 'Airport transport']] as const
+
+/** Edit an offering's basics after it's been submitted, or delete it. */
+function EditOffering({ o, onDone, update }: { o: Offering; onDone: () => void; update: (id: string, patch: Partial<Offering>) => Promise<string | null> }) {
+  const navigate = useNavigate()
+  const [d, setD] = useState({
+    title: o.title, format: o.format, practices: o.practices, description: o.description,
+    start: o.start_date ?? '', end: o.end_date ?? '', spots: o.spots, price: o.price_usd != null ? String(o.price_usd) : '', included: { ...o.included },
+  })
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const set = <K extends keyof typeof d>(k: K, v: (typeof d)[K]) => setD((x) => ({ ...x, [k]: v }))
+
+  const save = async () => {
+    setError('')
+    if (!d.title.trim()) { setError('Please give your offering a title.'); return }
+    if (!d.practices.length) { setError('Please choose at least one practice.'); return }
+    if (!d.start) { setError('Please choose a start date.'); return }
+    if (d.end && d.end < d.start) { setError('The end date is before the start date.'); return }
+    if (d.price && !(Number(d.price) >= 0)) { setError('Please enter the price as a number, e.g. 850.'); return }
+    setBusy(true)
+    const err = await update(o.id, {
+      title: d.title.trim(), format: d.format, practices: d.practices, description: d.description.trim(),
+      start_date: d.start, end_date: d.end || d.start, spots: d.spots, price_usd: d.price ? Number(d.price) : null, included: d.included,
+    })
+    setBusy(false)
+    if (err) setError(err); else onDone()
+  }
+  const remove = async () => {
+    setBusy(true)
+    const { error } = await supabase.from('offerings').delete().eq('id', o.id)
+    setBusy(false)
+    if (error) { setError(friendlyError(error.message)); return }
+    navigate('/container', { replace: true })
+  }
+  const box = (on: boolean) => `min-h-12 rounded-xl border text-sm ${on ? 'border-gold bg-gold font-semibold text-navy' : 'border-line-2 text-text'}`
+
+  return (
+    <Screen footer={<EditFooter onCancel={onDone} onSave={save} error={error} busy={busy} />}>
+      <div className="flex flex-col gap-[18px] px-5 pt-[52px] pb-8">
+        <h1 className="m-0 font-display text-[32px] font-medium text-ink">Edit offering</h1>
+        {o.status === 'live' && <p className="m-0 rounded-xl bg-plum px-3.5 py-3 text-[13px] leading-normal text-muted">This offering is live. Your changes show to guests as soon as you save.</p>}
+        <div className="grid grid-cols-3 gap-2">{FORMATS.map((f) => <button key={f} type="button" aria-pressed={d.format === f} onClick={() => set('format', f)} className={box(d.format === f)}>{f}</button>)}</div>
+        <Field label="Title"><input value={d.title} onChange={(e) => set('title', e.target.value)} className={inputCls} /></Field>
+        <div className="flex flex-col gap-2">
+          <span className="text-[13px] text-muted">Practices</span>
+          <div className="flex flex-wrap gap-2">{PRACTICES.filter((p) => p !== 'Trainings').map((p) => (
+            <Chip key={p} on={d.practices.includes(p)} onClick={() => set('practices', d.practices.includes(p) ? d.practices.filter((x) => x !== p) : [...d.practices, p])}>{p}</Chip>
+          ))}</div>
+        </div>
+        <Field label="Description"><textarea rows={5} value={d.description} onChange={(e) => set('description', e.target.value)} className={`${inputCls} resize-none py-3 leading-relaxed`} /></Field>
+        <div className="grid grid-cols-2 gap-2.5">
+          <Field label="Starts"><input type="date" value={d.start} onChange={(e) => set('start', e.target.value)} className={`${inputCls} px-3 text-sm [color-scheme:dark]`} /></Field>
+          <Field label="Ends"><input type="date" value={d.end} min={d.start || undefined} onChange={(e) => set('end', e.target.value)} className={`${inputCls} px-3 text-sm [color-scheme:dark]`} /></Field>
+        </div>
+        <div className="flex items-center justify-between rounded-[14px] bg-surface-2 px-4 py-3.5">
+          <span className="text-[15px] text-ink">Spots</span>
+          <div className="flex items-center gap-3">
+            <button type="button" aria-label="Fewer spots" onClick={() => set('spots', Math.max(1, d.spots - 1))} className="h-11 w-11 rounded-xl border border-line-2 text-xl text-text">−</button>
+            <span className="min-w-7 text-center text-lg font-semibold text-ink" aria-live="polite">{d.spots}</span>
+            <button type="button" aria-label="More spots" onClick={() => set('spots', d.spots + 1)} className="h-11 w-11 rounded-xl border border-line-2 text-xl text-text">+</button>
+          </div>
+        </div>
+        <Field label="Price per person (USD)"><input inputMode="decimal" value={d.price} onChange={(e) => set('price', e.target.value.replace(/[^0-9.]/g, ''))} placeholder="e.g. 850" className={inputCls} /></Field>
+        <div className="flex flex-col gap-2">
+          <span className="text-[13px] text-muted">Held for guests</span>
+          {INCLUDED.map(([k, label]) => (
+            <div key={k} className="flex items-center justify-between gap-3 rounded-[14px] bg-surface-2 px-4 py-3">
+              <span className="text-[15px] text-ink">{label}</span>
+              <Switch on={!!d.included[k]} onChange={(v) => set('included', { ...d.included, [k]: v })} label={label} />
+            </div>
+          ))}
+        </div>
+        {confirmDelete ? (
+          <div className="flex flex-col gap-2 rounded-2xl border border-gold/50 p-4">
+            <span className="text-[14px] text-text">Delete this offering? This can't be undone.</span>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setConfirmDelete(false)} className="min-h-11 flex-1 rounded-xl border border-line-2 text-[13px] text-muted">Keep it</button>
+              <button type="button" disabled={busy} onClick={remove} className="min-h-11 flex-1 rounded-xl bg-gold text-[13px] font-semibold text-navy">Delete</button>
+            </div>
+          </div>
+        ) : (
+          <button type="button" onClick={() => setConfirmDelete(true)} className="min-h-11 self-center text-[13px] text-subtle">Delete offering</button>
+        )}
+      </div>
+    </Screen>
+  )
+}
 
 const TABS = ['Guests', 'Schedule', 'Meals', 'Outings'] as const
 
@@ -20,6 +114,7 @@ function dayCount(o: Offering) {
 export default function ManageOffering() {
   const [params] = useSearchParams()
   const { offerings, loading, update } = useOfferings()
+  const [editing, setEditing] = useState(false)
   const [tab, setTab] = useState<(typeof TABS)[number]>('Guests')
   const [day, setDay] = useState(1)
   const [time, setTime] = useState('')
@@ -30,19 +125,45 @@ export default function ManageOffering() {
   const [busy, setBusy] = useState(false)
 
   if (loading) return <Loading label="Loading your offering…" />
-  const o = offerings.find((x) => x.id === params.get('id')) ?? offerings[0]
+  const id = params.get('id')
+  const o = offerings.find((x) => x.id === id)
+
+  // Offerings tab: every offering at a glance
+  if (!id && offerings.length) {
+    return (
+      <Screen footer={<ContainerTabs />}>
+        <div className="flex flex-col gap-4 px-5 pt-14 pb-6">
+          <div className="flex items-baseline justify-between">
+            <h1 className="m-0 font-display text-[34px] font-medium text-ink">Offerings</h1>
+            <Link to="/container/new" className="text-[13px] no-underline">+ New offering</Link>
+          </div>
+          {offerings.map((x) => <OfferingCard key={x.id} o={x} />)}
+        </div>
+      </Screen>
+    )
+  }
 
   if (!o) {
     return (
       <Screen footer={<ContainerTabs />}>
         <div className="flex flex-col gap-5 px-5 pt-14 pb-6">
           <h1 className="m-0 font-display text-[34px] font-medium text-ink">Offerings</h1>
+          {id && <p className="m-0 text-[14px] text-muted">That offering couldn't be found. It may have been deleted.</p>}
           <EmptyState title="No offerings yet" action={<PrimaryLink to="/container/new" className="mt-1 min-h-[46px] text-sm">Create your first offering</PrimaryLink>}>
             Create a retreat, training or drop-in. Guests, schedules, meals and outings will all live here.
           </EmptyState>
         </div>
       </Screen>
     )
+  }
+
+  if (editing) return <EditOffering o={o} onDone={() => setEditing(false)} update={update} />
+
+  const resubmit = async () => {
+    setBusy(true); setError('')
+    const err = await update(o.id, { status: 'in_review' })
+    setBusy(false)
+    if (err) setError(err)
   }
 
   const days = dayCount(o)
@@ -72,8 +193,11 @@ export default function ManageOffering() {
   const header = (
     <div className="flex flex-col gap-3.5 bg-plum px-5 pt-[52px]">
       <div className="flex items-center justify-between">
-        <BackButton to="/container" />
-        <Link to={`/experience/${o.id}`} className="flex min-h-11 items-center text-[13px] no-underline">Preview as guest</Link>
+        <BackButton to="/container/offering" />
+        <div className="flex items-center gap-1">
+          <Link to={`/experience/${o.id}`} className="flex min-h-11 items-center px-2 text-[13px] no-underline">Preview</Link>
+          <button type="button" onClick={() => { setError(''); setEditing(true) }} className="min-h-10 rounded-full border border-gold px-3.5 text-[13px] font-semibold text-gold-pale">Edit details</button>
+        </div>
       </div>
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-2"><StatusPill status={o.status} /><span className="text-xs text-gold-soft">{`${o.format} · ${dateRange(o)}`}</span></div>
@@ -98,6 +222,16 @@ export default function ManageOffering() {
   return (
     <Screen header={header} footer={<ContainerTabs />}>
       <div className="flex flex-col gap-3 px-5 pt-[18px] pb-7">
+        {o.status === 'declined' && (
+          <div className="flex flex-col gap-2.5 rounded-2xl border border-gold/60 bg-plum p-4">
+            <span className="text-[15px] font-semibold text-ink">The team asked for a few changes</span>
+            <span className="text-[13px] leading-normal text-subtle">Their note is in your Inbox. Tap Edit details to make the changes, then resubmit.</span>
+            <div className="flex gap-2">
+              <Link to="/container/inbox" className="flex min-h-11 flex-1 items-center justify-center rounded-xl border border-line-2 text-[13px] text-text no-underline">Open Inbox</Link>
+              <button type="button" disabled={busy} onClick={resubmit} className="min-h-11 flex-1 rounded-xl bg-gold text-[13px] font-semibold text-navy disabled:opacity-70">Resubmit for review</button>
+            </div>
+          </div>
+        )}
         {error && <p role="alert" className="m-0 text-[13px] text-gold-pale">{error}</p>}
 
         {tab === 'Guests' && (

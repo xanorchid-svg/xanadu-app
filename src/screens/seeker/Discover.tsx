@@ -2,10 +2,15 @@ import { useState } from 'react'
 import { Chip, EmptyState, H1, H2, Page, PrimaryButton, RowLink, Screen, SeekerTabs } from '../../components/ui'
 import { IconSearch, IconStar } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
-import { CONTACT_EMAIL, experiences, PRACTICES } from '../../data'
+import { CONTACT_EMAIL, PRACTICES } from '../../data'
 import { useAuth } from '../../auth'
 import { useMatches } from '../../matching'
+import { useListings, useSpaces, type Listing, type PublicSpace } from '../../store'
 import { Link } from 'react-router-dom'
+
+/** Does a practice chip match this experience or space? ("Trainings" also matches the Training format.) */
+const fits = (picked: string, practices: string[], format?: string) =>
+  picked === 'All' || practices.includes(picked) || (picked === 'Trainings' && format === 'Training')
 
 export default function Discover() {
   const [picked, setPicked] = useState<string>('All')
@@ -13,14 +18,23 @@ export default function Discover() {
   const { profile, updateProfile } = useAuth()
   const notified = profile?.launch_notify ?? false
   const { matches } = useMatches(6)
+  const { listings, loading } = useListings()
+  const { spaces } = useSpaces()
   const hasWords = !!profile?.seeking?.trim() || (profile?.prefs?.length ?? 0) > 0
+  const prefs = profile?.prefs ?? []
 
   const q = query.trim().toLowerCase()
-  const shown = experiences.filter((e) =>
-    (picked === 'All' || e.practice === picked) &&
-    (!q || `${e.title} ${e.practice} ${e.containerName} ${e.town}`.toLowerCase().includes(q)))
+  const textOf = (e: Listing) => `${e.title} ${e.format} ${e.practices.join(' ')} ${e.description} ${e.space?.name ?? ''} ${e.space?.town ?? ''}`.toLowerCase()
+  const spaceText = (s: PublicSpace) => `${s.name} ${s.town} ${s.about} ${s.practices.join(' ')}`.toLowerCase()
+  // aligned first: experiences sharing the most of the Seeker's practices, then soonest
+  const overlap = (e: Listing) => e.practices.filter((p) => prefs.includes(p)).length
+  const shown = listings
+    .filter((e) => fits(picked, e.practices, e.format) && (!q || textOf(e).includes(q)))
+    .sort((a, b) => overlap(b) - overlap(a))
+  const places = spaces.filter((s) => fits(picked, s.practices) && (!q || spaceText(s).includes(q)))
+  const filtering = picked !== 'All' || !!q
 
-  const emptyTitle = picked === 'All' ? 'The first experiences are on their way' : `No ${picked.toLowerCase()} experiences yet`
+  const emptyTitle = q ? `Nothing matches "${query.trim()}" yet` : picked === 'All' ? 'The first experiences are on their way' : `No ${picked.toLowerCase()} experiences yet`
 
   return (
     <Screen footer={<SeekerTabs />}>
@@ -63,17 +77,38 @@ export default function Discover() {
           )}
         </section>
 
-        {shown.length > 0 ? (
+        {loading ? <span className="text-[13px] text-subtle">Finding experiences…</span> : shown.length > 0 ? (
           <section className="flex flex-col gap-3">
-            <H2>Aligned for you</H2>
+            <H2>{filtering ? 'Experiences' : 'Aligned for you'}</H2>
             {shown.map((e) => <ExperienceCard key={e.id} e={e} />)}
           </section>
+        ) : filtering && listings.length > 0 ? (
+          <EmptyState title={emptyTitle} action={<button type="button" onClick={() => { setPicked('All'); setQuery('') }} className="flex min-h-11 items-center text-sm font-semibold text-gold-soft">Show everything</button>}>
+            Try another practice or a different word.
+          </EmptyState>
         ) : (
           <EmptyState icon={<span className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/50"><IconStar /></span>}
             title={emptyTitle}
             action={<PrimaryButton done={notified} onClick={() => updateProfile({ launch_notify: true })} className="mt-1">{notified ? "We'll let you know ✓" : 'Notify me when they open'}</PrimaryButton>}>
             We're welcoming our founding retreat spaces and facilitators in Costa Rica. Their experiences will appear here as they join.
           </EmptyState>
+        )}
+
+        {places.length > 0 && (
+          <section className="flex flex-col gap-3">
+            <div className="flex flex-col gap-0.5"><H2>Retreat spaces</H2><span className="text-xs text-subtle">Founding spaces welcomed by Xanadu</span></div>
+            <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">
+              {places.map((s) => (
+                <Link key={s.id} to={`/space/${s.id}`} className="flex w-[200px] flex-none flex-col overflow-hidden rounded-[18px] bg-surface text-text no-underline">
+                  <div className="h-[110px] bg-sage">{s.photos[0] && <img src={s.photos[0]} alt="" className="h-full w-full object-cover" />}</div>
+                  <div className="flex flex-col gap-0.5 p-3">
+                    <span className="truncate font-display text-[19px] leading-tight text-ink">{s.name}</span>
+                    <span className="truncate text-xs text-subtle">{[s.town, s.volunteer_exchange ? 'Welcomes volunteers' : ''].filter(Boolean).join(' · ')}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
 
         <section className="flex flex-col gap-3">

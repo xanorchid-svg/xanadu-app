@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { AvatarPicker, PhotoGallery, PracticePicker, TextArea, TextField } from '../components/edit'
 import { IconClose } from '../components/icons'
 import { Field, inputCls } from '../components/ui'
-import { HOME, Loading, useAuth } from '../auth'
+import { HOME, Loading, takeReturn, useAuth } from '../auth'
 import { PRACTICES, SEEKER_ALIGN } from '../data'
 import { refreshMatches } from '../matching'
 import { EMPTY_SPACE, savePrivateDetails, uploadPhotos, useSpaceProfile, type Reference, type SpaceProfile, type Training } from '../store'
@@ -88,7 +88,7 @@ function SeekerWelcome() {
       const err = await updateProfile({ name: name.trim(), photo_url: photoUrl ?? '', region: region.trim() || 'Costa Rica', prefs, seeking: seeking.trim().slice(0, 2000), onboarded: true })
       if (err) { setError(friendlyError(err)); setBusy(false); return }
       await refreshMatches()
-      navigate('/discover', { replace: true })
+      navigate(takeReturn('/discover'), { replace: true })
     } catch (e) { setError((e as Error).message); setBusy(false) }
   }
 

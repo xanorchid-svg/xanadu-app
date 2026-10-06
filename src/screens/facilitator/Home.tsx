@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useFacilitatorProfile } from '../../store'
 import { useAuth } from '../../auth'
@@ -17,16 +16,14 @@ export default function FacilitatorHome() {
   const { profile, updateProfile } = useAuth()
   const open = profile?.open_to_spaces ?? true
   const [me] = useFacilitatorProfile()
-  const [manual, setManual] = useState<string[]>(['account'])
   // items tick themselves off as the profile fills in
-  const auto = [
+  const done = [
+    'account',
     me.photo ? 'photo' : '',
     me.about.trim() ? 'about' : '',
     me.trainings.length ? 'training' : '',
     me.references.length ? 'refs' : '',
   ].filter(Boolean)
-  const done = Array.from(new Set([...manual, ...auto]))
-  const toggle = (id: string) => setManual((d) => (d.includes(id) ? d.filter((x) => x !== id) : [...d, id]))
 
   return (
     <Screen footer={<FacilitatorTabs />}>
@@ -50,7 +47,7 @@ export default function FacilitatorHome() {
           <Switch on={open} onChange={(v) => updateProfile({ open_to_spaces: v })} label="Open to new spaces" />
         </div>
 
-        <Checklist title="Complete your profile" items={SETUP} done={done} onToggle={toggle} />
+        <Checklist title="Complete your profile" items={SETUP} done={done} />
 
         <section className="flex flex-col gap-2.5">
           <H2>Intros</H2>
@@ -60,7 +57,7 @@ export default function FacilitatorHome() {
         </section>
 
         <section className="flex flex-col gap-2.5 rounded-[20px] border border-plum-line p-[18px]">
-          <div className="flex items-baseline justify-between"><span className="text-[15px] font-semibold text-ink">Path to ✦ Verified</span><span className="text-[13px] text-subtle">0 of [N] vouches</span></div>
+          <div className="flex items-baseline justify-between"><span className="text-[15px] font-semibold text-ink">Path to ✦ Verified</span><span className="text-[13px] text-subtle">0 of 5 vouches</span></div>
           <div className="grid grid-cols-5 gap-1.5">{Array.from({ length: 5 }, (_, i) => <span key={i} className="h-1.5 rounded-full bg-line" />)}</div>
           <span className="text-[13px] leading-normal text-subtle">After each experience, Seekers who sat with you can vouch for you.</span>
         </section>

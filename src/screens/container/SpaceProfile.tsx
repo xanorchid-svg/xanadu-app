@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ContainerTabs, Reviews, Screen, Switch } from '../../components/ui'
 import { AddPhotosButton, EditFooter, PhotoGallery, PracticePicker, SignOutButton, TextArea, TextField } from '../../components/edit'
-import { Loading } from '../../auth'
+import { Loading, useAuth } from '../../auth'
 import { IconPhoto } from '../../components/icons'
-import { useSpaceProfile, type SpaceProfile as SP } from '../../store'
+import { StatusPill, dateRange } from '../../components/OfferingCard'
+import { useOfferings, useSpaceProfile, type SpaceProfile as SP } from '../../store'
 import { PRACTICES } from '../../data'
 
 const h2 = 'm-0 font-display text-[22px] font-semibold text-ink'
@@ -16,7 +17,10 @@ export default function SpaceProfile() {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<SP>(space)
   const [error, setError] = useState('')
-  const [shared, setShared] = useState(false)
+  const [shareNote, setShareNote] = useState('')
+  const { profile } = useAuth()
+  const { offerings } = useOfferings()
+  const approved = profile?.status === 'approved'
   const set = <K extends keyof SP>(k: K, v: SP[K]) => setDraft((d) => ({ ...d, [k]: v }))
   const startEdit = () => { setDraft(space); setError(''); setEditing(true) }
 
@@ -60,6 +64,18 @@ export default function SpaceProfile() {
 
   const addPhotos = async (urls: string[]) => { setError(''); const err = await save({ ...space, photos: [...space.photos, ...urls].slice(0, 8) }); if (err) setError(err) }
   if (loading) return <Loading label="Loading your space…" />
+  const share = async () => {
+    setShareNote('')
+    if (!approved || !space.id) { setShareNote('Your share link opens once the Xanadu team has welcomed your space.'); return }
+    const url = `${window.location.origin}/space/${space.id}`
+    try {
+      if (navigator.share) { await navigator.share({ title: space.name, text: `${space.name} on Xanadu`, url }); return }
+      await navigator.clipboard.writeText(url)
+      setShareNote('Link copied. Members can open it after signing in.')
+    } catch (e) {
+      if ((e as Error).name !== 'AbortError') setShareNote(`Your link: ${url}`)
+    }
+  }
   const facts: [string, string][] = [
     [space.sleeps.trim() ? `Sleeps ${space.sleeps.trim()}` : 'Sleeps [N]', space.rooms.trim() || '[Room types]'],
     ['Practice space', space.mats.trim() ? `Holds ${space.mats.trim()}` : 'Holds [N] mats'],
@@ -73,7 +89,7 @@ export default function SpaceProfile() {
       <div className={`relative flex h-[260px] flex-col justify-between px-4 pt-[52px] pb-4 ${cover ? '' : 'border-b border-dashed border-line-2 bg-surface-2'}`}>
         {cover && <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover" />}
         <div className="relative flex justify-end gap-2">
-          <button type="button" onClick={() => setShared(true)} className="min-h-10 rounded-full bg-navy/75 px-3.5 text-[13px] text-text">{shared ? 'Link coming soon' : 'Share'}</button>
+          <button type="button" onClick={share} className="min-h-10 rounded-full bg-navy/75 px-3.5 text-[13px] text-text">Share</button>
           <button type="button" onClick={startEdit} className="min-h-10 rounded-full bg-gold px-3.5 text-[13px] font-semibold text-navy">Edit space</button>
         </div>
         <AddPhotosButton onAdd={addPhotos}
@@ -90,13 +106,17 @@ export default function SpaceProfile() {
 
       <div className="flex flex-col gap-6 px-5 pt-5 pb-7">
         {error && <p role="alert" className="m-0 text-[13px] text-gold-pale">{error}</p>}
+        {shareNote && <p role="status" className="m-0 rounded-xl bg-surface px-3.5 py-2.5 text-[13px] break-all text-muted">{shareNote}</p>}
         <div className="flex flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-2.5">
             <h1 className="m-0 font-display text-[32px] font-medium text-ink">{space.name.trim() || '[Your space name]'}</h1>
             <span className="rounded-full border border-gold px-2 py-1 text-xs text-gold-pale">Founding member</span>
           </div>
           <span className="text-sm text-muted">{`Retreat space · ${space.town.trim() || '[Town]'}, Costa Rica`}</span>
-          <a href="#reviews" className="text-[13px] text-subtle no-underline">No reviews yet</a>
+          <span className="flex flex-wrap gap-x-3 text-[13px]">
+            <a href="#reviews" className="text-subtle no-underline">No reviews yet</a>
+            {space.id && <Link to={`/space/${space.id}`} className="no-underline">Preview as guests see it ›</Link>}
+          </span>
         </div>
         <p className={`m-0 text-[15px] leading-relaxed whitespace-pre-line ${space.about.trim() ? 'text-muted' : 'text-subtle'}`}>
           {space.about.trim() || "[In your own words: the land, the spirit of the space and who it's for.]"}
@@ -133,8 +153,14 @@ export default function SpaceProfile() {
 
         <section className="flex flex-col gap-2.5">
           <h2 className={h2}>Upcoming here</h2>
+          {offerings.map((o) => (
+            <Link key={o.id} to={`/container/offering?id=${o.id}`} className="flex items-center justify-between gap-3 rounded-[14px] bg-surface p-3.5 text-text no-underline">
+              <span className="flex min-w-0 flex-col gap-0.5"><span className="truncate text-sm font-semibold text-ink">{o.title || 'Untitled offering'}</span><span className="text-xs text-subtle">{dateRange(o)}</span></span>
+              <StatusPill status={o.status} />
+            </Link>
+          ))}
           <Link to="/container/new" className="flex items-center justify-between rounded-[14px] border border-dashed border-line-2 p-3.5 text-text no-underline">
-            <span className="text-sm text-muted">No offerings yet · Create one</span><span className="text-gold-soft">›</span>
+            <span className="text-sm text-muted">{offerings.length ? 'Create another offering' : 'No offerings yet · Create one'}</span><span className="text-gold-soft">›</span>
           </Link>
         </section>
 

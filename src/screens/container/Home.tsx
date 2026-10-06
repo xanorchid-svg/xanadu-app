@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Badge, Checklist, ContainerTabs, EmptyState, H2, Page, PrimaryLink, Screen } from '../../components/ui'
 import { IconPeople } from '../../components/icons'
@@ -17,16 +16,15 @@ const SETUP = [
 export default function ContainerHome() {
   const [space] = useSpaceProfile()
   const { offerings } = useOfferings()
-  const [manual, setManual] = useState<string[]>(['account'])
   // items tick themselves off as the space profile fills in
-  const auto = [
-    space.photos.length ? 'photos' : '',
+  const done = [
+    'account',
+    space.photos.length >= 5 ? 'photos' : '',
     space.about.trim() ? 'about' : '',
     space.sleeps.trim() || space.kitchen.trim() || space.gettingHere.trim() ? 'details' : '',
     offerings.length ? 'offering' : '',
   ].filter(Boolean)
-  const done = Array.from(new Set([...manual, ...auto]))
-  const toggle = (id: string) => setManual((d) => (d.includes(id) ? d.filter((x) => x !== id) : [...d, id]))
+  const items = SETUP.map((t) => (t.id === 'photos' && space.photos.length && space.photos.length < 5 ? { ...t, sub: `${space.photos.length} of 5 added, including the main practice area` } : t))
 
   return (
     <Screen footer={<ContainerTabs />}>
@@ -42,7 +40,7 @@ export default function ContainerHome() {
 
         <ApplicationBanner />
 
-        <Checklist title="Set up your space" items={SETUP} done={done} onToggle={toggle} />
+        <Checklist title="Set up your space" items={items} done={done} />
 
         <section className="flex flex-col gap-3">
           <div className="flex items-baseline justify-between"><H2>Your offerings</H2>{offerings.length > 0 && <Link to="/container/new" className="text-[13px] no-underline">+ New offering</Link>}</div>

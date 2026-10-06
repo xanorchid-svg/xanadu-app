@@ -114,12 +114,25 @@ export function Loading({ label = 'Opening Xanadu…' }: { label?: string }) {
   )
 }
 
+/** Remembers the page a signed-out member opened (e.g. a shared space link) so sign-in can take them back to it. */
+const RETURN_KEY = 'xa-return-to'
+export function rememberReturn(path: string) { try { sessionStorage.setItem(RETURN_KEY, path) } catch { /* private mode */ } }
+/** Where to go after sign-in: the remembered page, else the member's home. */
+export function takeReturn(fallback: string) {
+  try {
+    const p = sessionStorage.getItem(RETURN_KEY)
+    sessionStorage.removeItem(RETURN_KEY)
+    if (p && p.startsWith('/') && !p.startsWith('//')) return p
+  } catch { /* private mode */ }
+  return fallback
+}
+
 /** Guards a page: must be signed in, set up, and the right kind of member. */
 export function RequireRole({ role, children }: { role: DbRole | 'any'; children: ReactNode }) {
   const { session, profile, loading } = useAuth()
   const location = useLocation()
   if (loading) return <Loading />
-  if (!session) return <Navigate to="/" replace state={{ from: location.pathname }} />
+  if (!session) { rememberReturn(location.pathname + location.search); return <Navigate to="/" replace /> }
   if (!profile) return <Loading label="Setting up your account…" />
   if (!profile.onboarded) return <Navigate to="/welcome" replace />
   if (role !== 'any' && profile.role !== role) return <Navigate to={HOME[profile.role]} replace />
