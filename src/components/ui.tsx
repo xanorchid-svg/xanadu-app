@@ -21,15 +21,15 @@ export function Page({ children, className = '' }: { children: ReactNode; classN
 
 /**
  * The app bar on every main screen: a solid navy band locked to the top, holding only the
- * Xanadu lockup (the app icon, exactly as on the home screen, with the wordmark beside it).
+ * Xanadu lockup, centred: the emblem (transparent background) with the wordmark beside it.
  * Clears the notch / Dynamic Island on every iPhone.
  */
 export function AppHeader() {
   const { profile } = useAuth()
   return (
-    <header className="pt-safe-bar relative z-20 flex flex-none items-center border-b border-white/[0.06] bg-navy px-4 pb-2.5">
-      <Link to={HOME[profile?.role ?? 'seeker']} aria-label="Xanadu home" className="flex min-h-12 items-center gap-3 no-underline">
-        <img src="/icon-192.png?v=2" alt="" className="h-11 w-11 flex-none rounded-[11px] shadow-[0_2px_10px_rgba(0,0,0,0.35)]" />
+    <header className="pt-safe-bar relative z-20 flex flex-none items-center justify-center border-b border-white/[0.06] bg-navy px-4 pb-2">
+      <Link to={HOME[profile?.role ?? 'seeker']} aria-label="Xanadu home" className="flex min-h-12 items-center gap-2.5 no-underline">
+        <img src="/logo-emblem-light.png?v=3" alt="" className="h-[54px] w-auto flex-none" />
         <img src="/logo-xanadu-text.png" alt="Xanadu" className="h-[16px] w-auto" />
       </Link>
     </header>
