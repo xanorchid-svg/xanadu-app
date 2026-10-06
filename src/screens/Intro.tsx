@@ -171,7 +171,7 @@ export default function Intro() {
       <form
         onSubmit={(e) => { e.preventDefault(); submit() }}
         aria-hidden={!login}
-        className="relative flex h-full flex-col overflow-y-auto px-[22px] pt-[max(56px,calc(env(safe-area-inset-top)+28px))] pb-[max(26px,env(safe-area-inset-bottom))]"
+        className="relative flex h-full flex-col overflow-y-auto px-[22px] pt-[max(56px,calc(env(safe-area-inset-top)+28px))] pb-safe"
         style={{ pointerEvents: login ? 'auto' : 'none' }}
       >
         <img src="/logo-wordmark-clean.png" alt="Xanadu — a network for awakening places"

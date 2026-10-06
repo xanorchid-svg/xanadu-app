@@ -19,7 +19,7 @@ function Wizard({ steps, step, setStep, onFinish, finishLabel, busy, error, chil
   const last = step === steps.length - 1
   return (
     <div className="flex h-full flex-col bg-navy">
-      <header className="flex flex-col gap-3 border-b border-[#1F2B3E] px-5 pt-[max(48px,calc(env(safe-area-inset-top)+20px))] pb-3.5">
+      <header className="flex flex-col gap-3 border-b border-[#1F2B3E] px-5 pt-safe pb-3.5">
         <div className="flex items-center justify-between">
           <span className="text-[13px] text-subtle">{`Step ${step + 1} of ${steps.length} · ${steps[step]}`}</span>
           <button type="button" onClick={onSignOut} className="min-h-10 text-[13px] text-subtle">Sign out</button>
@@ -29,7 +29,7 @@ function Wizard({ steps, step, setStep, onFinish, finishLabel, busy, error, chil
         </div>
       </header>
       <main key={step} className="xa-page flex flex-1 flex-col gap-5 overflow-y-auto px-5 py-6">{children}</main>
-      <footer className="border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-[max(28px,env(safe-area-inset-bottom))]">
+      <footer className="border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-safe">
         {error && <p role="alert" className="m-0 mb-2.5 text-center text-[13px] text-gold-pale">{error}</p>}
         <div className="flex gap-2.5">
           {step > 0 && <button type="button" onClick={() => setStep(step - 1)} className="min-h-[54px] rounded-2xl border border-line-2 px-5 text-[15px] text-text">Back</button>}

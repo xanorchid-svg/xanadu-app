@@ -54,7 +54,7 @@ export default function Experience() {
   if (!offering) {
     return (
       <Screen>
-        <div className="flex flex-col gap-4 px-5 pt-[52px]">
+        <div className="flex flex-col gap-4 px-5 pt-safe">
           {back}
           <h1 className="m-0 font-display text-3xl font-medium text-ink">This experience isn't available</h1>
           <p className="m-0 text-[15px] leading-relaxed text-muted">It may have ended or been taken down by its host.</p>
@@ -90,7 +90,7 @@ export default function Experience() {
         : <button type="button" onClick={request} disabled={sending} className="min-h-[52px] rounded-2xl bg-gold px-6 text-[15px] font-semibold text-navy disabled:opacity-70">{sending ? 'Sending…' : 'Request a spot'}</button>
 
   const footer = (
-    <div className="flex flex-col gap-1.5 border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-[max(30px,env(safe-area-inset-bottom))]">
+    <div className="flex flex-col gap-1.5 border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-safe">
       {error && <p role="alert" className="m-0 text-[13px] text-gold-pale">{error}</p>}
       {requested && isSeeker && <p className="m-0 text-[13px] text-muted">The Xanadu team will reply in your Messages, usually within a day.</p>}
       <div className="flex items-center gap-3">
@@ -112,7 +112,7 @@ export default function Experience() {
 
   return (
     <Screen footer={footer}>
-      <div className="relative flex h-[300px] flex-col bg-sage px-4 pt-[52px] pb-4">
+      <div className="relative flex h-[300px] flex-col bg-sage px-4 pt-safe pb-4">
         {cover && <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover" />}
         <div className="relative flex justify-between">
           {back}

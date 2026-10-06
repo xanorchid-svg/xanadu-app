@@ -50,8 +50,8 @@ export default function App() {
   useScrollToTop()
   return (
     <div className="flex h-dvh justify-center bg-navy-deep">
-      {/* Phone-width column; fills the screen on mobile, centered on desktop */}
-      <div className="relative h-full w-full max-w-[430px] overflow-hidden bg-navy shadow-[0_0_80px_rgba(0,0,0,0.45)]">
+      {/* Fills every phone edge to edge; a phone-width column only on tablets and desktop */}
+      <div className="relative h-full w-full overflow-hidden bg-navy sm:max-w-[430px] sm:shadow-[0_0_80px_rgba(0,0,0,0.45)]">
         {/* keyed by path so each page mounts fresh, with its own scroll position and state */}
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Intro />} />

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { BackButton, Chip, ContainerTabs, EmptyState, Field, inputCls, PrimaryLink, Screen, Switch } from '../../components/ui'
+import { AppHeader, BackButton, Chip, ContainerTabs, EmptyState, Field, inputCls, PrimaryLink, Screen, Switch } from '../../components/ui'
 import { IconPeople } from '../../components/icons'
 import OfferingCard, { StatusPill, dateRange } from '../../components/OfferingCard'
 import { EditFooter } from '../../components/edit'
@@ -50,7 +50,7 @@ function EditOffering({ o, onDone, update }: { o: Offering; onDone: () => void; 
 
   return (
     <Screen footer={<EditFooter onCancel={onDone} onSave={save} error={error} busy={busy} />}>
-      <div className="flex flex-col gap-[18px] px-5 pt-[52px] pb-8">
+      <div className="flex flex-col gap-[18px] px-5 pt-safe pb-8">
         <h1 className="m-0 font-display text-[32px] font-medium text-ink">Edit offering</h1>
         {o.status === 'live' && <p className="m-0 rounded-xl bg-plum px-3.5 py-3 text-[13px] leading-normal text-muted">This offering is live. Your changes show to guests as soon as you save.</p>}
         <div className="grid grid-cols-3 gap-2">{FORMATS.map((f) => <button key={f} type="button" aria-pressed={d.format === f} onClick={() => set('format', f)} className={box(d.format === f)}>{f}</button>)}</div>
@@ -131,8 +131,8 @@ export default function ManageOffering() {
   // Offerings tab: every offering at a glance
   if (!id && offerings.length) {
     return (
-      <Screen footer={<ContainerTabs />}>
-        <div className="flex flex-col gap-4 px-5 pt-14 pb-6">
+      <Screen header={<AppHeader />} footer={<ContainerTabs />}>
+        <div className="flex flex-col gap-4 px-5 pt-5 pb-6">
           <div className="flex items-baseline justify-between">
             <h1 className="m-0 font-display text-[34px] font-medium text-ink">Offerings</h1>
             <Link to="/container/new" className="text-[13px] no-underline">+ New offering</Link>
@@ -145,8 +145,8 @@ export default function ManageOffering() {
 
   if (!o) {
     return (
-      <Screen footer={<ContainerTabs />}>
-        <div className="flex flex-col gap-5 px-5 pt-14 pb-6">
+      <Screen header={<AppHeader />} footer={<ContainerTabs />}>
+        <div className="flex flex-col gap-5 px-5 pt-5 pb-6">
           <h1 className="m-0 font-display text-[34px] font-medium text-ink">Offerings</h1>
           {id && <p className="m-0 text-[14px] text-muted">That offering couldn't be found. It may have been deleted.</p>}
           <EmptyState title="No offerings yet" action={<PrimaryLink to="/container/new" className="mt-1 min-h-[46px] text-sm">Create your first offering</PrimaryLink>}>
@@ -191,7 +191,7 @@ export default function ManageOffering() {
   const removeOuting = (i: number) => saveSchedule({ ...schedule, outings: outings.filter((_, j) => j !== i) })
 
   const header = (
-    <div className="flex flex-col gap-3.5 bg-plum px-5 pt-[52px]">
+    <div className="flex flex-col gap-3.5 bg-plum px-5 pt-safe">
       <div className="flex items-center justify-between">
         <BackButton to="/container/offering" />
         <div className="flex items-center gap-1">

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
-import { Chip, EmptyState, FacilitatorTabs, Page, PrimaryButton, Screen, SeekerTabs, Segmented, Switch } from '../../components/ui'
+import { AppHeader, Chip, EmptyState, FacilitatorTabs, Page, PrimaryButton, Screen, SeekerTabs, Segmented, Switch } from '../../components/ui'
 import { IconChat, IconPeople, IconPin } from '../../components/icons'
 import { HOME, useAuth } from '../../auth'
 import {
@@ -100,7 +100,7 @@ export default function Community() {
   // Facilitators join once a person on the team has approved their profile
   if (!approved) {
     return (
-      <Screen footer={<Tabs />}>
+      <Screen header={<AppHeader />} footer={<Tabs />}>
         <Page>
           {header}
           <EmptyState icon={<IconPeople size={32} />} title="Opens once you're approved">
@@ -114,7 +114,7 @@ export default function Community() {
   // Opt-in: nobody appears in Community until they choose to
   if (!visible || located === false) {
     return (
-      <Screen footer={<Tabs />}>
+      <Screen header={<AppHeader />} footer={<Tabs />}>
         <Page>
           {header}
           <section className="flex flex-col gap-4 rounded-[22px] bg-plum p-5">
@@ -135,10 +135,10 @@ export default function Community() {
     )
   }
 
-  if (located === null) return <Screen footer={<Tabs />}><Page>{header}</Page></Screen>
+  if (located === null) return <Screen header={<AppHeader />} footer={<Tabs />}><Page>{header}</Page></Screen>
 
   return (
-    <Screen footer={<Tabs />}>
+    <Screen header={<AppHeader />} footer={<Tabs />}>
       <Page className="gap-5">
         {header}
 

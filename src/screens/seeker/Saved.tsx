@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { EmptyState, H1, Page, PrimaryLink, Screen, SeekerTabs, Segmented } from '../../components/ui'
+import { AppHeader, EmptyState, H1, Page, PrimaryLink, Screen, SeekerTabs, Segmented } from '../../components/ui'
 import { IconHeart } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
 import { supabase } from '../../lib/supabase'
@@ -41,7 +41,7 @@ export default function Saved() {
   const empty = <EmptyState icon={<IconHeart size={36} />} title={title} action={<PrimaryLink to="/discover" className="mt-1">Explore Discover</PrimaryLink>}>{body}</EmptyState>
 
   return (
-    <Screen footer={<SeekerTabs />}>
+    <Screen header={<AppHeader />} footer={<SeekerTabs />}>
       <Page className="gap-5">
         <H1>Saved</H1>
         <Segmented label="Saved" options={TABS} value={tab} onChange={setTab} />

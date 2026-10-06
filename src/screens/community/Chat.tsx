@@ -29,7 +29,7 @@ export default function Chat() {
   if (!c || !session) {
     return (
       <Screen>
-        <div className="flex flex-col gap-4 px-5 pt-[52px]">
+        <div className="flex flex-col gap-4 px-5 pt-safe">
           <BackButton to="/community" />
           <p className="m-0 text-[15px] text-muted">This chat isn't available. It opens once you're both connected.</p>
         </div>
@@ -63,7 +63,7 @@ export default function Chat() {
   }
 
   const header = (
-    <div className="flex flex-col gap-2 border-b border-[#1F2B3E] bg-navy px-4 pt-[52px] pb-3">
+    <div className="flex flex-col gap-2 border-b border-[#1F2B3E] bg-navy px-4 pt-safe pb-3">
       <div className="flex items-center gap-3">
         <BackButton to="/community" />
         <Avatar name={c.name} photo={c.photo_url} size={40} />
@@ -107,7 +107,7 @@ export default function Chat() {
   )
 
   const footer = (
-    <form onSubmit={submit} className="flex flex-col gap-1.5 border-t border-[#1F2B3E] bg-navy-deep px-4 pt-3 pb-[max(24px,env(safe-area-inset-bottom))]">
+    <form onSubmit={submit} className="flex flex-col gap-1.5 border-t border-[#1F2B3E] bg-navy-deep px-4 pt-3 pb-safe">
       {error && <p role="alert" className="m-0 text-[13px] text-gold-pale">{error}</p>}
       <div className="flex items-center gap-2">
         <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Message" aria-label="Message"
@@ -126,7 +126,7 @@ export default function Chat() {
           const mine = m.sender === me
           return (
             <div key={m.id} className={`flex max-w-[80%] flex-col gap-0.5 ${mine ? 'self-end items-end' : 'self-start items-start'}`}>
-              <span className={`rounded-[18px] px-3.5 py-2.5 text-[15px] leading-snug whitespace-pre-wrap ${mine ? 'bg-gold text-navy' : 'bg-surface text-text'}`}>{m.body}</span>
+              <span className={`selectable rounded-[18px] px-3.5 py-2.5 text-[15px] leading-snug whitespace-pre-wrap ${mine ? 'bg-gold text-navy' : 'bg-surface text-text'}`}>{m.body}</span>
               <span className="px-1 text-[11px] text-faint">{time(m.created_at)}</span>
             </div>
           )

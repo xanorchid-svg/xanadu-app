@@ -99,7 +99,7 @@ export function AddPhotosButton({ onAdd, children, className = '' }: { onAdd: (u
 /** Fixed footer used while editing a profile. */
 export function EditFooter({ onCancel, onSave, error, busy = false }: { onCancel: () => void; onSave: () => void; error?: string; busy?: boolean }) {
   return (
-    <div className="border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-[max(30px,env(safe-area-inset-bottom))]">
+    <div className="border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-safe">
       {error && <p role="alert" className="m-0 mb-2 text-center text-[13px] text-gold-pale">{error}</p>}
       <div className="flex gap-2.5">
         <button type="button" onClick={onCancel} className="min-h-[54px] rounded-2xl border border-line-2 px-5 text-[15px] text-text">Cancel</button>

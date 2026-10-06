@@ -8,7 +8,7 @@ function LegalPage({ title, children }: { title: string; children: ReactNode }) 
   const navigate = useNavigate()
   return (
     <div className="xa-page h-full overflow-y-auto bg-navy">
-      <div className="flex flex-col gap-5 px-5 pt-14 pb-12">
+      <div className="flex flex-col gap-5 px-5 pt-safe pb-12">
         <button type="button" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))} className="min-h-10 self-start text-[13px] text-gold-soft">‹ Back</button>
         <div className="flex flex-col gap-1">
           <h1 className="m-0 font-display text-[34px] leading-[1.05] font-medium text-ink">{title}</h1>

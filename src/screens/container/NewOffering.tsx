@@ -68,7 +68,7 @@ export default function NewOffering() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex flex-col gap-3.5 border-b border-[#1F2B3E] px-5 pt-[52px] pb-3.5">
+      <header className="flex flex-col gap-3.5 border-b border-[#1F2B3E] px-5 pt-safe pb-3.5">
         <div className="flex items-center justify-between">
           <button type="button" aria-label="Close" onClick={close} className="flex h-11 w-11 items-center justify-center rounded-full bg-surface text-text"><IconClose /></button>
           <span className="text-[13px] text-subtle">{`Step ${step} of 4 · ${STEP_NAMES[step - 1]}`}</span>
@@ -152,7 +152,7 @@ export default function NewOffering() {
         )}
       </main>
 
-      <footer className="flex flex-col gap-2 border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-[max(30px,env(safe-area-inset-bottom))]">
+      <footer className="flex flex-col gap-2 border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-safe">
         {error && <p role="alert" className="m-0 text-center text-[13px] text-gold-pale">{error}</p>}
         <div className="flex gap-2.5">
           <button type="button" disabled={step === 1} onClick={() => { setError(''); setStep((s) => Math.max(1, s - 1)) }}

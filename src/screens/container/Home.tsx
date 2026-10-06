@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Badge, Checklist, ContainerTabs, EmptyState, H2, Page, PrimaryLink, Screen } from '../../components/ui'
+import { AppHeader, Badge, Checklist, ContainerTabs, EmptyState, H2, Page, PrimaryLink, Screen } from '../../components/ui'
 import { IconPeople } from '../../components/icons'
 import { useOfferings, useSpaceProfile } from '../../store'
 import ApplicationBanner from '../../components/ApplicationBanner'
@@ -27,7 +27,7 @@ export default function ContainerHome() {
   const items = SETUP.map((t) => (t.id === 'photos' && space.photos.length && space.photos.length < 5 ? { ...t, sub: `${space.photos.length} of 5 added, including the main practice area` } : t))
 
   return (
-    <Screen footer={<ContainerTabs />}>
+    <Screen header={<AppHeader />} footer={<ContainerTabs />}>
       <Page>
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">

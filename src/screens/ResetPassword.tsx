@@ -36,7 +36,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <form onSubmit={(e) => { e.preventDefault(); save() }} className="flex h-full flex-col gap-4 bg-navy px-6 pt-20">
+    <form onSubmit={(e) => { e.preventDefault(); save() }} className="flex h-full flex-col gap-4 bg-navy px-6 pt-safe">
       <h1 className="m-0 font-display text-[32px] font-medium text-ink">Set a new password</h1>
       <Field label="New password"><input type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputCls} /></Field>
       <Field label="Type it again"><input type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className={inputCls} /></Field>

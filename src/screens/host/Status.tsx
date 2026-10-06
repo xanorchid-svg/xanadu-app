@@ -25,7 +25,7 @@ export default function Status() {
         : ['In review', "We're reading your application", "Most reviews take a few days. We'll email you either way. Meanwhile, keep building your profile."]
 
   const footer = (
-    <div className="border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-[max(30px,env(safe-area-inset-bottom))]">
+    <div className="border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-safe">
       {status === 'declined'
         ? <a href={`mailto:${CONTACT_EMAIL}`} className="flex min-h-[54px] items-center justify-center rounded-2xl border border-line-2 text-[15px] text-text no-underline">Write to us</a>
         : <Link to={home} className="flex min-h-[54px] items-center justify-center rounded-2xl bg-gold font-semibold text-navy no-underline hover:text-navy">Back to your home</Link>}
@@ -34,7 +34,7 @@ export default function Status() {
 
   return (
     <Screen footer={footer}>
-      <div className="flex flex-col gap-6 px-5 pt-[52px] pb-6">
+      <div className="flex flex-col gap-6 px-5 pt-safe pb-6">
         <BackButton to={home} />
         <div className="flex flex-col gap-2">
           <span className="text-xs tracking-[0.2em] text-gold-soft uppercase">{kicker}</span>

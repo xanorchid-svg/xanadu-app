@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { BackButton, ContainerTabs, EmptyState, FacilitatorTabs, H1, Page, Screen, SeekerTabs } from '../../components/ui'
+import { AppHeader, BackButton, ContainerTabs, EmptyState, FacilitatorTabs, H1, Page, Screen, SeekerTabs } from '../../components/ui'
 import { IconSend } from '../../components/icons'
 import type { Role } from '../../data'
 import { useMessages } from '../../store'
@@ -49,20 +49,20 @@ export default function Inbox({ role }: { role: Role }) {
     }
     return (
       <div className="flex h-full flex-col">
-        <div className="flex items-center gap-3 border-b border-[#1F2B3E] px-4 pt-[52px] pb-3">
+        <div className="flex items-center gap-3 border-b border-[#1F2B3E] px-4 pt-safe pb-3">
           <BackButton onClick={() => setOpen(false)} />
           <div className="flex flex-1 flex-col gap-0.5"><span className="text-[15px] font-semibold text-ink">Xanadu</span><span className="text-xs text-subtle">The Xanadu team · usually replies within a day</span></div>
         </div>
         <div className="flex flex-1 flex-col gap-2.5 overflow-y-auto p-4">
           {messages.map((m) => (
             <div key={m.id} className={`flex max-w-[280px] flex-col gap-1 px-3.5 py-2.5 text-sm leading-snug ${m.from_team ? 'self-start rounded-[18px_18px_18px_4px] bg-[#22304A] text-text' : 'self-end rounded-[18px_18px_4px_18px] bg-gold text-navy'}`}>
-              <span className="whitespace-pre-line">{m.body}</span>
+              <span className="selectable whitespace-pre-line">{m.body}</span>
               <span className={`text-[10px] ${m.from_team ? 'text-subtle' : 'text-navy/70'}`}>{fmt(m.created_at)}</span>
             </div>
           ))}
           <div ref={endRef} />
         </div>
-        <form onSubmit={(e) => { e.preventDefault(); submit() }} className="flex flex-col gap-1.5 border-t border-[#1F2B3E] bg-navy-deep px-4 pt-2.5 pb-[max(30px,env(safe-area-inset-bottom))]">
+        <form onSubmit={(e) => { e.preventDefault(); submit() }} className="flex flex-col gap-1.5 border-t border-[#1F2B3E] bg-navy-deep px-4 pt-2.5 pb-safe">
           {error && <p role="alert" className="m-0 text-[13px] text-gold-pale">{error}</p>}
           <div className="flex items-center gap-2">
             <label className="flex flex-1"><span className="sr-only">Message</span>
@@ -76,7 +76,7 @@ export default function Inbox({ role }: { role: Role }) {
   }
 
   return (
-    <Screen footer={tabs}>
+    <Screen header={<AppHeader />} footer={tabs}>
       <Page className="gap-4">
         <H1>{role === 'Seeker' ? 'Messages' : 'Inbox'}</H1>
         {loading ? <p className="m-0 text-sm text-subtle">Loading…</p> : (

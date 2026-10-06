@@ -72,6 +72,9 @@ Members can't approve themselves: `status` on profiles and offerings only change
 ### Community
 `/community` (Seekers and approved Facilitators). Opt-in: a member appears only after turning on *Show me in Community* and sharing their location, which is rounded to about 1 km on the phone and never shown to anyone. Others see name, photo, practices and distance in whole miles (5, 10 or 25 mi circles). Chat (`/community/chat/:id`) opens only after both people accept a connection; messages arrive live. Members can report, remove or block from the chat menu.
 
+### App feel and iPhone fit
+Every main (tab) screen has the `AppHeader` (`src/components/ui.tsx`): the brightened emblem (`public/logo-emblem-light.png`) with the XANADU wordmark (`public/logo-xanadu-text.png`), plus Messages (Seekers) and the member's avatar. The app runs edge to edge (`viewport-fit=cover`); use the `pt-safe`, `pt-safe-bar`, `pb-safe` and `pb-tab` utilities (`src/index.css`) instead of fixed paddings so content clears the notch, Dynamic Island and home indicator on every iPhone. On phones the app is full width; the 430px column only applies from the `sm` breakpoint up. UI text isn't selectable (chat text is, via `.selectable`), buttons dim when pressed, scrollbars are hidden.
+
 ### Discover filters and destinations
 Xanadu is global. Spaces have `country`, `region` (state, province or island) and `town`; hosts pick a country from `DESTINATIONS` in `src/data.ts` or type another. Discover has a Filters sheet (`src/components/FilterSheet.tsx`, logic in `src/filters.ts`): Type (Retreat, Training, Drop-in, Volunteer exchange), Where (countries and regions that actually have listings), When, Price, Length and Sort. Options that would show nothing are hidden, and filters are kept for the session. Calendar and Facilitator Spaces filter by country.
 

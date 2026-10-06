@@ -43,7 +43,7 @@ export default function FilterSheet({ value, onApply, onClose, listings, spaces,
 
   // rendered above the whole app (not inside the scrolling page), over the phone-width column
   return createPortal(
-    <div className="fixed inset-y-0 left-1/2 z-50 flex w-full max-w-[430px] -translate-x-1/2 flex-col justify-end bg-navy-deep/70" role="dialog" aria-modal="true" aria-label="Filters" onClick={onClose}>
+    <div className="fixed inset-y-0 left-1/2 z-50 flex w-full -translate-x-1/2 sm:max-w-[430px] flex-col justify-end bg-navy-deep/70" role="dialog" aria-modal="true" aria-label="Filters" onClick={onClose}>
       <div className="xa-page flex max-h-[88%] flex-col rounded-t-[26px] bg-navy" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-[#1F2B3E] px-5 pt-4 pb-3">
           <button type="button" aria-label="Close filters" onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-full bg-surface text-text"><IconClose size={18} /></button>
@@ -98,7 +98,7 @@ export default function FilterSheet({ value, onApply, onClose, listings, spaces,
           )}
         </div>
 
-        <div className="border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-[max(24px,env(safe-area-inset-bottom))]">
+        <div className="border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-safe">
           <button type="button" onClick={() => onApply(f)} className="min-h-[54px] w-full rounded-2xl bg-gold text-[15px] font-semibold text-navy">
             {results === 0 ? 'Show results (none yet)' : `Show ${results} ${f.type === 'Volunteer exchange' ? (results === 1 ? 'space' : 'spaces') : results === 1 ? 'experience' : 'experiences'}`}
           </button>

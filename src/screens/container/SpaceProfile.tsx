@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ContainerTabs, Reviews, Screen, Switch } from '../../components/ui'
+import { AppHeader, ContainerTabs, Reviews, Screen, Switch } from '../../components/ui'
 import { AddPhotosButton, EditFooter, LocationFields, PhotoGallery, PracticePicker, SignOutButton, TextArea, TextField } from '../../components/edit'
 import { Loading, useAuth } from '../../auth'
 import { IconPhoto } from '../../components/icons'
@@ -28,7 +28,7 @@ export default function SpaceProfile() {
     const commit = async () => { setBusy(true); const err = await save(draft); setBusy(false); if (err) setError(err); else setEditing(false) }
     return (
       <Screen footer={<EditFooter onCancel={() => setEditing(false)} onSave={commit} error={error} busy={busy} />}>
-        <div className="flex flex-col gap-5 px-5 pt-[52px] pb-8">
+        <div className="flex flex-col gap-5 px-5 pt-safe pb-8">
           <h1 className="m-0 font-display text-[32px] font-medium text-ink">Edit space</h1>
           <PhotoGallery photos={draft.photos} onChange={(p) => set('photos', p)} />
           <TextField label="Space name" value={draft.name} onChange={(v) => set('name', v)} />
@@ -85,8 +85,8 @@ export default function SpaceProfile() {
   const cover = space.photos[0]
 
   return (
-    <Screen footer={<ContainerTabs />}>
-      <div className={`relative flex h-[260px] flex-col justify-between px-4 pt-[52px] pb-4 ${cover ? '' : 'border-b border-dashed border-line-2 bg-surface-2'}`}>
+    <Screen header={<AppHeader />} footer={<ContainerTabs />}>
+      <div className={`relative flex h-[260px] flex-col justify-between px-4 pt-4 pb-4 ${cover ? '' : 'border-b border-dashed border-line-2 bg-surface-2'}`}>
         {cover && <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover" />}
         <div className="relative flex justify-end gap-2">
           <button type="button" onClick={share} className="min-h-10 rounded-full bg-navy/75 px-3.5 text-[13px] text-text">Share</button>

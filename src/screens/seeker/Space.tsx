@@ -39,7 +39,7 @@ export default function Space() {
   if (space === undefined) return <Loading label="Opening space…" />
   const back = <button type="button" aria-label="Back" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))} className="flex h-11 w-11 items-center justify-center rounded-full bg-navy/70 text-text"><IconBack /></button>
   if (!space) return (
-    <Screen><div className="flex flex-col gap-4 px-5 pt-[52px]">{back}
+    <Screen><div className="flex flex-col gap-4 px-5 pt-safe">{back}
       <h1 className="m-0 font-display text-3xl font-medium text-ink">This space isn't available</h1>
       <p className="m-0 text-[15px] leading-relaxed text-muted">It may not be open to guests yet. Spaces appear once the Xanadu team has welcomed them.</p>
     </div></Screen>
@@ -58,7 +58,7 @@ export default function Space() {
 
   return (
     <Screen>
-      <div className="relative flex h-[280px] flex-col bg-sage px-4 pt-[52px]">
+      <div className="relative flex h-[280px] flex-col bg-sage px-4 pt-safe">
         {space.photos[0] && <img src={space.photos[0]} alt="" className="absolute inset-0 h-full w-full object-cover" />}
         <div className="relative flex justify-between">
           {back}
