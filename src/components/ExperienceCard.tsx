@@ -10,7 +10,7 @@ export default function ExperienceCard({ e }: { e: Listing }) {
   const where = [e.space?.name, e.space ? placeLabel({ town: e.space.town, region: e.space.region }) || e.space.country : ''].filter(Boolean).join(' · ')
   return (
     <Link to={`/experience/${e.id}`} className="flex items-center gap-3.5 rounded-[18px] bg-surface p-2.5 text-text no-underline">
-      <div className="h-[76px] w-[76px] flex-none overflow-hidden rounded-[14px] bg-sage">
+      <div className="h-[76px] w-[76px] flex-none overflow-hidden rounded-[14px] bg-portal">
         {cover && <img src={cover} alt="" className="h-full w-full object-cover" />}
       </div>
       <div className="flex min-w-0 flex-col gap-0.5">

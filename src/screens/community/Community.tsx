@@ -199,10 +199,10 @@ export default function Community() {
 
 function MemberCard({ m, act, me }: { m: NearbyMember; act: (fn: () => Promise<string | null>) => void; me: string }) {
   let action
-  if (m.connection_status === 'accepted') action = <Link to={`/community/chat/${m.connection_id}`} className={`${btn} flex items-center bg-gold text-navy no-underline hover:text-navy`}>Message</Link>
+  if (m.connection_status === 'accepted') action = <Link to={`/community/chat/${m.connection_id}`} className={`${btn} flex items-center bg-iri text-navy no-underline hover:text-navy`}>Message</Link>
   else if (m.connection_status === 'pending' && m.incoming) action = (
     <div className="flex gap-1.5">
-      <button type="button" onClick={() => act(() => respondToConnection(m.connection_id!, true))} className={`${btn} bg-gold text-navy`}>Accept</button>
+      <button type="button" onClick={() => act(() => respondToConnection(m.connection_id!, true))} className={`${btn} bg-iri text-navy`}>Accept</button>
       <button type="button" onClick={() => act(() => respondToConnection(m.connection_id!, false))} className={`${btn} border border-line-2 text-muted`}>Decline</button>
     </div>
   )
@@ -241,7 +241,7 @@ function ConnectionRow({ c, act }: { c: Connection; act: (fn: () => Promise<stri
       {inner}
       {c.incoming && (
         <div className="flex gap-1.5">
-          <button type="button" onClick={() => act(() => respondToConnection(c.connection_id, true))} className={`${btn} bg-gold text-navy`}>Accept</button>
+          <button type="button" onClick={() => act(() => respondToConnection(c.connection_id, true))} className={`${btn} bg-iri text-navy`}>Accept</button>
           <button type="button" onClick={() => act(() => respondToConnection(c.connection_id, false))} className={`${btn} border border-line-2 text-muted`}>Decline</button>
         </div>
       )}

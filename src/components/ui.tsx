@@ -26,8 +26,10 @@ export const H2 = ({ children, className = '' }: { children: ReactNode; classNam
   <h2 className={`m-0 font-display text-2xl font-semibold text-ink ${className}`}>{children}</h2>
 )
 export const Eyebrow = ({ children }: { children: ReactNode }) => (
-  <span className="text-xs tracking-[0.2em] text-gold-soft uppercase">{children}</span>
+  <span className="text-iri self-start text-xs font-semibold tracking-[0.2em] uppercase">{children}</span>
 )
+/** A word or phrase inside a heading that shimmers in the logo's iridescence. */
+export const Glow = ({ children }: { children: ReactNode }) => <em className="text-iri not-italic">{children}</em>
 
 export function BackButton({ to, label = 'Back', onClick }: { to?: string; label?: string; onClick?: () => void }) {
   const cls = 'flex h-11 w-11 items-center justify-center rounded-full bg-surface text-text'
@@ -36,7 +38,7 @@ export function BackButton({ to, label = 'Back', onClick }: { to?: string; label
 }
 
 export function Chip({ on, onClick, children, solid = false }: { on: boolean; onClick: () => void; children: ReactNode; solid?: boolean }) {
-  const onCls = solid ? 'border-gold bg-gold text-navy font-semibold' : 'border-gold bg-gold/18 text-gold-pale font-semibold'
+  const onCls = solid ? 'border-transparent bg-iri text-navy font-semibold' : 'ring-iri border-transparent bg-iri-violet/14 text-ink font-semibold'
   return (
     <button type="button" aria-pressed={on} onClick={onClick}
       className={`min-h-9 flex-none rounded-full border px-3.5 text-[13px] transition-colors ${on ? onCls : 'border-line-2 text-muted'}`}>
@@ -61,8 +63,8 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
 export function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boolean) => void; label: string }) {
   return (
     <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={() => onChange(!on)}
-      className={`flex h-[30px] w-[52px] flex-none rounded-full p-[3px] transition-colors ${on ? 'justify-end bg-gold' : 'justify-start bg-line'}`}>
-      <span className="h-6 w-6 rounded-full bg-ink" />
+      className={`flex h-[30px] w-[52px] flex-none rounded-full p-[3px] transition-colors ${on ? 'justify-end bg-iri-strong' : 'justify-start bg-line'}`}>
+      <span className="h-6 w-6 rounded-full bg-ink shadow-[0_1px_4px_rgba(0,0,0,.35)]" />
     </button>
   )
 }
@@ -81,7 +83,7 @@ export function EmptyState({ icon, title, children, action }: { icon?: ReactNode
 export function PrimaryButton({ children, onClick, className = '', done = false, type = 'button' }: { children: ReactNode; onClick?: () => void; className?: string; done?: boolean; type?: 'button' | 'submit' }) {
   return (
     <button type={type} onClick={onClick}
-      className={`min-h-12 rounded-2xl px-6 text-[15px] font-semibold text-navy transition-colors ${done ? 'bg-calm' : 'bg-gold hover:bg-gold-soft'} ${className}`}>
+      className={`min-h-12 rounded-2xl px-6 text-[15px] font-semibold text-navy transition-colors ${done ? 'bg-calm' : 'bg-iri shadow-[0_6px_24px_-8px_rgba(181,139,224,.55)]'} ${className}`}>
       {children}
     </button>
   )
@@ -89,7 +91,7 @@ export function PrimaryButton({ children, onClick, className = '', done = false,
 
 export function PrimaryLink({ to, children, className = '' }: { to: string; children: ReactNode; className?: string }) {
   return (
-    <Link to={to} className={`flex min-h-12 items-center justify-center rounded-2xl bg-gold px-6 text-[15px] font-semibold text-navy no-underline hover:bg-gold-soft hover:text-navy ${className}`}>
+    <Link to={to} className={`flex min-h-12 items-center justify-center rounded-2xl bg-iri px-6 text-[15px] font-semibold text-navy no-underline hover:text-navy ${className}`}>
       {children}
     </Link>
   )
@@ -99,7 +101,7 @@ export function RowLink({ to, href, title, sub }: { to?: string; href?: string; 
   const inner = (
     <>
       <span className="flex flex-col gap-0.5"><span className="text-[15px] font-semibold text-ink">{title}</span><span className="text-[13px] text-subtle">{sub}</span></span>
-      <span className="text-gold-soft" aria-hidden>›</span>
+      <span className="text-iri text-lg leading-none" aria-hidden>›</span>
     </>
   )
   const cls = 'flex items-center justify-between gap-3 rounded-[18px] bg-surface p-4 text-text no-underline'
@@ -112,11 +114,11 @@ export function Field({ label, children }: { label: ReactNode; children: ReactNo
 export const inputCls = 'min-h-12 rounded-xl border border-line bg-surface-2 px-3.5 text-[15px] text-text outline-none placeholder:text-faint focus:border-gold'
 
 export function Badge({ children }: { children: ReactNode }) {
-  return <span className="self-start rounded-full border border-gold px-2.5 py-1 text-xs text-gold-pale">{children}</span>
+  return <span className="ring-iri self-start rounded-full px-2.5 py-1 text-xs text-gold-pale">{children}</span>
 }
 
 export function Progress({ value }: { value: number }) {
-  return <div className="h-1.5 overflow-hidden rounded-full bg-plum-line"><div className="h-1.5 rounded-full bg-gold transition-[width] duration-500" style={{ width: `${Math.round(value * 100)}%` }} /></div>
+  return <div className="h-1.5 overflow-hidden rounded-full bg-plum-line"><div className="bg-iri-strong h-1.5 rounded-full transition-[width] duration-500" style={{ width: `${Math.round(value * 100)}%` }} /></div>
 }
 
 /* ---------- Tab bars ---------- */
@@ -125,17 +127,24 @@ type Tab = { to: string; label: string; icon: ReactNode; end?: boolean }
 function TabBar({ tabs, center, label }: { tabs: Tab[]; center?: Tab; label: string }) {
   const item = (t: Tab) => (
     <NavLink key={t.to} to={t.to} end={t.end ?? true}
-      className={({ isActive }) => `flex min-h-12 min-w-14 flex-col items-center justify-center gap-1 text-[10.5px] font-medium tracking-[0.01em] no-underline ${isActive ? 'text-gold-soft' : 'text-faint'}`}>
-      {t.icon}{t.label}
+      className={({ isActive }) => `relative flex min-h-12 min-w-14 flex-col items-center justify-center gap-1 text-[10.5px] font-medium tracking-[0.01em] no-underline transition-colors ${isActive ? 'text-ink' : 'text-faint'}`}>
+      {({ isActive }) => (
+        <>
+          <span className={`transition-[filter,transform] duration-300 ${isActive ? 'scale-110 drop-shadow-[0_0_8px_rgba(181,139,224,.75)]' : ''}`}>{t.icon}</span>
+          {t.label}
+          <span aria-hidden className={`bg-iri-strong absolute -bottom-0.5 h-[3px] rounded-full transition-all duration-300 ${isActive ? 'w-5 opacity-100' : 'w-0 opacity-0'}`} />
+        </>
+      )}
     </NavLink>
   )
   const left = center ? tabs.slice(0, 2) : tabs
   const right = center ? tabs.slice(2) : []
   return (
-    <nav aria-label={label} className="pb-tab relative z-20 flex flex-none items-start justify-around border-t border-white/[0.06] bg-navy-deep/90 px-2 pt-2 backdrop-blur-xl">
+    <nav aria-label={label} className="pb-tab relative z-20 flex flex-none items-start justify-around bg-navy-deep/85 px-2 pt-2 backdrop-blur-xl">
+      <span aria-hidden className="bg-iri-strong absolute inset-x-0 top-0 h-px opacity-60" />
       {left.map(item)}
       {center && (
-        <Link to={center.to} aria-label={center.label} className="-mt-1.5 flex h-13 w-13 items-center justify-center rounded-full bg-gold text-navy hover:text-navy">{center.icon}</Link>
+        <Link to={center.to} aria-label={center.label} className="-mt-1.5 flex h-13 w-13 items-center justify-center rounded-full bg-iri text-navy shadow-[0_0_22px_-2px_rgba(181,139,224,.7)] hover:text-navy">{center.icon}</Link>
       )}
       {right.map(item)}
     </nav>
@@ -174,14 +183,14 @@ export const FacilitatorTabs = () => (
 /** Checklist used on Container and Facilitator home screens. Items tick themselves off as the profile fills in. */
 export function Checklist({ title, items, done }: { title: string; items: { id: string; title: string; sub: string; to: string }[]; done: string[] }) {
   return (
-    <section className="flex flex-col gap-3 rounded-[20px] bg-plum p-[18px]">
+    <section className="ring-iri flex flex-col gap-3 rounded-[20px] bg-plum/80 p-[18px]">
       <div className="flex items-baseline justify-between"><H2>{title}</H2><span className="text-[13px] text-gold-pale">{`${done.length} of ${items.length}`}</span></div>
       <Progress value={done.length / items.length} />
       {items.map((t) => {
         const d = done.includes(t.id)
         return (
           <div key={t.id} className="flex items-center gap-3 py-2.5">
-            <span aria-hidden className={`flex h-7 w-7 flex-none items-center justify-center rounded-lg text-sm font-bold ${d ? 'bg-gold text-navy' : 'border-[1.5px] border-slate text-transparent'}`}>✓</span>
+            <span aria-hidden className={`flex h-7 w-7 flex-none items-center justify-center rounded-lg text-sm font-bold ${d ? 'bg-iri-strong text-navy' : 'border-[1.5px] border-slate text-transparent'}`}>✓</span>
             <Link to={t.to} aria-label={`${t.title}${d ? ' (done)' : ''}`} className="flex min-w-0 flex-1 flex-col gap-0.5 no-underline">
               <span className={`text-[15px] font-semibold ${d ? 'text-faint line-through' : 'text-ink'}`}>{t.title}</span>
               <span className="text-xs text-subtle">{t.sub}</span>

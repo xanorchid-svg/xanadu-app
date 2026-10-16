@@ -11,10 +11,11 @@ export type Filters = {
   to: string
   price: 'any' | 'u500' | 'mid' | 'high'
   length: 'any' | 'day' | 'weekend' | 'week' | 'long'
+  land: string // '' = any landscape
   sort: 'match' | 'soon' | 'price'
 }
 
-export const NO_FILTERS: Filters = { type: 'Any', country: '', region: '', when: 'any', from: '', to: '', price: 'any', length: 'any', sort: 'match' }
+export const NO_FILTERS: Filters = { type: 'Any', country: '', region: '', when: 'any', from: '', to: '', price: 'any', length: 'any', land: '', sort: 'match' }
 
 export const TYPES: Filters['type'][] = ['Any', 'Retreat', 'Training', 'Drop-in', 'Volunteer exchange']
 export const WHEN: [Filters['when'], string][] = [['any', 'Any time'], ['week', 'This week'], ['month', 'This month'], ['dates', 'Pick dates']]
@@ -33,7 +34,7 @@ export function useFilters() {
 
 /** How many filters are switched on (sort doesn't count). */
 export const activeCount = (f: Filters) =>
-  [f.type !== 'Any', !!f.country, f.when !== 'any', f.price !== 'any', f.length !== 'any'].filter(Boolean).length
+  [f.type !== 'Any', !!f.country, !!f.land, f.when !== 'any', f.price !== 'any', f.length !== 'any'].filter(Boolean).length
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 const addDays = (n: number) => { const d = new Date(); d.setDate(d.getDate() + n); return iso(d) }
@@ -50,6 +51,7 @@ const inPlace = (s: { country?: string; region?: string } | null | undefined, f:
 export function passes(e: Listing, f: Filters, ignore?: keyof Filters) {
   if (ignore !== 'type' && f.type !== 'Any' && (f.type === 'Volunteer exchange' || e.format !== f.type)) return false
   if (ignore !== 'country' && ignore !== 'region' && !inPlace(e.space, f)) return false
+  if (ignore !== 'land' && f.land && !(e.space?.lifestyle ?? []).includes(f.land)) return false
   if (ignore !== 'when' && f.when !== 'any') {
     const start = e.start_date, end = e.end_date || e.start_date
     if (!start || !end) return false
@@ -78,6 +80,7 @@ export function spacePasses(s: PublicSpace, f: Filters, ignore?: keyof Filters) 
   if (ignore !== 'type' && f.type === 'Volunteer exchange' && !s.volunteer_exchange) return false
   if (ignore !== 'type' && f.type !== 'Any' && f.type !== 'Volunteer exchange') return true // experience types don't hide spaces
   if (ignore !== 'country' && ignore !== 'region' && !inPlace(s, f)) return false
+  if (ignore !== 'land' && f.land && !(s.lifestyle ?? []).includes(f.land)) return false
   return true
 }
 

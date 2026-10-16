@@ -58,7 +58,7 @@ export default function Experience() {
           {back}
           <h1 className="m-0 font-display text-3xl font-medium text-ink">This experience isn't available</h1>
           <p className="m-0 text-[15px] leading-relaxed text-muted">It may have ended or been taken down by its host.</p>
-          <Link to="/" className="flex min-h-12 items-center justify-center rounded-2xl bg-gold font-semibold text-navy no-underline hover:text-navy">Explore Xanadu</Link>
+          <Link to="/" className="flex min-h-12 items-center justify-center rounded-2xl bg-iri font-semibold text-navy no-underline hover:text-navy">Explore Xanadu</Link>
         </div>
       </Screen>
     )
@@ -87,7 +87,7 @@ export default function Experience() {
       ? <span className="rounded-2xl border border-line-2 px-4 py-3 text-[13px] text-subtle">Seekers request spots</span>
       : requested
         ? <Link to="/messages" className="flex min-h-[52px] items-center rounded-2xl bg-calm px-5 text-[15px] font-semibold text-navy no-underline hover:text-navy">Request sent ✓</Link>
-        : <button type="button" onClick={request} disabled={sending} className="min-h-[52px] rounded-2xl bg-gold px-6 text-[15px] font-semibold text-navy disabled:opacity-70">{sending ? 'Sending…' : 'Request a spot'}</button>
+        : <button type="button" onClick={request} disabled={sending} className="min-h-[52px] rounded-2xl bg-iri px-6 text-[15px] font-semibold text-navy disabled:opacity-70">{sending ? 'Sending…' : 'Request a spot'}</button>
 
   const footer = (
     <div className="flex flex-col gap-1.5 border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-safe">
@@ -112,7 +112,7 @@ export default function Experience() {
 
   return (
     <Screen footer={footer}>
-      <div className="relative flex h-[300px] flex-col bg-sage px-4 pt-safe pb-4">
+      <div className="relative flex h-[300px] flex-col bg-portal px-4 pt-safe pb-4">
         {cover && <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover" />}
         <div className="relative flex justify-between">
           {back}
@@ -133,7 +133,7 @@ export default function Experience() {
 
         {space && (
           <Link to={`/space/${space.id}`} className="flex items-center gap-3 rounded-[18px] bg-surface p-3 text-text no-underline">
-            <div className="h-12 w-12 flex-none overflow-hidden rounded-[12px] bg-sage">{space.photos[0] && <img src={space.photos[0]} alt="" className="h-full w-full object-cover" />}</div>
+            <div className="h-12 w-12 flex-none overflow-hidden rounded-[12px] bg-portal">{space.photos[0] && <img src={space.photos[0]} alt="" className="h-full w-full object-cover" />}</div>
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
               <span className="text-xs text-subtle">Held at</span>
               <span className="truncate text-[15px] font-semibold text-ink">{space.name}</span>

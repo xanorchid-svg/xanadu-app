@@ -28,7 +28,7 @@ export default function Status() {
     <div className="border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-safe">
       {status === 'declined'
         ? <a href={`mailto:${CONTACT_EMAIL}`} className="flex min-h-[54px] items-center justify-center rounded-2xl border border-line-2 text-[15px] text-text no-underline">Write to us</a>
-        : <Link to={home} className="flex min-h-[54px] items-center justify-center rounded-2xl bg-gold font-semibold text-navy no-underline hover:text-navy">Back to your home</Link>}
+        : <Link to={home} className="flex min-h-[54px] items-center justify-center rounded-2xl bg-iri font-semibold text-navy no-underline hover:text-navy">Back to your home</Link>}
     </div>
   )
 
@@ -49,8 +49,8 @@ export default function Status() {
               return (
                 <li key={s.title} className="flex gap-3.5">
                   <div className="flex w-7 flex-none flex-col items-center">
-                    <span className={`flex h-7 w-7 items-center justify-center rounded-full text-[13px] font-semibold ${done ? 'bg-gold text-navy' : now ? 'border-[1.5px] border-gold text-gold-pale' : 'border-[1.5px] border-line-2 text-subtle'}`}>{done ? '✓' : i + 1}</span>
-                    <span className={`my-1 w-[1.5px] flex-1 ${last ? 'bg-transparent' : done ? 'bg-gold' : 'bg-line'}`} />
+                    <span className={`flex h-7 w-7 items-center justify-center rounded-full text-[13px] font-semibold ${done ? 'bg-iri text-navy' : now ? 'border-[1.5px] border-gold text-gold-pale' : 'border-[1.5px] border-line-2 text-subtle'}`}>{done ? '✓' : i + 1}</span>
+                    <span className={`my-1 w-[1.5px] flex-1 ${last ? 'bg-transparent' : done ? 'bg-iri' : 'bg-line'}`} />
                   </div>
                   <div className="flex flex-col gap-1 pb-[22px]">
                     <span className={`text-[15px] font-semibold ${done || now ? 'text-ink' : 'text-subtle'}`}>{s.title}</span>

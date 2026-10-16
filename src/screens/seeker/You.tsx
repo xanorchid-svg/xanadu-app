@@ -7,6 +7,7 @@ import { refreshMatches, useMyKeywords } from '../../matching'
 import { AvatarPicker, EditFooter, SignOutButton, TextArea, TextField } from '../../components/edit'
 import { useAuth } from '../../auth'
 import { useSeekerProfile, type SeekerProfile } from '../../store'
+import { LifestylePicker } from '../../components/Lifestyle'
 
 const JOURNEY_TABS = ['Upcoming', 'Past'] as const
 
@@ -55,8 +56,8 @@ export default function You() {
     <Screen footer={<SeekerTabs />}>
       <Page className="gap-6 pb-7">
         <div className="flex items-center gap-4">
-          <div className="flex h-[72px] w-[72px] flex-none items-center justify-center overflow-hidden rounded-full border border-gold bg-plum font-display text-3xl text-gold-pale">
-            {me.photo ? <img src={me.photo} alt="" className="h-full w-full object-cover" /> : (me.name.trim()[0] ?? 'X').toUpperCase()}
+          <div className="ring-iri flex h-[72px] w-[72px] flex-none items-center justify-center rounded-full bg-plum font-display text-3xl text-gold-pale shadow-[0_0_28px_-6px_rgba(181,139,224,.6)]">
+            {me.photo ? <img src={me.photo} alt="" className="h-full w-full rounded-full object-cover p-[2px]" /> : (me.name.trim()[0] ?? 'X').toUpperCase()}
           </div>
           <div className="flex flex-1 flex-col gap-1">
             <h1 className="m-0 font-display text-3xl font-medium text-ink">{me.name.trim() || '[Your name]'}</h1>
@@ -64,6 +65,11 @@ export default function You() {
           </div>
           <button type="button" aria-label="Edit profile" onClick={() => { setDraft(me); setError(''); setEditing(true) }} className="flex h-11 w-11 items-center justify-center rounded-full border border-line text-muted"><IconSettings /></button>
         </div>
+
+        <section className="ring-iri flex flex-col gap-4 rounded-[22px] bg-plum/60 p-[18px]">
+          <div className="flex flex-col gap-0.5"><H2 className="text-[22px]">Your way of living</H2><span className="text-xs text-subtle">How long, how you want to spend your days, and where. We match you to places that hold it.</span></div>
+          <LifestylePicker value={me.lifestyle} onChange={(v) => save({ ...me, lifestyle: v })} />
+        </section>
 
         <section className="flex flex-col gap-3">
           <div className="flex items-baseline justify-between"><H2 className="text-[22px]">Your alignment</H2><span className="text-xs text-subtle">Tap all that call to you</span></div>
@@ -78,12 +84,12 @@ export default function You() {
           <div className="flex items-center justify-between gap-3">
             <span className="text-[13px] text-subtle">{wordsState === 'saved' ? 'Saved. Your matches are updated.' : ''}</span>
             <button type="button" onClick={saveWords} disabled={wordsState === 'saving'}
-              className="min-h-10 rounded-xl bg-gold px-4 text-[13px] font-semibold text-navy disabled:opacity-60">{wordsState === 'saving' ? 'Matching…' : 'Save and match'}</button>
+              className="min-h-10 rounded-xl bg-iri px-4 text-[13px] font-semibold text-navy disabled:opacity-60">{wordsState === 'saving' ? 'Matching…' : 'Save and match'}</button>
           </div>
           {keywords.length > 0 && (
             <div className="flex flex-col gap-2">
               <span className="text-xs text-subtle">We picked up on</span>
-              <div className="flex flex-wrap gap-1.5">{keywords.map((k) => <span key={k} className="rounded-full bg-plum px-2.5 py-1 text-xs text-gold-pale">{k}</span>)}</div>
+              <div className="flex flex-wrap gap-1.5">{keywords.map((k) => <span key={k} className="ring-iri rounded-full bg-plum px-2.5 py-1 text-xs text-gold-pale">{k}</span>)}</div>
             </div>
           )}
         </section>
@@ -121,7 +127,7 @@ export default function You() {
           <a href={`mailto:${CONTACT_EMAIL}`} className={`${row} border-b-0`}>Help <span className="text-[13px] text-subtle">{CONTACT_EMAIL}</span></a>
         </section>
 
-        <a href={`mailto:${CONTACT_EMAIL}?subject=I'd%20like%20to%20hold%20space%20on%20Xanadu`} className="flex flex-col gap-1 rounded-[20px] bg-gold p-[18px] text-navy no-underline hover:text-navy">
+        <a href={`mailto:${CONTACT_EMAIL}?subject=I'd%20like%20to%20hold%20space%20on%20Xanadu`} className="flex flex-col gap-1 rounded-[20px] bg-iri p-[18px] text-navy no-underline hover:text-navy">
           <span className="text-base font-semibold">Hold space on Xanadu</span>
           <span className="text-[13px]">Have a retreat space or a practice to share? Write to us and we'll set up your host account →</span>
         </a>

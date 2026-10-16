@@ -12,12 +12,12 @@ import { refreshMatches } from './matching'
 export type { Training }
 export type Reference = { name: string; contact: string }
 
-export type SeekerProfile = { name: string; photo: string; region: string; prefs: string[]; notify: boolean; seeking: string }
+export type SeekerProfile = { name: string; photo: string; region: string; prefs: string[]; notify: boolean; seeking: string; lifestyle: string[] }
 
 export type SpaceProfile = {
   id: string; name: string; town: string; region: string; country: string; about: string; practices: string[]; photos: string[]
   sleeps: string; rooms: string; mats: string; kitchen: string; gettingHere: string
-  volunteerExchange: boolean; volunteerDetails: string
+  volunteerExchange: boolean; volunteerDetails: string; lifestyle: string[]
 }
 
 export type FacilitatorProfile = {
@@ -43,7 +43,7 @@ export type Offering = {
 
 export type Message = { id: string; from_team: boolean; body: string; created_at: string }
 
-export const EMPTY_SPACE: SpaceProfile = { id: '', name: '', town: '', region: '', country: '', about: '', practices: [], photos: [], sleeps: '', rooms: '', mats: '', kitchen: '', gettingHere: '', volunteerExchange: false, volunteerDetails: '' }
+export const EMPTY_SPACE: SpaceProfile = { id: '', name: '', town: '', region: '', country: '', about: '', practices: [], photos: [], sleeps: '', rooms: '', mats: '', kitchen: '', gettingHere: '', volunteerExchange: false, volunteerDetails: '', lifestyle: [] }
 
 /* ---------- photos ---------- */
 
@@ -84,13 +84,13 @@ export function useSeekerProfile() {
   const { session, profile, updateProfile } = useAuth()
   const value: SeekerProfile = {
     name: profile?.name ?? '', photo: profile?.photo_url ?? '', region: profile?.region ?? '',
-    prefs: profile?.prefs ?? [], notify: profile?.notify ?? true, seeking: profile?.seeking ?? '',
+    prefs: profile?.prefs ?? [], notify: profile?.notify ?? true, seeking: profile?.seeking ?? '', lifestyle: profile?.lifestyle ?? [],
   }
   const save = useCallback(async (next: SeekerProfile): Promise<string | null> => {
     if (!session) return 'You are signed out. Please sign in again.'
     try {
       const [photo] = await uploadPhotos(session.user.id, next.photo ? [next.photo] : [])
-      const err = await updateProfile({ name: next.name.trim(), photo_url: photo ?? '', region: next.region.trim(), prefs: next.prefs, notify: next.notify, seeking: next.seeking.trim().slice(0, 2000) })
+      const err = await updateProfile({ name: next.name.trim(), photo_url: photo ?? '', region: next.region.trim(), prefs: next.prefs, notify: next.notify, seeking: next.seeking.trim().slice(0, 2000), lifestyle: next.lifestyle })
       if (err) return friendlyError(err)
       refreshMatches()
       return null
@@ -101,8 +101,8 @@ export function useSeekerProfile() {
 
 /* ---------- container space ---------- */
 
-type SpaceRow = { id: string; name: string; town: string; region: string; country: string; about: string; practices: string[]; photos: string[]; sleeps: string; rooms: string; mats: string; kitchen: string; getting_here: string; volunteer_exchange: boolean; volunteer_details: string }
-const fromSpaceRow = (r: SpaceRow): SpaceProfile => ({ ...r, gettingHere: r.getting_here, volunteerExchange: r.volunteer_exchange, volunteerDetails: r.volunteer_details })
+type SpaceRow = { id: string; name: string; town: string; region: string; country: string; about: string; practices: string[]; photos: string[]; sleeps: string; rooms: string; mats: string; kitchen: string; getting_here: string; volunteer_exchange: boolean; volunteer_details: string; lifestyle: string[] | null }
+const fromSpaceRow = (r: SpaceRow): SpaceProfile => ({ ...r, lifestyle: r.lifestyle ?? [], gettingHere: r.getting_here, volunteerExchange: r.volunteer_exchange, volunteerDetails: r.volunteer_details })
 
 export function useSpaceProfile() {
   const { session } = useAuth()
@@ -127,7 +127,7 @@ export function useSpaceProfile() {
       const row = {
         owner_id: session.user.id, name: next.name.trim(), town: next.town.trim(), region: next.region.trim(), country: next.country.trim(), about: next.about.trim(), practices: next.practices,
         photos, sleeps: next.sleeps.trim(), rooms: next.rooms.trim(), mats: next.mats.trim(), kitchen: next.kitchen.trim(), getting_here: next.gettingHere.trim(),
-        volunteer_exchange: next.volunteerExchange, volunteer_details: next.volunteerDetails.trim(),
+        volunteer_exchange: next.volunteerExchange, volunteer_details: next.volunteerDetails.trim(), lifestyle: next.lifestyle,
       }
       const { data, error } = await supabase.from('spaces').upsert(row, { onConflict: 'owner_id' }).select('*').single()
       if (error) return friendlyError(error.message)
@@ -262,7 +262,7 @@ export function useMessages() {
 /** A space as members see it (approved hosts only, enforced by the database). */
 export type PublicSpace = {
   id: string; owner_id: string; name: string; town: string; region: string; country: string; about: string; practices: string[]; photos: string[]
-  sleeps: string; kitchen: string; volunteer_exchange: boolean
+  sleeps: string; kitchen: string; volunteer_exchange: boolean; lifestyle?: string[] | null
 }
 
 /** A live offering plus the space that hosts it (when that space is approved). */

@@ -5,12 +5,13 @@ import { IconBack, IconHeart } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
 import { Loading, useAuth } from '../../auth'
 import { supabase } from '../../lib/supabase'
-import { placeLabel } from '../../data'
+import { LANDSCAPES, placeLabel, STAYS } from '../../data'
+import { LandChip } from '../../components/Lifestyle'
 import { fetchListings, useSaved, type Listing } from '../../store'
 
 type Row = {
   id: string; owner_id: string; name: string; town: string; region: string; country: string; about: string; practices: string[]; photos: string[]
-  sleeps: string; rooms: string; mats: string; kitchen: string; getting_here: string; volunteer_exchange: boolean; volunteer_details: string
+  sleeps: string; rooms: string; mats: string; kitchen: string; getting_here: string; volunteer_exchange: boolean; volunteer_details: string; lifestyle?: string[] | null
 }
 
 const h2 = 'm-0 font-display text-[22px] font-semibold text-ink'
@@ -58,7 +59,7 @@ export default function Space() {
 
   return (
     <Screen>
-      <div className="relative flex h-[280px] flex-col bg-sage px-4 pt-safe">
+      <div className="relative flex h-[280px] flex-col bg-portal px-4 pt-safe">
         {space.photos[0] && <img src={space.photos[0]} alt="" className="absolute inset-0 h-full w-full object-cover" />}
         <div className="relative flex justify-between">
           {back}
@@ -82,6 +83,19 @@ export default function Space() {
           {error && <span role="alert" className="text-[13px] text-gold-pale">{error}</span>}
         </div>
         {space.about && <p className="m-0 text-[15px] leading-relaxed whitespace-pre-line text-muted">{space.about}</p>}
+        {(space.lifestyle ?? []).length > 0 && (() => {
+          const life = space.lifestyle ?? []
+          const lands = LANDSCAPES.filter((l) => life.includes(l))
+          const stays = STAYS.filter((x) => life.includes(x))
+          return (
+            <section className="ring-iri flex flex-col gap-3 rounded-[18px] bg-plum/50 p-4">
+              <h2 className={h2}>Life here</h2>
+              {lands.length > 0 && <div className="flex flex-wrap gap-2">{lands.map((l) => <LandChip key={l} name={l} on />)}</div>}
+              {stays.length > 0 && <span className="text-[13px] text-muted">{`Stays: ${stays.join(' · ')}`}</span>}
+              {life.includes('Work remotely') && <span className="text-[13px] text-muted">Good for remote work</span>}
+            </section>
+          )
+        })()}
         {space.practices.length > 0 && (
           <section className="flex flex-col gap-2.5">
             <h2 className={h2}>They host</h2>
@@ -92,7 +106,7 @@ export default function Space() {
           <section className="flex flex-col gap-2 rounded-[18px] bg-plum p-4">
             <h2 className={h2}>Volunteer exchange</h2>
             <p className="m-0 text-[14px] leading-relaxed whitespace-pre-line text-muted">{space.volunteer_details || 'This space welcomes volunteers. Ask us for the details.'}</p>
-            {isSeeker && <Link to={ask(`Hi! I'd love to volunteer at ${space.name}. `)} className="flex min-h-11 items-center self-start rounded-xl bg-gold px-4 text-[13px] font-semibold text-navy no-underline hover:text-navy">Ask about volunteering</Link>}
+            {isSeeker && <Link to={ask(`Hi! I'd love to volunteer at ${space.name}. `)} className="flex min-h-11 items-center self-start rounded-xl bg-iri px-4 text-[13px] font-semibold text-navy no-underline hover:text-navy">Ask about volunteering</Link>}
           </section>
         )}
         {facts.length > 0 && (

@@ -24,6 +24,14 @@
   --color-calm: #9FB5BA;
   --color-calm-text: #B9CDD1;
 
+  /* Iridescence, taken from the logo's oil-slick sheen: sage → teal → periwinkle → violet → rose → gold */
+  --color-iri-sage: #9DBB7A;
+  --color-iri-teal: #6FB7BF;
+  --color-iri-blue: #8F9BE6;
+  --color-iri-violet: #B58BE0;
+  --color-iri-rose: #E09AC4;
+  --color-iri-gold: #E8BF8A;
+
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-sans: "Manrope", system-ui, sans-serif;
 }
@@ -40,7 +48,11 @@ html, body {
 }
 body {
   margin: 0;
-  background: var(--color-navy-deep);
+  background:
+    radial-gradient(120% 60% at 110% -10%, rgba(181, 139, 224, .16), transparent 60%),
+    radial-gradient(90% 50% at -20% 30%, rgba(111, 183, 191, .12), transparent 60%),
+    radial-gradient(100% 60% at 50% 120%, rgba(224, 154, 196, .10), transparent 60%),
+    var(--color-navy-deep);
   color: var(--color-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -63,6 +75,71 @@ button { font: inherit; }
 :focus-visible { outline: 2px solid var(--color-gold-soft); outline-offset: 2px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
+
+/* ---------- Iridescence ---------- */
+:root {
+  --iri: linear-gradient(115deg, #9DBB7A 0%, #6FB7BF 18%, #8F9BE6 36%, #B58BE0 54%, #E09AC4 72%, #E8BF8A 88%, #9DBB7A 100%);
+  /* soft pearl version: light enough for navy text on top */
+  --iri-pearl: linear-gradient(115deg, #EDD8B4 0%, #CFE6DA 20%, #CBD0F3 40%, #E3CAEE 60%, #F1CCDA 80%, #EDD8B4 100%);
+}
+@keyframes xa-iri-shift { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+@keyframes xa-sheen { 0%, 70% { transform: translateX(-120%) skewX(-18deg); } 100% { transform: translateX(260%) skewX(-18deg); } }
+@keyframes xa-aurora {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  50% { transform: translate3d(-6%, 4%, 0) rotate(12deg) scale(1.08); }
+  100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+}
+
+/* Pearl iridescent fill for primary buttons and "on" states; a slow light sweeps across it */
+@utility bg-iri {
+  background-color: #E6CDA6;
+  background-image: var(--iri-pearl);
+  background-size: 300% 100%;
+  animation: xa-iri-shift 9s ease-in-out infinite alternate;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  &::after {
+    content: ''; position: absolute; inset: 0 auto 0 0; width: 40%; z-index: -1; pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .55), transparent);
+    animation: xa-sheen 5.5s ease-in-out infinite;
+  }
+}
+/* Saturated iridescent fill (bars, switches, small marks) */
+@utility bg-iri-strong { background-image: var(--iri); background-size: 250% 100%; animation: xa-iri-shift 8s ease-in-out infinite alternate; }
+/* Iridescent text */
+@utility text-iri {
+  background-image: var(--iri); background-size: 250% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
+  animation: xa-iri-shift 10s ease-in-out infinite alternate;
+}
+/* Hairline iridescent ring that follows the element's rounded corners */
+@utility ring-iri {
+  position: relative;
+  &::before {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+    background: var(--iri); background-size: 250% 100%; animation: xa-iri-shift 8s ease-in-out infinite alternate;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+  }
+}
+/* Photo placeholder: a soft portal of colour instead of a flat block */
+@utility bg-portal {
+  background:
+    radial-gradient(60% 70% at 30% 30%, rgba(111, 183, 191, .55), transparent 70%),
+    radial-gradient(60% 70% at 75% 65%, rgba(181, 139, 224, .5), transparent 70%),
+    radial-gradient(50% 60% at 60% 10%, rgba(232, 191, 138, .4), transparent 70%),
+    linear-gradient(160deg, #2A1F39, #172234);
+}
+
+/* Slowly drifting aurora behind every screen */
+.xa-aurora { position: absolute; inset: -25%; z-index: 0; pointer-events: none; opacity: .9;
+  background:
+    radial-gradient(35% 30% at 80% 15%, rgba(181, 139, 224, .14), transparent 70%),
+    radial-gradient(30% 28% at 15% 45%, rgba(111, 183, 191, .11), transparent 70%),
+    radial-gradient(35% 30% at 60% 90%, rgba(224, 154, 196, .09), transparent 70%),
+    radial-gradient(25% 22% at 30% 10%, rgba(157, 187, 122, .07), transparent 70%);
+  animation: xa-aurora 38s ease-in-out infinite; will-change: transform; }
 
 /*
  * Safe areas: every iPhone, from the SE (no notch) to the Pro Max (Dynamic Island).

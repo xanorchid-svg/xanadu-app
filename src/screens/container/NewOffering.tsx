@@ -62,7 +62,7 @@ export default function NewOffering() {
     if (!started || window.confirm('Leave without submitting? What you\'ve written here won\'t be saved.')) { if (window.history.length > 1) navigate(-1); else navigate('/container') }
   }
   const togglePractice = (p: string) => setPractices((xs) => (xs.includes(p) ? xs.filter((x) => x !== p) : [...xs, p]))
-  const box = (on: boolean) => `min-h-12 rounded-xl border text-sm ${on ? 'border-gold bg-gold font-semibold text-navy' : 'border-line-2 text-text'}`
+  const box = (on: boolean) => `min-h-12 rounded-xl border text-sm ${on ? 'border-transparent bg-iri font-semibold text-navy' : 'border-line-2 text-text'}`
   const kicker = [format, ...(practices.length ? practices.slice(0, 2) : ['[Practices]'])].join(' · ')
   const h1 = 'm-0 font-display text-[32px] leading-[1.05] font-medium text-ink'
 
@@ -75,7 +75,7 @@ export default function NewOffering() {
           <span className="w-11 text-right text-[13px] text-subtle">Draft</span>
         </div>
         <div className="grid grid-cols-4 gap-1.5">
-          {STEP_NAMES.map((n, i) => <span key={n} className={`h-1 rounded-full ${i < step ? 'bg-gold' : 'bg-line'}`} />)}
+          {STEP_NAMES.map((n, i) => <span key={n} className={`h-1 rounded-full ${i < step ? 'bg-iri' : 'bg-line'}`} />)}
         </div>
       </header>
 
@@ -158,7 +158,7 @@ export default function NewOffering() {
           <button type="button" disabled={step === 1} onClick={() => { setError(''); setStep((s) => Math.max(1, s - 1)) }}
             className="min-h-[54px] rounded-2xl border border-line-2 px-5 text-[15px] text-text disabled:text-[#5B6780]">Back</button>
           <button type="button" disabled={busy} onClick={next}
-            className="min-h-[54px] flex-1 rounded-2xl bg-gold text-[15px] font-semibold text-navy disabled:opacity-70">
+            className="min-h-[54px] flex-1 rounded-2xl bg-iri text-[15px] font-semibold text-navy disabled:opacity-70">
             {step < 4 ? 'Continue' : busy ? 'Submitting…' : 'Submit for review'}
           </button>
         </div>

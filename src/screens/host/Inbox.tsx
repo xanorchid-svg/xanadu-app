@@ -55,7 +55,7 @@ export default function Inbox({ role }: { role: Role }) {
         </div>
         <div className="flex flex-1 flex-col gap-2.5 overflow-y-auto p-4">
           {messages.map((m) => (
-            <div key={m.id} className={`flex max-w-[280px] flex-col gap-1 px-3.5 py-2.5 text-sm leading-snug ${m.from_team ? 'self-start rounded-[18px_18px_18px_4px] bg-[#22304A] text-text' : 'self-end rounded-[18px_18px_4px_18px] bg-gold text-navy'}`}>
+            <div key={m.id} className={`flex max-w-[280px] flex-col gap-1 px-3.5 py-2.5 text-sm leading-snug ${m.from_team ? 'self-start rounded-[18px_18px_18px_4px] bg-[#22304A] text-text' : 'self-end rounded-[18px_18px_4px_18px] bg-iri text-navy'}`}>
               <span className="selectable whitespace-pre-line">{m.body}</span>
               <span className={`text-[10px] ${m.from_team ? 'text-subtle' : 'text-navy/70'}`}>{fmt(m.created_at)}</span>
             </div>
@@ -68,7 +68,7 @@ export default function Inbox({ role }: { role: Role }) {
             <label className="flex flex-1"><span className="sr-only">Message</span>
               <input value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={4000} placeholder="Write a message" className="min-h-[46px] flex-1 rounded-full border border-line bg-surface px-4 text-[15px] text-text outline-none placeholder:text-faint" />
             </label>
-            <button type="submit" disabled={sending || !draft.trim()} aria-label="Send" className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-gold text-navy disabled:opacity-60"><IconSend /></button>
+            <button type="submit" disabled={sending || !draft.trim()} aria-label="Send" className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-iri text-navy disabled:opacity-60"><IconSend /></button>
           </div>
         </form>
       </div>
@@ -86,7 +86,7 @@ export default function Inbox({ role }: { role: Role }) {
               <span className="flex justify-between gap-2"><span className="text-[15px] font-semibold text-ink">Xanadu</span><span className="text-xs text-subtle">{latest ? fmt(latest.created_at) : ''}</span></span>
               <span className="truncate text-[13px] text-subtle">{latest ? `${latest.from_team ? '' : 'You: '}${latest.body}` : 'Say hello to the Xanadu team'}</span>
             </span>
-            <span className={`h-2 w-2 flex-none rounded-full ${unread ? 'bg-gold' : 'bg-transparent'}`} />
+            <span className={`h-2 w-2 flex-none rounded-full ${unread ? 'bg-iri' : 'bg-transparent'}`} />
           </button>
         )}
         <EmptyState title="No other conversations yet">{role === 'Seeker'

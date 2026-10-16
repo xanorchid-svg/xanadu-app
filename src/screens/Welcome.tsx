@@ -2,7 +2,8 @@ import { useState, type ReactNode } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { AvatarPicker, LocationFields, PhotoGallery, PracticePicker, TextArea, TextField } from '../components/edit'
 import { IconClose } from '../components/icons'
-import { Field, inputCls } from '../components/ui'
+import { Field, Glow, inputCls } from '../components/ui'
+import { LifestylePicker } from '../components/Lifestyle'
 import { HOME, Loading, takeReturn, useAuth } from '../auth'
 import { PRACTICES, SEEKER_ALIGN } from '../data'
 import { refreshMatches } from '../matching'
@@ -18,14 +19,14 @@ function Wizard({ steps, step, setStep, onFinish, finishLabel, busy, error, chil
 }) {
   const last = step === steps.length - 1
   return (
-    <div className="flex h-full flex-col bg-navy">
+    <div className="flex h-full flex-col">
       <header className="flex flex-col gap-3 border-b border-[#1F2B3E] px-5 pt-safe pb-3.5">
         <div className="flex items-center justify-between">
           <span className="text-[13px] text-subtle">{`Step ${step + 1} of ${steps.length} · ${steps[step]}`}</span>
           <button type="button" onClick={onSignOut} className="min-h-10 text-[13px] text-subtle">Sign out</button>
         </div>
         <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
-          {steps.map((s, i) => <span key={s} className={`h-1 rounded-full ${i <= step ? 'bg-gold' : 'bg-line'}`} />)}
+          {steps.map((s, i) => <span key={s} className={`h-1 rounded-full transition-colors duration-500 ${i <= step ? 'bg-iri-strong' : 'bg-line'}`} />)}
         </div>
       </header>
       <main key={step} className="xa-page flex flex-1 flex-col gap-5 overflow-y-auto px-5 py-6">{children}</main>
@@ -34,7 +35,7 @@ function Wizard({ steps, step, setStep, onFinish, finishLabel, busy, error, chil
         <div className="flex gap-2.5">
           {step > 0 && <button type="button" onClick={() => setStep(step - 1)} className="min-h-[54px] rounded-2xl border border-line-2 px-5 text-[15px] text-text">Back</button>}
           <button type="button" disabled={busy} onClick={last ? onFinish : () => setStep(step + 1)}
-            className="min-h-[54px] flex-1 rounded-2xl bg-gold text-[15px] font-semibold text-navy disabled:opacity-70">
+            className="min-h-[54px] flex-1 rounded-2xl bg-iri text-[15px] font-semibold text-navy disabled:opacity-70">
             {busy ? 'Saving…' : last ? finishLabel : 'Continue'}
           </button>
         </div>
@@ -74,6 +75,7 @@ function SeekerWelcome() {
   const [region, setRegion] = useState(profile?.region ?? '')
   const [prefs, setPrefs] = useState<string[]>(profile?.prefs ?? [])
   const [seeking, setSeeking] = useState(profile?.seeking ?? '')
+  const [lifestyle, setLifestyle] = useState<string[]>(profile?.lifestyle ?? [])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -85,7 +87,7 @@ function SeekerWelcome() {
     setBusy(true); setError('')
     try {
       const [photoUrl] = await uploadPhotos(session!.user.id, photo ? [photo] : [])
-      const err = await updateProfile({ name: name.trim(), photo_url: photoUrl ?? '', region: region.trim(), prefs, seeking: seeking.trim().slice(0, 2000), onboarded: true })
+      const err = await updateProfile({ name: name.trim(), photo_url: photoUrl ?? '', region: region.trim(), prefs, seeking: seeking.trim().slice(0, 2000), lifestyle, onboarded: true })
       if (err) { setError(friendlyError(err)); setBusy(false); return }
       await refreshMatches()
       navigate(takeReturn('/discover'), { replace: true })
@@ -93,7 +95,7 @@ function SeekerWelcome() {
   }
 
   return (
-    <Wizard steps={['You', 'Your alignment']} step={step} setStep={go} onFinish={finish} finishLabel="Enter Xanadu" busy={busy} error={error} onSignOut={signOut}>
+    <Wizard steps={['You', 'Your way', 'Your alignment']} step={step} setStep={go} onFinish={finish} finishLabel="Enter Xanadu" busy={busy} error={error} onSignOut={signOut}>
       {step === 0 && (
         <>
           <Title sub="A few details so Xanadu feels like yours.">Welcome, Seeker</Title>
@@ -104,7 +106,13 @@ function SeekerWelcome() {
       )}
       {step === 1 && (
         <>
-          <Title sub="Tap everything that calls to you. Discover will show what's aligned first.">What are you seeking?</Title>
+          <Title sub="Tell us the life you want and Xanadu will match you with the places that hold it.">What do <Glow>you</Glow> want?</Title>
+          <LifestylePicker value={lifestyle} onChange={setLifestyle} />
+        </>
+      )}
+      {step === 2 && (
+        <>
+          <Title sub="Tap everything that calls to you. Discover will show what's aligned first.">What are you <Glow>seeking</Glow>?</Title>
           <PracticePicker label="Practices" options={SEEKER_ALIGN} value={prefs} onChange={setPrefs} />
           <TextArea label="In your own words (optional)" value={seeking} onChange={setSeeking} rows={5}
             placeholder="e.g. I'd love a month-long volunteer exchange near the ocean, helping in the garden or kitchen, with daily yoga and time to surf." />
@@ -161,6 +169,7 @@ function ContainerWelcome() {
           <Title sub="This is what Seekers and facilitators will read first.">The spirit of the place</Title>
           <TextArea label="About your space" value={space.about} onChange={(v) => set('about', v)} rows={6} placeholder="The land, the spirit of the place and who it's for." />
           <PracticePicker label="Practices you host" options={HOST_PRACTICES} value={space.practices} onChange={(v) => set('practices', v)} />
+          <LifestylePicker host value={space.lifestyle} onChange={(v) => set('lifestyle', v)} />
         </>
       )}
       {step === 2 && (

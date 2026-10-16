@@ -201,7 +201,7 @@ export default function Intro() {
             <div role="radiogroup" aria-label={signup ? 'Joining as' : 'Sign in as'} className="grid grid-cols-3 gap-1.5 rounded-2xl bg-surface/85 p-1 backdrop-blur-sm" style={rise(2)}>
               {ROLES.map(({ role: r, sub }) => (
                 <button key={r} type="button" role="radio" aria-checked={role === r} onClick={() => setRole(r)}
-                  className={`flex min-h-12 flex-col items-center justify-center rounded-xl transition-colors ${role === r ? 'bg-gold text-navy' : 'text-muted'}`}>
+                  className={`flex min-h-12 flex-col items-center justify-center rounded-xl transition-colors ${role === r ? 'bg-iri text-navy' : 'text-muted'}`}>
                   <span className="text-sm font-semibold">{r}</span>
                   <span className="text-[11px] opacity-80">{sub}</span>
                 </button>
@@ -218,7 +218,7 @@ export default function Intro() {
             {error && <p role="alert" className="m-0 rounded-xl bg-plum/90 px-3.5 py-2.5 text-[13px] text-gold-pale">{error}</p>}
             {info && <p role="status" className="m-0 rounded-xl bg-surface/90 px-3.5 py-2.5 text-[13px] text-calm-text">{info}</p>}
 
-            <button type="submit" disabled={busy} style={rise(5)} className="mt-1 min-h-[54px] flex-none rounded-2xl bg-gold text-base font-semibold text-navy hover:bg-gold-soft disabled:opacity-70">
+            <button type="submit" disabled={busy} style={rise(5)} className="mt-1 min-h-[54px] flex-none rounded-2xl bg-iri text-base font-semibold text-navy disabled:opacity-70">
               {busy ? 'One moment…' : signup ? `Create account as ${role}` : `Sign in as ${role}`}
             </button>
 

@@ -46,7 +46,7 @@ function EditOffering({ o, onDone, update }: { o: Offering; onDone: () => void; 
     if (error) { setError(friendlyError(error.message)); return }
     navigate('/container', { replace: true })
   }
-  const box = (on: boolean) => `min-h-12 rounded-xl border text-sm ${on ? 'border-gold bg-gold font-semibold text-navy' : 'border-line-2 text-text'}`
+  const box = (on: boolean) => `min-h-12 rounded-xl border text-sm ${on ? 'border-transparent bg-iri font-semibold text-navy' : 'border-line-2 text-text'}`
 
   return (
     <Screen footer={<EditFooter onCancel={onDone} onSave={save} error={error} busy={busy} />}>
@@ -89,7 +89,7 @@ function EditOffering({ o, onDone, update }: { o: Offering; onDone: () => void; 
             <span className="text-[14px] text-text">Delete this offering? This can't be undone.</span>
             <div className="flex gap-2">
               <button type="button" onClick={() => setConfirmDelete(false)} className="min-h-11 flex-1 rounded-xl border border-line-2 text-[13px] text-muted">Keep it</button>
-              <button type="button" disabled={busy} onClick={remove} className="min-h-11 flex-1 rounded-xl bg-gold text-[13px] font-semibold text-navy">Delete</button>
+              <button type="button" disabled={busy} onClick={remove} className="min-h-11 flex-1 rounded-xl bg-iri text-[13px] font-semibold text-navy">Delete</button>
             </div>
           </div>
         ) : (
@@ -228,7 +228,7 @@ export default function ManageOffering() {
             <span className="text-[13px] leading-normal text-subtle">Their note is in your Inbox. Tap Edit details to make the changes, then resubmit.</span>
             <div className="flex gap-2">
               <Link to="/container/inbox" className="flex min-h-11 flex-1 items-center justify-center rounded-xl border border-line-2 text-[13px] text-text no-underline">Open Inbox</Link>
-              <button type="button" disabled={busy} onClick={resubmit} className="min-h-11 flex-1 rounded-xl bg-gold text-[13px] font-semibold text-navy disabled:opacity-70">Resubmit for review</button>
+              <button type="button" disabled={busy} onClick={resubmit} className="min-h-11 flex-1 rounded-xl bg-iri text-[13px] font-semibold text-navy disabled:opacity-70">Resubmit for review</button>
             </div>
           </div>
         )}
@@ -245,7 +245,7 @@ export default function ManageOffering() {
             <div className="flex gap-2 overflow-x-auto">
               {Array.from({ length: days }, (_, i) => i + 1).map((d) => (
                 <button key={d} type="button" aria-pressed={day === d} onClick={() => setDay(d)}
-                  className={`min-h-10 flex-none rounded-full border px-4 text-[13px] ${day === d ? 'border-gold bg-gold font-semibold text-navy' : 'border-line-2 text-muted'}`}>{`Day ${d}`}</button>
+                  className={`min-h-10 flex-none rounded-full border px-4 text-[13px] ${day === d ? 'border-transparent bg-iri font-semibold text-navy' : 'border-line-2 text-muted'}`}>{`Day ${d}`}</button>
               ))}
             </div>
             {sessions.map((s, i) => {
@@ -264,7 +264,7 @@ export default function ManageOffering() {
                 <Field label="Time"><input type="time" value={time} onChange={(e) => setTime(e.target.value)} className={`${inputCls} px-2.5 text-sm [color-scheme:dark]`} /></Field>
                 <Field label="What's happening"><input value={what} onChange={(e) => setWhat(e.target.value)} placeholder="e.g. Opening circle" className={inputCls} /></Field>
               </div>
-              <button type="button" disabled={busy} onClick={addSession} className="min-h-11 rounded-xl bg-gold text-sm font-semibold text-navy disabled:opacity-70">{busy ? 'Saving…' : `Add to Day ${day}`}</button>
+              <button type="button" disabled={busy} onClick={addSession} className="min-h-11 rounded-xl bg-iri text-sm font-semibold text-navy disabled:opacity-70">{busy ? 'Saving…' : `Add to Day ${day}`}</button>
             </div>
           </>
         )}
@@ -301,7 +301,7 @@ export default function ManageOffering() {
                 </Field>
                 <Field label="Outing"><input value={outing} onChange={(e) => setOuting(e.target.value)} placeholder="e.g. Waterfall hike" className={inputCls} /></Field>
               </div>
-              <button type="button" disabled={busy} onClick={addOuting} className="min-h-11 rounded-xl bg-gold text-sm font-semibold text-navy disabled:opacity-70">{busy ? 'Saving…' : 'Add outing'}</button>
+              <button type="button" disabled={busy} onClick={addOuting} className="min-h-11 rounded-xl bg-iri text-sm font-semibold text-navy disabled:opacity-70">{busy ? 'Saving…' : 'Add outing'}</button>
             </div>
           </>
         )}

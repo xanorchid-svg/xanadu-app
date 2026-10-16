@@ -88,7 +88,7 @@ export default function Chat() {
             : `Remove ${c.name.trim() || 'this member'} as a connection? This chat closes. You can connect again later.`}</span>
           <div className="flex gap-2">
             <button type="button" onClick={() => setMenu('closed')} className="min-h-10 flex-1 rounded-xl border border-line-2 text-[13px] text-muted">Cancel</button>
-            <button type="button" onClick={menu === 'block' ? block : disconnect} className="min-h-10 flex-1 rounded-xl bg-gold text-[13px] font-semibold text-navy">{menu === 'block' ? 'Block' : 'Remove'}</button>
+            <button type="button" onClick={menu === 'block' ? block : disconnect} className="min-h-10 flex-1 rounded-xl bg-iri text-[13px] font-semibold text-navy">{menu === 'block' ? 'Block' : 'Remove'}</button>
           </div>
         </div>
       )}
@@ -99,7 +99,7 @@ export default function Chat() {
             className="rounded-xl border border-line bg-surface-2 p-3 text-[15px] text-text outline-none focus:border-gold" />
           <div className="flex gap-2">
             <button type="button" onClick={() => setMenu('closed')} className="min-h-10 flex-1 rounded-xl border border-line-2 text-[13px] text-muted">Cancel</button>
-            <button type="button" onClick={report} className="min-h-10 flex-1 rounded-xl bg-gold text-[13px] font-semibold text-navy">Send report</button>
+            <button type="button" onClick={report} className="min-h-10 flex-1 rounded-xl bg-iri text-[13px] font-semibold text-navy">Send report</button>
           </div>
         </div>
       )}
@@ -112,7 +112,7 @@ export default function Chat() {
       <div className="flex items-center gap-2">
         <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Message" aria-label="Message"
           className="min-h-12 flex-1 rounded-full border border-line bg-surface-2 px-4 text-[15px] text-text outline-none placeholder:text-faint focus:border-gold" />
-        <button type="submit" aria-label="Send" disabled={!text.trim()} className="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-gold text-navy disabled:opacity-50"><IconSend /></button>
+        <button type="submit" aria-label="Send" disabled={!text.trim()} className="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-iri text-navy disabled:opacity-50"><IconSend /></button>
       </div>
     </form>
   )
@@ -126,7 +126,7 @@ export default function Chat() {
           const mine = m.sender === me
           return (
             <div key={m.id} className={`flex max-w-[80%] flex-col gap-0.5 ${mine ? 'self-end items-end' : 'self-start items-start'}`}>
-              <span className={`selectable rounded-[18px] px-3.5 py-2.5 text-[15px] leading-snug whitespace-pre-wrap ${mine ? 'bg-gold text-navy' : 'bg-surface text-text'}`}>{m.body}</span>
+              <span className={`selectable rounded-[18px] px-3.5 py-2.5 text-[15px] leading-snug whitespace-pre-wrap ${mine ? 'bg-iri text-navy' : 'bg-surface text-text'}`}>{m.body}</span>
               <span className="px-1 text-[11px] text-faint">{time(m.created_at)}</span>
             </div>
           )

@@ -6,7 +6,8 @@ import { Loading, useAuth } from '../../auth'
 import { IconPhoto } from '../../components/icons'
 import { StatusPill, dateRange } from '../../components/OfferingCard'
 import { useOfferings, useSpaceProfile, type SpaceProfile as SP } from '../../store'
-import { placeLabel, PRACTICES } from '../../data'
+import { LANDSCAPES, placeLabel, PRACTICES, STAYS } from '../../data'
+import { LandChip, LifestylePicker } from '../../components/Lifestyle'
 
 const h2 = 'm-0 font-display text-[22px] font-semibold text-ink'
 
@@ -36,6 +37,10 @@ export default function SpaceProfile() {
           <TextArea label="About your space" value={draft.about} onChange={(v) => set('about', v)} rows={5}
             placeholder="The land, the spirit of the place and who it's for." />
           <PracticePicker label="Practices you host" options={PRACTICES} value={draft.practices} onChange={(v) => set('practices', v)} />
+          <section className="flex flex-col gap-3.5">
+            <h2 className={h2}>Life here</h2>
+            <LifestylePicker host value={draft.lifestyle} onChange={(v) => set('lifestyle', v)} />
+          </section>
           <section className="flex flex-col gap-3.5">
             <h2 className={h2}>The details</h2>
             <div className="grid grid-cols-2 gap-2.5">
@@ -90,7 +95,7 @@ export default function SpaceProfile() {
         {cover && <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover" />}
         <div className="relative flex justify-end gap-2">
           <button type="button" onClick={share} className="min-h-10 rounded-full bg-navy/75 px-3.5 text-[13px] text-text">Share</button>
-          <button type="button" onClick={startEdit} className="min-h-10 rounded-full bg-gold px-3.5 text-[13px] font-semibold text-navy">Edit space</button>
+          <button type="button" onClick={startEdit} className="min-h-10 rounded-full bg-iri px-3.5 text-[13px] font-semibold text-navy">Edit space</button>
         </div>
         <AddPhotosButton onAdd={addPhotos}
           className={`relative flex min-h-11 items-center gap-2 self-center rounded-full px-4 text-sm ${cover ? 'bg-navy/75 text-text' : 'border border-slate text-muted'}`}>
@@ -110,7 +115,7 @@ export default function SpaceProfile() {
         <div className="flex flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-2.5">
             <h1 className="m-0 font-display text-[32px] font-medium text-ink">{space.name.trim() || '[Your space name]'}</h1>
-            <span className="rounded-full border border-gold px-2 py-1 text-xs text-gold-pale">Founding member</span>
+            <span className="ring-iri rounded-full px-2 py-1 text-xs text-gold-pale">Founding member</span>
           </div>
           <span className="text-sm text-muted">{`Retreat space · ${placeLabel(space) || '[Town, country]'}`}</span>
           <span className="flex flex-wrap gap-x-3 text-[13px]">
@@ -127,6 +132,16 @@ export default function SpaceProfile() {
           {space.practices.length
             ? <div className="flex flex-wrap gap-2">{space.practices.map((p) => <span key={p} className="rounded-full border border-line-2 px-3 py-1.5 text-[13px] text-text">{p}</span>)}</div>
             : <span className="text-[13px] text-subtle">[Practices you host, e.g. yoga, breathwork, sound]</span>}
+        </section>
+
+        <section className="flex flex-col gap-2.5">
+          <h2 className={h2}>Life here</h2>
+          {space.lifestyle.length ? (
+            <>
+              <div className="flex flex-wrap gap-2">{LANDSCAPES.filter((l) => space.lifestyle.includes(l)).map((l) => <LandChip key={l} name={l} on />)}</div>
+              <span className="text-[13px] text-muted">{[STAYS.filter((x) => space.lifestyle.includes(x)).join(' · '), space.lifestyle.includes('Work remotely') ? 'Good for remote work' : ''].filter(Boolean).join(' · ')}</span>
+            </>
+          ) : <button type="button" onClick={startEdit} className="self-start text-left text-[13px] text-subtle">[Your landscape, the stays you welcome and remote work. Seekers are matched on these.] <span className="text-iri font-semibold">Add ›</span></button>}
         </section>
 
         {space.volunteerExchange && (

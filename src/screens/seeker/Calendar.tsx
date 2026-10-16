@@ -56,7 +56,7 @@ export default function Calendar() {
               return (
                 <button key={id} type="button" onClick={() => setDay(id)}
                   aria-label={d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} aria-pressed={on}
-                  className={`flex min-h-[60px] flex-col items-center justify-center gap-0.5 rounded-[14px] ${on ? 'bg-gold text-navy' : 'text-text'}`}>
+                  className={`flex min-h-[60px] flex-col items-center justify-center gap-0.5 rounded-[14px] ${on ? 'bg-iri text-navy' : 'text-text'}`}>
                   <span className="text-[11px] opacity-80">{d.toLocaleDateString('en-US', { weekday: 'short' })}</span>
                   <span className="text-base font-semibold">{d.getDate()}</span>
                   <span className={`h-[5px] w-[5px] rounded-full ${busy.has(id) ? (on ? 'bg-navy' : 'bg-gold-soft') : 'bg-transparent'}`} />

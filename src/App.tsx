@@ -52,6 +52,9 @@ export default function App() {
     <div className="flex h-dvh justify-center bg-navy-deep">
       {/* Fills every phone edge to edge; a phone-width column only on tablets and desktop */}
       <div className="relative h-full w-full overflow-hidden bg-navy sm:max-w-[430px] sm:shadow-[0_0_80px_rgba(0,0,0,0.45)]">
+        {/* a slow aurora in the logo's colours drifts behind every screen */}
+        <div className="xa-aurora" aria-hidden />
+        <div className="relative z-[1] h-full">
         {/* keyed by path so each page mounts fresh, with its own scroll position and state */}
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Intro />} />
@@ -90,6 +93,7 @@ export default function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </div>
       </div>
     </div>
   )

@@ -5,6 +5,20 @@
 /** What a Seeker can say they're seeking (sign-up and profile). */
 export const SEEKER_ALIGN = ['Yoga', 'Breathwork', 'Meditation', 'Sound', 'Ecstatic dance', 'Kirtan', 'Trainings', 'Volunteer exchange', "Women's retreats", "Men's retreats", 'Permaculture']
 
+/**
+ * Way of living. Seekers say how they want to live; spaces say what they offer.
+ * The same words are stored on both sides (profiles.lifestyle, spaces.lifestyle) so matching can pair them up.
+ */
+export const STAYS = ['A weekend', 'A week or two', 'A month or more', 'A season', 'To live there'] as const
+export const WORK_STYLES = ['Work remotely', 'Volunteer exchange', 'Just be, no work'] as const
+export const LANDSCAPES = ['Beach', 'Ocean', 'Jungle', 'Mountains', 'Desert', 'Forest', 'Countryside', 'Town', 'City'] as const
+
+/** Each landscape picks up one colour from the logo's iridescence. */
+export const LANDSCAPE_HUE: Record<string, string> = {
+  Beach: '#E6CDA6', Ocean: '#7FB3C2', Jungle: '#86A06A', Mountains: '#8C95C9', Desert: '#D9A67E',
+  Forest: '#6E9A7E', Countryside: '#B7B470', Town: '#C8A0C4', City: '#A58BD6',
+}
+
 export type Role = 'Seeker' | 'Container' | 'Facilitator'
 
 export const PRACTICES = [

@@ -46,7 +46,7 @@ export default function FindSpaces() {
         {loading ? <span className="text-[13px] text-subtle">Finding spaces…</span>
           : shown.length ? shown.map((s) => (
             <Link key={s.id} to={`/space/${s.id}`} className="flex flex-col overflow-hidden rounded-[20px] bg-surface text-text no-underline">
-              <div className="h-[140px] bg-sage">{s.photos[0] && <img src={s.photos[0]} alt="" className="h-full w-full object-cover" />}</div>
+              <div className="h-[140px] bg-portal">{s.photos[0] && <img src={s.photos[0]} alt="" className="h-full w-full object-cover" />}</div>
               <div className="flex flex-col gap-1 p-4">
                 <span className="font-display text-[22px] leading-tight text-ink">{s.name}</span>
                 <span className="text-[13px] text-subtle">{[placeLabel(s), s.sleeps && `Sleeps ${s.sleeps}`, s.volunteer_exchange && 'Welcomes volunteers'].filter(Boolean).join(' · ')}</span>

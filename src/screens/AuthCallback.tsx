@@ -33,7 +33,7 @@ export default function AuthCallback() {
       <div className="flex h-full flex-col items-center justify-center gap-4 bg-navy px-8 text-center">
         <h1 className="m-0 font-display text-3xl font-medium text-ink">That link didn't work</h1>
         <p className="m-0 text-sm leading-relaxed text-muted">{linkError ?? 'It may have expired or already been used. Please sign in again.'}</p>
-        <Link to="/" className="flex min-h-12 items-center rounded-2xl bg-gold px-6 font-semibold text-navy no-underline hover:text-navy">Back to sign in</Link>
+        <Link to="/" className="flex min-h-12 items-center rounded-2xl bg-iri px-6 font-semibold text-navy no-underline hover:text-navy">Back to sign in</Link>
       </div>
     )
   }

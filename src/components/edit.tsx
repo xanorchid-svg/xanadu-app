@@ -103,7 +103,7 @@ export function EditFooter({ onCancel, onSave, error, busy = false }: { onCancel
       {error && <p role="alert" className="m-0 mb-2 text-center text-[13px] text-gold-pale">{error}</p>}
       <div className="flex gap-2.5">
         <button type="button" onClick={onCancel} className="min-h-[54px] rounded-2xl border border-line-2 px-5 text-[15px] text-text">Cancel</button>
-        <button type="button" disabled={busy} onClick={onSave} className="min-h-[54px] flex-1 rounded-2xl bg-gold text-[15px] font-semibold text-navy disabled:opacity-70">{busy ? 'Saving…' : 'Save changes'}</button>
+        <button type="button" disabled={busy} onClick={onSave} className="min-h-[54px] flex-1 rounded-2xl bg-iri text-[15px] font-semibold text-navy disabled:opacity-70">{busy ? 'Saving…' : 'Save changes'}</button>
       </div>
     </div>
   )
@@ -143,7 +143,7 @@ export function SignOutButton() {
           <div className="flex gap-2">
             <button type="button" onClick={() => { setStep('idle'); setTyped(''); setError('') }} className="min-h-11 flex-1 rounded-xl border border-line-2 text-[13px] text-muted">Keep my account</button>
             <button type="button" disabled={typed.trim().toUpperCase() !== 'DELETE' || step === 'deleting'} onClick={remove}
-              className="min-h-11 flex-1 rounded-xl bg-gold text-[13px] font-semibold text-navy disabled:opacity-50">{step === 'deleting' ? 'Deleting…' : 'Delete forever'}</button>
+              className="min-h-11 flex-1 rounded-xl bg-iri text-[13px] font-semibold text-navy disabled:opacity-50">{step === 'deleting' ? 'Deleting…' : 'Delete forever'}</button>
           </div>
         </div>
       )}

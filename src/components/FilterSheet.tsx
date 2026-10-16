@@ -4,6 +4,8 @@ import { Chip, Field, inputCls } from './ui'
 import { IconClose } from './icons'
 import { LENGTHS, NO_FILTERS, PRICES, SORTS, TYPES, WHEN, passes, spacePasses, type Filters } from '../filters'
 import type { Listing, PublicSpace } from '../store'
+import { LANDSCAPES } from '../data'
+import { LandChip } from './Lifestyle'
 
 const Section = ({ title, children }: { title: string; children: ReactNode }) => (
   <section className="flex flex-col gap-2.5">
@@ -71,6 +73,13 @@ export default function FilterSheet({ value, onApply, onClose, listings, spaces,
             </Section>
           )}
 
+          {(f.land || LANDSCAPES.some((l) => count({ land: l }, 'land') > 0)) && (
+            <Section title="Landscape">
+              <Chip solid on={!f.land} onClick={() => set({ land: '' })}>Anywhere</Chip>
+              {LANDSCAPES.map((l) => show(f.land === l, count({ land: l }, 'land')) && <LandChip key={l} name={l} on={f.land === l} onClick={() => set({ land: f.land === l ? '' : l })} />)}
+            </Section>
+          )}
+
           {experiencesOnly && (
             <>
               <Section title="When">
@@ -99,7 +108,7 @@ export default function FilterSheet({ value, onApply, onClose, listings, spaces,
         </div>
 
         <div className="border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-safe">
-          <button type="button" onClick={() => onApply(f)} className="min-h-[54px] w-full rounded-2xl bg-gold text-[15px] font-semibold text-navy">
+          <button type="button" onClick={() => onApply(f)} className="min-h-[54px] w-full rounded-2xl bg-iri text-[15px] font-semibold text-navy">
             {results === 0 ? 'Show results (none yet)' : `Show ${results} ${f.type === 'Volunteer exchange' ? (results === 1 ? 'space' : 'spaces') : results === 1 ? 'experience' : 'experiences'}`}
           </button>
         </div>
