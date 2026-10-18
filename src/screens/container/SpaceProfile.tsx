@@ -92,7 +92,7 @@ export default function SpaceProfile() {
   return (
     <Screen footer={<ContainerTabs />}>
       <div className={`relative flex h-[260px] flex-col justify-between px-4 pt-safe pb-4 ${cover ? '' : 'border-b border-dashed border-line-2 bg-surface-2'}`}>
-        {cover && <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover" />}
+        {cover && <img decoding="async" src={cover} alt="" className="absolute inset-0 h-full w-full object-cover" />}
         <div className="relative flex justify-end gap-2">
           <button type="button" onClick={share} className="min-h-10 rounded-full bg-navy/75 px-3.5 text-[13px] text-text">Share</button>
           <button type="button" onClick={startEdit} className="min-h-10 rounded-full bg-iri px-3.5 text-[13px] font-semibold text-navy">Edit space</button>
@@ -105,7 +105,7 @@ export default function SpaceProfile() {
       </div>
       {space.photos.length > 1 && (
         <div className="flex gap-2 overflow-x-auto px-5 pt-3">
-          {space.photos.slice(1).map((p, i) => <img key={i} src={p} alt={`Space photo ${i + 2}`} className="h-16 w-16 flex-none rounded-xl object-cover" />)}
+          {space.photos.slice(1).map((p, i) => <img decoding="async" loading="lazy" key={i} src={p} alt={`Space photo ${i + 2}`} className="h-16 w-16 flex-none rounded-xl object-cover" />)}
         </div>
       )}
 

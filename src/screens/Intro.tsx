@@ -159,7 +159,7 @@ export default function Intro() {
         }}>
           <Logo emblemOnly animated={phase === 'spin'} />
         </div>
-        <img src="/logo-wordmark.png" alt="" draggable={false} className="block w-full select-none"
+        <img decoding="async" src="/logo-wordmark.png" alt="" draggable={false} className="block w-full select-none"
           style={{ opacity: login ? 0 : 1, transition: 'opacity .6s ease' }} />
       </div>
 
@@ -174,7 +174,7 @@ export default function Intro() {
         className="relative flex h-full flex-col overflow-y-auto px-[22px] pt-[max(56px,calc(env(safe-area-inset-top)+28px))] pb-safe"
         style={{ pointerEvents: login ? 'auto' : 'none' }}
       >
-        <img src="/logo-wordmark-clean.png" alt="Xanadu — a network for awakening places"
+        <img decoding="async" src="/logo-wordmark-clean.png" alt="Xanadu — a network for awakening places"
           className="mx-auto block w-[270px] max-w-full select-none"
           style={{ filter: 'brightness(0) invert(1) sepia(.18) brightness(.97)', ...rise(0) }} />
 

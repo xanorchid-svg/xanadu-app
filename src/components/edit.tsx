@@ -54,7 +54,7 @@ export function AvatarPicker({ photo, onChange, size = 104, label = 'Add photo' 
       <button type="button" onClick={open} aria-label={photo ? 'Change photo' : label}
         className="relative flex items-center justify-center overflow-hidden rounded-full border border-dashed border-slate text-[13px] text-subtle"
         style={{ width: size, height: size }}>
-        {photo ? <img src={photo} alt="" className="h-full w-full object-cover" /> : label}
+        {photo ? <img decoding="async" src={photo} alt="" className="h-full w-full object-cover" /> : label}
         {photo && <span className="absolute inset-x-0 bottom-0 bg-navy/70 py-1 text-[11px] text-text">Change</span>}
       </button>
       {input}
@@ -72,7 +72,7 @@ export function PhotoGallery({ photos, onChange, max = 8 }: { photos: string[]; 
       <div className="grid grid-cols-3 gap-2">
         {photos.map((p, i) => (
           <div key={i} className="relative aspect-square overflow-hidden rounded-xl bg-surface">
-            <img src={p} alt={`Space photo ${i + 1}`} className="h-full w-full object-cover" />
+            <img decoding="async" src={p} alt={`Space photo ${i + 1}`} className="h-full w-full object-cover" />
             {i === 0 && <span className="absolute top-1.5 left-1.5 rounded-full bg-navy/75 px-2 py-0.5 text-[10px] text-text">Cover</span>}
             <button type="button" aria-label={`Remove photo ${i + 1}`} onClick={() => onChange(photos.filter((_, j) => j !== i))}
               className="absolute top-1 right-1 flex h-8 w-8 items-center justify-center rounded-full bg-navy/80 text-text"><IconClose size={14} /></button>

@@ -4,6 +4,7 @@ import { IconPeople } from '../../components/icons'
 import { useOfferings, useSpaceProfile } from '../../store'
 import ApplicationBanner from '../../components/ApplicationBanner'
 import OfferingCard from '../../components/OfferingCard'
+import { Bell } from '../../components/Bell'
 
 const SETUP = [
   { id: 'account', title: 'Create your account', sub: 'Done', to: '/container' },
@@ -35,7 +36,8 @@ export default function ContainerHome() {
             <h1 className="m-0 font-display text-[32px] font-medium text-ink">{space.name.trim() || '[Your space name]'}</h1>
             <div className="mt-1"><Badge>Founding Container</Badge></div>
           </div>
-          <Link to="/container/space" aria-label="Your space profile" className="flex h-12 w-12 flex-none items-center justify-center overflow-hidden rounded-[14px] border border-dashed border-slate text-xl text-subtle no-underline">{space.photos[0] ? <img src={space.photos[0]} alt="" className="h-full w-full object-cover" /> : '+'}</Link>
+          <div className="flex flex-none items-center gap-2"><Bell />
+          <Link to="/container/space" aria-label="Your space profile" className="flex h-12 w-12 flex-none items-center justify-center overflow-hidden rounded-[14px] border border-dashed border-slate text-xl text-subtle no-underline">{space.photos[0] ? <img decoding="async" src={space.photos[0]} alt="" className="h-full w-full object-cover" /> : '+'}</Link></div>
         </div>
 
         <ApplicationBanner />

@@ -17,15 +17,15 @@ export default function Logo({ animated = false, emblemOnly = false, className =
   return (
     <div className={`relative w-full ${className}`} role={emblemOnly ? undefined : 'img'} aria-label={emblemOnly ? undefined : 'Xanadu — a network for awakening places'} aria-hidden={emblemOnly || undefined}>
       <div className="relative" style={{ perspective: '1000px', aspectRatio: '900 / 518' }}>
-        <img src="/logo-static.png" alt="" draggable={false} className={img} />
-        <img src="/logo-orbit-outer.png" alt="" draggable={false} className={img}
+        <img decoding="async" src="/logo-static.png" alt="" draggable={false} className={img} />
+        <img decoding="async" src="/logo-orbit-outer.png" alt="" draggable={false} className={img}
           style={{ transformOrigin: ORIGIN, animation: animated ? 'xa-orbit-outer 12s linear .4s infinite' : 'none' }} />
-        <img src="/logo-orbit-inner.png" alt="" draggable={false} className={img}
+        <img decoding="async" src="/logo-orbit-inner.png" alt="" draggable={false} className={img}
           style={{ transformOrigin: ORIGIN, animation: animated ? 'xa-orbit-inner 7s linear .4s infinite' : 'none' }} />
-        <img src="/logo-nucleus.png" alt="" draggable={false} className="absolute select-none"
+        <img decoding="async" src="/logo-nucleus.png" alt="" draggable={false} className="absolute select-none"
           style={{ left: `${NUCLEUS.left}%`, top: `${NUCLEUS.top}%`, width: `${NUCLEUS.width}%`, animation: animated ? 'xa-glow 4.5s ease-in-out infinite' : 'none' }} />
       </div>
-      {!emblemOnly && <img src="/logo-wordmark.png" alt="" draggable={false} className="block w-full select-none" />}
+      {!emblemOnly && <img decoding="async" src="/logo-wordmark.png" alt="" draggable={false} className="block w-full select-none" />}
     </div>
   )
 }

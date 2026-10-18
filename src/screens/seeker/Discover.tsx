@@ -10,6 +10,7 @@ import { useAuth } from '../../auth'
 import { useMatches } from '../../matching'
 import { useListings, useSpaces, type Listing, type PublicSpace } from '../../store'
 import { activeCount, destinations, NO_FILTERS, passes, sortListings, spacePasses, useFilters } from '../../filters'
+import { Bell } from '../../components/Bell'
 
 /** Does a practice chip match this experience or space? ("Trainings" also matches the Training format.) */
 const fits = (picked: string, practices: string[], format?: string) =>
@@ -19,7 +20,7 @@ function SpaceRow({ s, wide = false }: { s: PublicSpace; wide?: boolean }) {
   const sub = [placeLabel({ town: s.town, region: s.region }) || s.country, s.volunteer_exchange ? 'Welcomes volunteers' : ''].filter(Boolean).join(' · ')
   if (wide) return (
     <Link to={`/space/${s.id}`} className="flex items-center gap-3.5 rounded-[18px] bg-surface p-2.5 text-text no-underline">
-      <div className="h-[76px] w-[76px] flex-none overflow-hidden rounded-[14px] bg-portal">{s.photos[0] && <img src={s.photos[0]} alt="" className="h-full w-full object-cover" />}</div>
+      <div className="h-[76px] w-[76px] flex-none overflow-hidden rounded-[14px] bg-portal">{s.photos[0] && <img decoding="async" loading="lazy" src={s.photos[0]} alt="" className="h-full w-full object-cover" />}</div>
       <div className="flex min-w-0 flex-col gap-0.5">
         <span className="text-xs text-gold-soft">Volunteer exchange</span>
         <span className="truncate text-[15px] font-semibold text-ink">{s.name}</span>
@@ -29,7 +30,7 @@ function SpaceRow({ s, wide = false }: { s: PublicSpace; wide?: boolean }) {
   )
   return (
     <Link to={`/space/${s.id}`} className="flex w-[200px] flex-none flex-col overflow-hidden rounded-[18px] bg-surface text-text no-underline">
-      <div className="h-[110px] bg-portal">{s.photos[0] && <img src={s.photos[0]} alt="" className="h-full w-full object-cover" />}</div>
+      <div className="h-[110px] bg-portal">{s.photos[0] && <img decoding="async" loading="lazy" src={s.photos[0]} alt="" className="h-full w-full object-cover" />}</div>
       <div className="flex flex-col gap-0.5 p-3">
         <span className="truncate font-display text-[19px] leading-tight text-ink">{s.name}</span>
         <span className="truncate text-xs text-subtle">{sub}</span>
@@ -69,9 +70,12 @@ export default function Discover() {
   return (
     <Screen footer={<SeekerTabs />}>
       <Page>
-        <div className="flex flex-col gap-1">
-          <button type="button" onClick={() => setSheet(true)} className="self-start text-xs tracking-[0.08em] text-subtle">{`${where} ▾`}</button>
-          <H1>What are you <Glow>seeking</Glow>?</H1>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <button type="button" onClick={() => setSheet(true)} className="self-start text-xs tracking-[0.08em] text-subtle">{`${where} ▾`}</button>
+            <H1>What are you <Glow>seeking</Glow>?</H1>
+          </div>
+          <Bell className="mt-1" />
         </div>
 
         <div className="flex gap-2">
@@ -116,7 +120,7 @@ export default function Discover() {
                 {matches.map((m) => (
                   <Link key={`${m.kind}-${m.id}`} to={m.kind === 'offering' ? `/experience/${m.id}` : `/space/${m.id}`}
                     className="ring-iri flex w-[220px] flex-none flex-col overflow-hidden rounded-[18px] bg-surface text-text no-underline">
-                    <div className="h-[120px] bg-portal">{m.photo_url && <img src={m.photo_url} alt="" className="h-full w-full object-cover" />}</div>
+                    <div className="h-[120px] bg-portal">{m.photo_url && <img decoding="async" loading="lazy" src={m.photo_url} alt="" className="h-full w-full object-cover" />}</div>
                     <div className="flex flex-col gap-1 p-3">
                       <span className="text-[11px] tracking-[0.08em] text-gold-soft uppercase">{m.kind === 'offering' ? 'Experience' : 'Space'}{m.town ? ` · ${m.town}` : ''}</span>
                       <span className="font-display text-[19px] leading-tight text-ink">{m.title || 'Untitled'}</span>

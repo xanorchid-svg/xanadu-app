@@ -66,7 +66,7 @@ export default function Space() {
   return (
     <Screen>
       <div className="relative flex h-[280px] flex-col bg-portal px-4 pt-safe">
-        {space.photos[0] && <img src={space.photos[0]} alt="" className="absolute inset-0 h-full w-full object-cover" />}
+        {space.photos[0] && <img decoding="async" src={space.photos[0]} alt="" className="absolute inset-0 h-full w-full object-cover" />}
         <div className="relative flex justify-between">
           {back}
           {isSeeker && (
@@ -78,7 +78,7 @@ export default function Space() {
       </div>
       {space.photos.length > 1 && (
         <div className="flex gap-2 overflow-x-auto px-5 pt-3">
-          {space.photos.slice(1).map((p, i) => <img key={i} src={p} alt={`${space.name} photo ${i + 2}`} className="h-16 w-16 flex-none rounded-xl object-cover" />)}
+          {space.photos.slice(1).map((p, i) => <img decoding="async" loading="lazy" key={i} src={p} alt={`${space.name} photo ${i + 2}`} className="h-16 w-16 flex-none rounded-xl object-cover" />)}
         </div>
       )}
       <div className="flex flex-col gap-6 px-5 pt-5 pb-8">

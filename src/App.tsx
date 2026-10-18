@@ -1,31 +1,52 @@
-import { useLayoutEffect } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect } from 'react'
 import { Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom'
-import { RequireRole, useAuth } from './auth'
+import { Loading, RequireRole, useAuth } from './auth'
 import AuthCallback from './screens/AuthCallback'
-import ResetPassword from './screens/ResetPassword'
-import Welcome from './screens/Welcome'
 import Intro from './screens/Intro'
-import { Privacy, Terms } from './screens/Legal'
-import Discover from './screens/seeker/Discover'
-import Calendar from './screens/seeker/Calendar'
-import Experience from './screens/seeker/Experience'
-import Saved from './screens/seeker/Saved'
-import You from './screens/seeker/You'
-import Space from './screens/seeker/Space'
-import Status from './screens/host/Status'
-import Inbox from './screens/host/Inbox'
-import ContainerHome from './screens/container/Home'
-import NewOffering from './screens/container/NewOffering'
-import ManageOffering from './screens/container/ManageOffering'
-import SpaceProfile from './screens/container/SpaceProfile'
-import FacilitatorHome from './screens/facilitator/Home'
-import FindSpaces from './screens/facilitator/FindSpaces'
-import FacilitatorProfile from './screens/facilitator/Profile'
-import Community from './screens/community/Community'
-import Chat from './screens/community/Chat'
-import Messages from './screens/messages/Messages'
-import Thread from './screens/messages/Thread'
-import Compose from './screens/messages/Compose'
+
+// Each screen is its own small file, loaded the first time it's opened (and kept offline by the app's service worker)
+const ResetPassword = lazy(() => import('./screens/ResetPassword'))
+const Welcome = lazy(() => import('./screens/Welcome'))
+const Privacy = lazy(() => import('./screens/Legal').then((m) => ({ default: m.Privacy })))
+const Terms = lazy(() => import('./screens/Legal').then((m) => ({ default: m.Terms })))
+const Discover = lazy(() => import('./screens/seeker/Discover'))
+const Calendar = lazy(() => import('./screens/seeker/Calendar'))
+const Experience = lazy(() => import('./screens/seeker/Experience'))
+const Saved = lazy(() => import('./screens/seeker/Saved'))
+const You = lazy(() => import('./screens/seeker/You'))
+const Space = lazy(() => import('./screens/seeker/Space'))
+const Status = lazy(() => import('./screens/host/Status'))
+const Inbox = lazy(() => import('./screens/host/Inbox'))
+const ContainerHome = lazy(() => import('./screens/container/Home'))
+const NewOffering = lazy(() => import('./screens/container/NewOffering'))
+const ManageOffering = lazy(() => import('./screens/container/ManageOffering'))
+const SpaceProfile = lazy(() => import('./screens/container/SpaceProfile'))
+const FacilitatorHome = lazy(() => import('./screens/facilitator/Home'))
+const FindSpaces = lazy(() => import('./screens/facilitator/FindSpaces'))
+const FacilitatorProfile = lazy(() => import('./screens/facilitator/Profile'))
+const Community = lazy(() => import('./screens/community/Community'))
+const Chat = lazy(() => import('./screens/community/Chat'))
+const Messages = lazy(() => import('./screens/messages/Messages'))
+const Thread = lazy(() => import('./screens/messages/Thread'))
+const Compose = lazy(() => import('./screens/messages/Compose'))
+const Notifications = lazy(() => import('./screens/Notifications'))
+
+/** Once signed in, quietly fetch the screens this member is most likely to open next, so tabs open instantly. */
+function usePrefetch() {
+  const { profile } = useAuth()
+  const role = profile?.role
+  useEffect(() => {
+    if (!role) return
+    const common = [() => import('./screens/messages/Messages'), () => import('./screens/Notifications'), () => import('./screens/seeker/Space'), () => import('./screens/seeker/Experience')]
+    const byRole = role === 'container'
+      ? [() => import('./screens/container/Home'), () => import('./screens/container/ManageOffering'), () => import('./screens/container/SpaceProfile'), () => import('./screens/container/NewOffering')]
+      : role === 'facilitator'
+        ? [() => import('./screens/facilitator/Home'), () => import('./screens/facilitator/FindSpaces'), () => import('./screens/facilitator/Profile'), () => import('./screens/community/Community')]
+        : [() => import('./screens/seeker/Discover'), () => import('./screens/seeker/Calendar'), () => import('./screens/seeker/You'), () => import('./screens/community/Community'), () => import('./screens/seeker/Saved')]
+    const idle = (cb: () => void) => ('requestIdleCallback' in window ? (window as Window & { requestIdleCallback: (f: () => void) => number }).requestIdleCallback(cb) : setTimeout(cb, 800))
+    idle(() => { [...byRole, ...common].forEach((load) => load().catch(() => {})) })
+  }, [role])
+}
 
 /** Every page opens at the top: on navigation, on refresh, and when returning to a page. */
 function useScrollToTop() {
@@ -51,6 +72,7 @@ function ApplyRedirect() {
 export default function App() {
   const location = useLocation()
   useScrollToTop()
+  usePrefetch()
   return (
     <div className="flex h-dvh justify-center bg-navy-deep">
       {/* Fills every phone edge to edge; a phone-width column only on tablets and desktop */}
@@ -59,6 +81,7 @@ export default function App() {
         <div className="xa-aurora" aria-hidden />
         <div className="relative z-[1] h-full">
         {/* keyed by path so each page mounts fresh, with its own scroll position and state */}
+        <Suspense fallback={<Loading />}>
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Intro />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
@@ -77,6 +100,7 @@ export default function App() {
           <Route path="/messages/team" element={<RequireRole role="any"><TeamThread /></RequireRole>} />
           <Route path="/messages/new" element={<RequireRole role="any"><Compose /></RequireRole>} />
           <Route path="/messages/:id" element={<RequireRole role="any"><Thread /></RequireRole>} />
+          <Route path="/notifications" element={<RequireRole role="any"><Notifications /></RequireRole>} />
 
           {/* Community: Seekers and Facilitators (Containers are sent to their home) */}
           <Route path="/community" element={<RequireRole role="any"><Community /></RequireRole>} />
@@ -99,6 +123,7 @@ export default function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
         </div>
       </div>
     </div>

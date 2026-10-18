@@ -82,7 +82,7 @@ export default function Inbox({ role, standalone = false }: { role: Role; standa
         <H1>{role === 'Seeker' ? 'Messages' : 'Inbox'}</H1>
         {loading ? <p className="m-0 text-sm text-subtle">Loading…</p> : (
           <button type="button" onClick={openThread} className="flex min-h-[72px] items-center gap-3 border-b border-[#1F2B3E] py-2.5 text-left text-text">
-            <span className="flex h-12 w-12 flex-none items-center justify-center overflow-hidden rounded-full bg-ivory"><img src="/xanadu-mark.png" alt="" className="h-9 w-auto" /></span>
+            <span className="flex h-12 w-12 flex-none items-center justify-center overflow-hidden rounded-full bg-ivory"><img decoding="async" src="/xanadu-mark.png" alt="" className="h-9 w-auto" /></span>
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
               <span className="flex justify-between gap-2"><span className="text-[15px] font-semibold text-ink">Xanadu</span><span className="text-xs text-subtle">{latest ? fmt(latest.created_at) : ''}</span></span>
               <span className="truncate text-[13px] text-subtle">{latest ? `${latest.from_team ? '' : 'You: '}${latest.body}` : 'Say hello to the Xanadu team'}</span>

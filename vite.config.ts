@@ -4,11 +4,26 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  build: {
+    rolldownOptions: {
+      output: {
+        // libraries change rarely, so they're cached separately from Xanadu's own code
+        advancedChunks: {
+          groups: [
+            { name: 'react', test: /node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/ },
+            { name: 'supabase', test: /node_modules[\\/]@supabase[\\/]/ },
+          ],
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      // phone notifications: push and tap handlers live in public/push-sw.js
+      workbox: { importScripts: ['push-sw.js'], navigateFallbackDenylist: [/^\/push-sw\.js$/] },
       includeAssets: ['favicon.png', 'apple-touch-icon.png', 'xanadu-logo.png', 'xanadu-mark.png', 'logo-static.png', 'logo-orbit-outer.png', 'logo-orbit-inner.png', 'logo-nucleus.png', 'logo-wordmark.png', 'logo-wordmark-clean.png', 'logo-emblem-light.png', 'logo-xanadu-text.png'],
       manifest: {
         name: 'Xanadu — A network for awakening places',

@@ -3,6 +3,7 @@ import { useFacilitatorProfile } from '../../store'
 import { useAuth } from '../../auth'
 import ApplicationBanner from '../../components/ApplicationBanner'
 import { Badge, Checklist, EmptyState, FacilitatorTabs, H2, Page, Screen, Switch } from '../../components/ui'
+import { Bell } from '../../components/Bell'
 
 const SETUP = [
   { id: 'account', title: 'Create your account', sub: 'Done', to: '/facilitator' },
@@ -34,7 +35,8 @@ export default function FacilitatorHome() {
             <h1 className="m-0 font-display text-[32px] font-medium text-ink">{me.name.trim() || '[Your name]'}</h1>
             <div className="mt-1"><Badge>Founding Facilitator</Badge></div>
           </div>
-          <Link to="/facilitator/profile" aria-label="Your profile" className="flex h-12 w-12 flex-none items-center justify-center overflow-hidden rounded-full border border-dashed border-slate text-xl text-subtle no-underline">{me.photo ? <img src={me.photo} alt="" className="h-full w-full object-cover" /> : '+'}</Link>
+          <div className="flex flex-none items-center gap-2"><Bell />
+          <Link to="/facilitator/profile" aria-label="Your profile" className="flex h-12 w-12 flex-none items-center justify-center overflow-hidden rounded-full border border-dashed border-slate text-xl text-subtle no-underline">{me.photo ? <img decoding="async" src={me.photo} alt="" className="h-full w-full object-cover" /> : '+'}</Link></div>
         </div>
 
         <ApplicationBanner />

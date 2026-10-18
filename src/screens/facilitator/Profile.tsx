@@ -101,7 +101,7 @@ export default function FacilitatorProfile() {
         <div className="flex flex-col items-center gap-2.5 text-center">
           {own
             ? <AvatarPicker photo={profile.photo} onChange={async (p) => { setError(''); const err = await save({ ...profile, photo: p }); if (err) setError(err) }} />
-            : <div className="h-[104px] w-[104px] overflow-hidden rounded-full bg-plum">{profile.photo && <img src={profile.photo} alt="" className="h-full w-full object-cover" />}</div>}
+            : <div className="h-[104px] w-[104px] overflow-hidden rounded-full bg-plum">{profile.photo && <img decoding="async" src={profile.photo} alt="" className="h-full w-full object-cover" />}</div>}
           <h1 className="m-0 font-display text-[32px] font-medium text-ink">{name}</h1>
           <span className="text-sm text-muted">{meta}</span>
           {profile.languages.trim() && <span className="text-[13px] text-subtle">{profile.languages}</span>}

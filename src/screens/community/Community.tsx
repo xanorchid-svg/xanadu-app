@@ -16,7 +16,7 @@ export function Avatar({ name, photo, size = 52 }: { name: string; photo: string
   return (
     <div className="flex flex-none items-center justify-center overflow-hidden rounded-full border border-gold/60 bg-plum font-display text-gold-pale"
       style={{ width: size, height: size, fontSize: size * 0.42 }}>
-      {photo ? <img src={photo} alt="" className="h-full w-full object-cover" /> : (name.trim()[0] ?? 'X').toUpperCase()}
+      {photo ? <img decoding="async" loading="lazy" src={photo} alt="" className="h-full w-full object-cover" /> : (name.trim()[0] ?? 'X').toUpperCase()}
     </div>
   )
 }

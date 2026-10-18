@@ -116,7 +116,7 @@ export default function Experience() {
   return (
     <Screen footer={footer}>
       <div className="relative flex h-[300px] flex-col bg-portal px-4 pt-safe pb-4">
-        {cover && <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover" />}
+        {cover && <img decoding="async" src={cover} alt="" className="absolute inset-0 h-full w-full object-cover" />}
         <div className="relative flex justify-between">
           {back}
           {isSeeker && (
@@ -136,7 +136,7 @@ export default function Experience() {
 
         {space && (
           <Link to={`/space/${space.id}`} className="flex items-center gap-3 rounded-[18px] bg-surface p-3 text-text no-underline">
-            <div className="h-12 w-12 flex-none overflow-hidden rounded-[12px] bg-portal">{space.photos[0] && <img src={space.photos[0]} alt="" className="h-full w-full object-cover" />}</div>
+            <div className="h-12 w-12 flex-none overflow-hidden rounded-[12px] bg-portal">{space.photos[0] && <img decoding="async" src={space.photos[0]} alt="" className="h-full w-full object-cover" />}</div>
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
               <span className="text-xs text-subtle">Held at</span>
               <span className="truncate text-[15px] font-semibold text-ink">{space.name}</span>

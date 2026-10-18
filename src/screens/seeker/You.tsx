@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Chip, EmptyState, H2, Page, PrimaryButton, Screen, SeekerTabs, Segmented, Switch } from '../../components/ui'
+import { Chip, EmptyState, H2, Page, PrimaryButton, Screen, SeekerTabs, Segmented } from '../../components/ui'
 import { IconChart, IconSettings } from '../../components/icons'
 import { CONTACT_EMAIL, SEEKER_ALIGN as ALIGN } from '../../data'
 import { refreshMatches, useMyKeywords } from '../../matching'
@@ -57,7 +57,7 @@ export default function You() {
       <Page className="gap-6 pb-7">
         <div className="flex items-center gap-4">
           <div className="ring-iri flex h-[72px] w-[72px] flex-none items-center justify-center rounded-full bg-plum font-display text-3xl text-gold-pale shadow-[0_0_28px_-6px_rgba(181,139,224,.6)]">
-            {me.photo ? <img src={me.photo} alt="" className="h-full w-full rounded-full object-cover p-[2px]" /> : (me.name.trim()[0] ?? 'X').toUpperCase()}
+            {me.photo ? <img decoding="async" src={me.photo} alt="" className="h-full w-full rounded-full object-cover p-[2px]" /> : (me.name.trim()[0] ?? 'X').toUpperCase()}
           </div>
           <div className="flex flex-1 flex-col gap-1">
             <h1 className="m-0 font-display text-3xl font-medium text-ink">{me.name.trim() || '[Your name]'}</h1>
@@ -121,7 +121,7 @@ export default function You() {
           <div className={row}>Membership <span className="text-[13px] text-gold-soft">Founding Seeker · Free</span></div>
           <button type="button" onClick={() => { setDraft(me); setError(''); setEditing(true) }} className={`${row} w-full text-left`}>Profile <span className="text-[13px] text-gold-soft">Edit name, photo, region</span></button>
           <div className={row}>Where you live <span className="text-[13px] text-subtle">{me.region.trim() || 'Not added'}</span></div>
-          <div className={row}>New aligned experiences <Switch on={me.notify} onChange={(v) => save({ ...me, notify: v })} label="Notify me about new aligned experiences" /></div>
+          <Link to="/notifications" className={row}>Notifications <span className="text-[13px] text-gold-soft">Phone, email and what you hear about ›</span></Link>
           <Link to="/privacy" className={row}>Privacy &amp; data <span className="text-[13px] text-subtle">Read our policy ›</span></Link>
           <Link to="/terms" className={row}>Terms &amp; guidelines <span className="text-[13px] text-subtle">Read the terms ›</span></Link>
           <a href={`mailto:${CONTACT_EMAIL}`} className={`${row} border-b-0`}>Help <span className="text-[13px] text-subtle">{CONTACT_EMAIL}</span></a>

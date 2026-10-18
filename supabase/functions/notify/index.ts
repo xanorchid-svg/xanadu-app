@@ -1,20 +1,46 @@
-// notify: sends Xanadu's emails through Resend.
+// notify: sends Xanadu's emails (through Resend) and phone notifications (web push).
 //
-// The database queues each email in public.email_queue (see queue_email()) and calls this
-// function with the queue row's id. The function only ever sends emails that are already
-// queued and not yet sent, so calling it from anywhere else can't send anything new or twice.
+// The database calls it with one of:
+//   { id }    an email_queue row: a welcome email, or a notification email (kind "n:<notification id>")
+//   { push }  a notification id: push it to the member's phones and browsers
+//   { init }  make sure the web-push keys exist (they're created once and kept in public.push_config)
+// It only ever sends things that are already queued or recorded, and each only once,
+// so calling it from anywhere else can't send anything new or twice.
 //
 // Secrets (Supabase → Edge Functions → Secrets):
 //   RESEND_API_KEY  required, from resend.com → API Keys (sending access)
 //   EMAIL_FROM      optional, defaults to "Xanadu <hello@dreamxanadu.com>" (the domain must be verified in Resend)
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
-import { createClient } from 'npm:@supabase/supabase-js@2'
+import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2'
+import webpush from 'npm:web-push@3.6.7'
 
 const APP = 'https://app.dreamxanadu.com'
 const REPLY_TO = 'networkxanadu@gmail.com'
 const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 
-type Email = { subject: string; preheader: string; heading: string; paragraphs: string[]; button: { label: string; url: string }; signoff: string }
+type Email = { subject: string; preheader: string; heading: string; paragraphs: string[]; button: { label: string; url: string }; signoff: string; footer?: string }
+type Notification = { id: string; user_id: string; kind: string; title: string; body: string; link: string; pushed_at: string | null }
+
+/** Emails for notifications: approvals, decisions, team replies, new messages, Community requests, new matches. */
+function composeNotification(n: Notification): Email {
+  const url = `${APP}${n.link.startsWith('/') ? n.link : `/${n.link}`}`
+  const isMessage = n.kind === 'message' || n.kind === 'team_message'
+  const label: Record<string, string> = {
+    approved: 'Open Xanadu', changes: 'See the note', declined: 'Read the message', offering_live: 'See it live',
+    offering_changes: 'Edit your experience', team_message: 'Reply', message: 'Reply', community_request: 'See the request',
+    community_accepted: 'Say hello', match: n.link.startsWith('/experience') ? 'See the experience' : 'See the place',
+  }
+  return {
+    subject: n.title,
+    preheader: n.body.slice(0, 120),
+    heading: n.title,
+    paragraphs: n.body ? [isMessage ? `“${n.body.length > 600 ? `${n.body.slice(0, 600)}…` : n.body}”` : n.body] : [],
+    button: { label: label[n.kind] ?? 'Open Xanadu', url },
+    signoff: isMessage ? 'Reply in the Xanadu app so your conversation stays in one place.' : 'Questions? Just reply to this email.',
+    footer: n.kind === 'message' ? 'Turn message emails off any time in Xanadu → Notifications.'
+      : n.kind === 'match' ? 'Turn match emails off any time in Xanadu → Notifications.' : undefined,
+  }
+}
 
 const first = (name: string | null | undefined) => (name ?? '').trim().split(/\s+/)[0] || ''
 const hi = (name: string) => (name ? `Welcome, ${name}.` : 'Welcome.')
@@ -89,7 +115,7 @@ function html(e: Email) {
     </td></tr>
     <tr><td align="center" style="padding:24px 8px 0;font-family:Manrope,'Helvetica Neue',Arial,sans-serif;font-size:12px;line-height:1.6;color:#7F8BA0;">
       Xanadu begins with you.<br>
-      You’re receiving this because you joined Xanadu. · <a href="${APP}/privacy" style="color:#7F8BA0;">Privacy</a>
+      ${e.footer ? `${esc(e.footer)}<br>` : ''}You’re receiving this because you joined Xanadu. · <a href="${APP}/privacy" style="color:#7F8BA0;">Privacy</a>
     </td></tr>
   </table>
 </td></tr></table></body></html>`
@@ -97,12 +123,52 @@ function html(e: Email) {
 
 const text = (e: Email) => [e.heading, '', ...e.paragraphs.flatMap((t) => [t, '']), `${e.button.label}: ${e.button.url}`, '', e.signoff, '', 'With love, the Xanadu team', `${APP}/privacy`].join('\n')
 
+/** The web-push keys, created the first time they're needed. */
+async function vapid(admin: SupabaseClient) {
+  const { data } = await admin.from('push_config').select('public_key, private_key').eq('id', 1).maybeSingle()
+  if (data) return data
+  const keys = webpush.generateVAPIDKeys()
+  await admin.from('push_config').upsert({ id: 1, public_key: keys.publicKey, private_key: keys.privateKey }, { onConflict: 'id', ignoreDuplicates: true })
+  const { data: again } = await admin.from('push_config').select('public_key, private_key').eq('id', 1).single()
+  return again!
+}
+
+/** Push one notification to every phone/browser the member turned notifications on for. */
+async function push(admin: SupabaseClient, id: string) {
+  // claim it, so it's pushed once
+  const { data: n } = await admin.from('notifications').update({ pushed_at: new Date().toISOString() })
+    .eq('id', id).is('pushed_at', null).select('id, user_id, kind, title, body, link').maybeSingle()
+  if (!n) return reply({ ok: true, skipped: 'already pushed' })
+  const { data: subs } = await admin.from('push_subscriptions').select('id, endpoint, p256dh, auth').eq('user_id', n.user_id)
+  if (!subs?.length) return reply({ ok: true, skipped: 'no devices' })
+  const keys = await vapid(admin)
+  webpush.setVapidDetails('mailto:networkxanadu@gmail.com', keys.public_key, keys.private_key)
+  const { count } = await admin.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', n.user_id).is('read_at', null)
+  const payload = JSON.stringify({ title: n.title, body: n.body.slice(0, 180), url: n.link, tag: n.kind === 'message' ? n.link : n.id, badge: count ?? 0 })
+  let sent = 0
+  for (const s of subs) {
+    try {
+      await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload, { TTL: 60 * 60 * 24 })
+      sent++
+    } catch (e) {
+      const status = (e as { statusCode?: number }).statusCode
+      if (status === 404 || status === 410) await admin.from('push_subscriptions').delete().eq('id', s.id) // phone unsubscribed
+    }
+  }
+  return reply({ ok: true, sent })
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return reply({ error: 'Method not allowed' }, 405)
-  const { id } = await req.json().catch(() => ({ id: null }))
-  if (typeof id !== 'string' || !/^[0-9a-f-]{36}$/i.test(id)) return reply({ error: 'Missing id' }, 400)
-
+  const input = await req.json().catch(() => ({}))
+  const uuid = (v: unknown) => typeof v === 'string' && /^[0-9a-f-]{36}$/i.test(v)
   const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } })
+
+  if (input?.init) { await vapid(admin); return reply({ ok: true }) }
+  if (uuid(input?.push)) return push(admin, input.push)
+
+  const id = input?.id
+  if (!uuid(id)) return reply({ error: 'Missing id' }, 400)
 
   // claim the queued row (so two calls can't both send it)
   const { data: job } = await admin.from('email_queue').update({ status: 'sent', sent_at: new Date().toISOString() })
@@ -120,10 +186,17 @@ Deno.serve(async (req) => {
   const { data: u } = await admin.auth.admin.getUserById(job.user_id)
   const to = u?.user?.email
   if (!to) return fail('member has no email address', 'skipped')
-  const { data: profile } = await admin.from('profiles').select('name').eq('id', job.user_id).maybeSingle()
-  const { data: space } = await admin.from('spaces').select('name').eq('owner_id', job.user_id).order('created_at').limit(1).maybeSingle()
 
-  const email = compose(job.kind, first(profile?.name), space?.name ?? '')
+  let email: Email | null
+  if (job.kind.startsWith('n:')) {
+    const { data: n } = await admin.from('notifications').select('id, user_id, kind, title, body, link, pushed_at').eq('id', job.kind.slice(2)).maybeSingle()
+    if (!n) return fail('notification no longer exists', 'skipped')
+    email = composeNotification(n as Notification)
+  } else {
+    const { data: profile } = await admin.from('profiles').select('name').eq('id', job.user_id).maybeSingle()
+    const { data: space } = await admin.from('spaces').select('name').eq('owner_id', job.user_id).order('created_at').limit(1).maybeSingle()
+    email = compose(job.kind, first(profile?.name), space?.name ?? '')
+  }
   if (!email) return fail(`unknown email kind ${job.kind}`, 'skipped')
 
   const res = await fetch('https://api.resend.com/emails', {
@@ -133,7 +206,7 @@ Deno.serve(async (req) => {
       from: Deno.env.get('EMAIL_FROM') || 'Xanadu <hello@dreamxanadu.com>',
       to: [to], reply_to: REPLY_TO,
       subject: email.subject, html: html(email), text: text(email),
-      tags: [{ name: 'kind', value: job.kind }],
+      tags: [{ name: 'kind', value: job.kind.startsWith('n:') ? 'notification' : job.kind }],
     }),
   })
   const out = await res.json().catch(() => ({}))

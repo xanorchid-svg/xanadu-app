@@ -51,7 +51,7 @@ export default function Saved() {
               <div className="flex flex-col gap-3">
                 {places.map((s) => (
                   <Link key={s.id} to={`/space/${s.id}`} className="flex items-center gap-3.5 rounded-[18px] bg-surface p-2.5 text-text no-underline">
-                    <div className="h-[76px] w-[76px] flex-none overflow-hidden rounded-[14px] bg-portal">{s.photos[0] && <img src={s.photos[0]} alt="" className="h-full w-full object-cover" />}</div>
+                    <div className="h-[76px] w-[76px] flex-none overflow-hidden rounded-[14px] bg-portal">{s.photos[0] && <img decoding="async" loading="lazy" src={s.photos[0]} alt="" className="h-full w-full object-cover" />}</div>
                     <div className="flex min-w-0 flex-col gap-0.5">
                       <span className="text-xs text-gold-soft">Retreat space</span>
                       <span className="truncate text-[15px] font-semibold text-ink">{s.name}</span>
