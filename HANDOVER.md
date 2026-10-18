@@ -32,7 +32,7 @@ The logo is a fine-line, portal-like emblem with a star at its centre.
 |---|---|
 | Code | GitHub `xanorchid-svg/xanadu-app`, branch `main` |
 | Live app | https://app.dreamxanadu.com (Vercel, auto-deploys on every push to `main`) |
-| Database, sign-in, storage | Supabase project `nmstrfmxflwgbgkiyeyq` (https://nmstrfmxflwgbgkiyeyq.supabase.co) |
+| Database, sign-in, storage | Supabase project **xanadu app** `gutqzqxybcnnpwfbkjsq` (https://gutqzqxybcnnpwfbkjsq.supabase.co). The website has its own project ("DreamXanadu Website", `nmstrfmxflwgbgkiyeyq`). |
 | Google sign-in | Google Cloud project "Xanadu" under networkxanadu-org, owned by networkxanadu@gmail.com |
 | Contact email used in the app | networkxanadu@gmail.com |
 | Original design | Claude Design canvas with 16 artboards (v1 look, already built) |

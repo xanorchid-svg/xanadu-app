@@ -1,12 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 
 /**
- * Supabase connection. The URL and publishable key are safe to ship in the app:
+ * Supabase connection: the "xanadu app" project (the dreamxanadu.com website has its own project). The URL and publishable key are safe to ship in the app:
  * they only allow what the database's row-level security rules allow.
  * Override them with VITE_SUPABASE_URL / VITE_SUPABASE_KEY if the project ever changes.
  */
-const URL = import.meta.env.VITE_SUPABASE_URL ?? 'https://nmstrfmxflwgbgkiyeyq.supabase.co'
-const KEY = import.meta.env.VITE_SUPABASE_KEY ?? 'sb_publishable_qLZukMIEQ7vpCfYhxaTCkw_EQUXINXS'
+const URL = import.meta.env.VITE_SUPABASE_URL ?? 'https://gutqzqxybcnnpwfbkjsq.supabase.co'
+const KEY = import.meta.env.VITE_SUPABASE_KEY ?? 'sb_publishable_7jInxBTTLrcqSP_OgCZApA_NlZG8Mpg'
 
 export const supabase = createClient(URL, KEY, {
   auth: { flowType: 'pkce', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
