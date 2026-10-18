@@ -2,7 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { AvatarPicker, LocationFields, PhotoGallery, PracticePicker, TextArea, TextField } from '../components/edit'
 import { IconClose } from '../components/icons'
-import { Field, Glow, inputCls } from '../components/ui'
+import { Chip, Field, Glow, inputCls } from '../components/ui'
 import { LifestylePicker } from '../components/Lifestyle'
 import { HOME, Loading, takeReturn, useAuth } from '../auth'
 import { PRACTICES, SEEKER_ALIGN } from '../data'
@@ -64,6 +64,29 @@ const AiNotice = () => (
   <p className="m-0 rounded-xl bg-plum px-3.5 py-3 text-[13px] leading-normal text-muted">We use AI to help review applications; a person makes every decision.</p>
 )
 
+/** "Where did you hear about us?" Stored on the profile as e.g. "Instagram" or "Other: a podcast". */
+const HEARD_OPTIONS = ['Friend or family', 'Instagram', 'Facebook', 'Google', 'TikTok', 'Other'] as const
+function useHeardFrom(initial = '') {
+  const isOther = initial.startsWith('Other')
+  const [pick, setPick] = useState(isOther ? 'Other' : initial)
+  const [other, setOther] = useState(isOther ? initial.replace(/^Other:?\s*/, '') : '')
+  const value = pick === 'Other' ? (other.trim() ? `Other: ${other.trim().slice(0, 120)}` : 'Other') : pick
+  return { pick, setPick, other, setOther, value }
+}
+function HeardFrom({ h, optional = false }: { h: ReturnType<typeof useHeardFrom>; optional?: boolean }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-[13px] text-muted">{`Where did you hear about Xanadu?${optional ? ' (optional)' : ''}`}</span>
+      <div className="flex flex-wrap gap-2">
+        {HEARD_OPTIONS.map((o) => <Chip key={o} on={h.pick === o} onClick={() => h.setPick(h.pick === o ? '' : o)}>{o}</Chip>)}
+      </div>
+      {h.pick === 'Other' && (
+        <input value={h.other} onChange={(e) => h.setOther(e.target.value)} placeholder="Tell us where" aria-label="Where you heard about Xanadu" className={inputCls} />
+      )}
+    </div>
+  )
+}
+
 /* ---------------- Seeker ---------------- */
 
 function SeekerWelcome() {
@@ -76,6 +99,7 @@ function SeekerWelcome() {
   const [prefs, setPrefs] = useState<string[]>(profile?.prefs ?? [])
   const [seeking, setSeeking] = useState(profile?.seeking ?? '')
   const [lifestyle, setLifestyle] = useState<string[]>(profile?.lifestyle ?? [])
+  const heard = useHeardFrom(profile?.heard_from ?? '')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -87,7 +111,7 @@ function SeekerWelcome() {
     setBusy(true); setError('')
     try {
       const [photoUrl] = await uploadPhotos(session!.user.id, photo ? [photo] : [])
-      const err = await updateProfile({ name: name.trim(), photo_url: photoUrl ?? '', region: region.trim(), prefs, seeking: seeking.trim().slice(0, 2000), lifestyle, onboarded: true })
+      const err = await updateProfile({ name: name.trim(), photo_url: photoUrl ?? '', region: region.trim(), prefs, seeking: seeking.trim().slice(0, 2000), lifestyle, heard_from: heard.value, onboarded: true })
       if (err) { setError(friendlyError(err)); setBusy(false); return }
       await refreshMatches()
       navigate(takeReturn('/discover'), { replace: true })
@@ -102,6 +126,7 @@ function SeekerWelcome() {
           <AvatarPicker photo={photo} onChange={setPhoto} label="Add a photo (optional)" />
           <TextField label="Your name" value={name} onChange={setName} autoComplete="name" />
           <TextField label="Where you live (optional)" value={region} onChange={setRegion} placeholder="e.g. Denver, Colorado" />
+          <HeardFrom h={heard} optional />
         </>
       )}
       {step === 1 && (
@@ -134,12 +159,14 @@ function ContainerWelcome() {
   const [phone, setPhone] = useState('')
   const [proof, setProof] = useState('')
   const [agreed, setAgreed] = useState(false)
+  const heard = useHeardFrom(profile?.heard_from ?? '')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const set = <K extends keyof SpaceProfile>(k: K, v: SpaceProfile[K]) => setSpace((s) => ({ ...s, [k]: v }))
 
   const go = (n: number) => {
     if (n > step && step === 0 && (!space.name.trim() || !space.country.trim() || !space.town.trim())) { setError('Please add your space name, country and town.'); return }
+    if (n > step && step === 0 && !heard.pick) { setError('Please tell us where you heard about Xanadu.'); return }
     if (n > step && step === 1 && !space.about.trim()) { setError('Please describe your space in a few sentences.'); return }
     setError(''); setStep(n)
   }
@@ -149,7 +176,7 @@ function ContainerWelcome() {
     setBusy(true); setError('')
     const e1 = await saveSpace(space)
     const e2 = e1 ?? await savePrivateDetails(session!.user.id, { proof: proof.trim(), phone: phone.trim(), agreed_guidelines: true })
-    const e3 = e2 ?? await updateProfile({ name: space.name.trim(), town: space.town.trim(), practices: space.practices, about: space.about.trim(), onboarded: true })
+    const e3 = e2 ?? await updateProfile({ name: space.name.trim(), town: space.town.trim(), practices: space.practices, about: space.about.trim(), heard_from: heard.value, onboarded: true })
     if (e3) { setError(friendlyError(e3)); setBusy(false); return }
     navigate('/container', { replace: true })
   }
@@ -162,6 +189,7 @@ function ContainerWelcome() {
           <TextField label="Space name" value={space.name} onChange={(v) => set('name', v)} />
           <LocationFields value={space} onChange={(v) => setSpace((s) => ({ ...s, ...v }))} />
           <TextField label="Phone (private, for your intro call)" value={phone} onChange={setPhone} type="tel" autoComplete="tel" />
+          <HeardFrom h={heard} />
         </>
       )}
       {step === 1 && (
@@ -212,12 +240,14 @@ function FacilitatorWelcome() {
   const [trainings, setTrainings] = useState<Training[]>([{ title: '', school: '', year: '' }])
   const [refs, setRefs] = useState<Reference[]>([{ name: '', contact: '' }])
   const [insurance, setInsurance] = useState('')
+  const heard = useHeardFrom(profile?.heard_from ?? '')
   const [agreed, setAgreed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
   const go = (n: number) => {
     if (n > step && step === 0 && (!name.trim() || !town.trim())) { setError("Please add your name and where you're based."); return }
+    if (n > step && step === 0 && !heard.pick) { setError('Please tell us where you heard about Xanadu.'); return }
     if (n > step && step === 1 && (!practices.length || !about.trim())) { setError('Please choose your practices and write a few words about your work.'); return }
     setError(''); setStep(n)
   }
@@ -229,7 +259,7 @@ function FacilitatorWelcome() {
     try {
       const [photoUrl] = await uploadPhotos(session!.user.id, photo ? [photo] : [])
       const e1 = await updateProfile({
-        name: name.trim(), photo_url: photoUrl ?? '', town: town.trim(), practices, languages: languages.trim(), about: about.trim(),
+        name: name.trim(), photo_url: photoUrl ?? '', town: town.trim(), practices, languages: languages.trim(), about: about.trim(), heard_from: heard.value,
         trainings: trainings.filter((t) => t.title.trim()),
       })
       const e2 = e1 ?? await savePrivateDetails(session!.user.id, { references_list: cleanRefs, insurance: insurance.trim(), agreed_guidelines: true })
@@ -250,6 +280,7 @@ function FacilitatorWelcome() {
           <AvatarPicker photo={photo} onChange={setPhoto} />
           <TextField label="Your name" value={name} onChange={setName} autoComplete="name" />
           <TextField label="Where you're based" value={town} onChange={setTown} placeholder="e.g. Ubud, Bali" />
+          <HeardFrom h={heard} />
         </>
       )}
       {step === 1 && (

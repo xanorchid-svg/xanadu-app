@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useGate } from '../gate'
 import { Card, EmptyState, Glow, PageTitle, Spinner } from '../ui'
+import { useTeamQuery } from '../lib/data'
+import { HeardFrom, SignupChart, type Heard, type SignupDay } from '../charts'
 
 type Counts = {
   pending_containers: number
@@ -27,6 +29,8 @@ export default function Today() {
   const [counts, setCounts] = useState<Counts | null>(null)
   const [actions, setActions] = useState<Action[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const signups = useTeamQuery<SignupDay[]>('team_signups', { p_days: 30 })
+  const heard = useTeamQuery<Heard[]>('team_heard_from')
 
   useEffect(() => {
     supabase.rpc('team_counts').then(({ data, error }) => {
@@ -84,6 +88,17 @@ export default function Today() {
               <Stat n={counts.live_offerings} label="Live offerings" />
             </Card>
           </section>
+
+          <section aria-labelledby="signups" className="mb-10 grid gap-3 lg:grid-cols-[1.6fr_1fr]">
+            <Card className="p-5">
+              <h2 id="signups" className="mb-1 text-[12px] font-semibold uppercase tracking-[.16em] text-faint">New members, last 30 days</h2>
+              {signups.data ? <SignupChart days={signups.data} /> : <div className="grid h-40 place-items-center"><Spinner /></div>}
+            </Card>
+            <Card className="p-5">
+              <h2 className="mb-3 text-[12px] font-semibold uppercase tracking-[.16em] text-faint">Where people heard about us</h2>
+              {heard.data ? <HeardFrom rows={heard.data} /> : <div className="grid h-40 place-items-center"><Spinner /></div>}
+            </Card>
+          </section>
         </>
       )}
 
@@ -96,7 +111,7 @@ export default function Today() {
             <ul className="divide-y divide-line">
               {actions.map((a) => (
                 <li key={a.id} className="flex items-center justify-between gap-4 px-4 py-3 text-[14px]">
-                  <span className="text-text">{a.action.replace(/_/g, ' ')}{a.note ? <span className="text-subtle"> · {a.note}</span> : null}</span>
+                  <span className="text-text first-letter:uppercase">{a.action.replace(/_/g, ' ')}{a.note ? <span className="text-subtle"> · {a.note}</span> : null}</span>
                   <time className="shrink-0 text-[12px] text-faint">{new Date(a.created_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</time>
                 </li>
               ))}

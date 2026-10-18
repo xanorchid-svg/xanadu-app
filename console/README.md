@@ -22,21 +22,27 @@ npx tsc -b && npm run build
 ## Database objects (all additive)
 | Object | Purpose |
 |---|---|
-| `team_members` | who's on the team (`admin` or `reviewer`) |
-| `team_actions` | audit log, readable by `is_team()` |
-| `am_team_member()` | am I on the list (any sign-in level) |
-| `is_team()` | on the list **and** aal2 |
-| `team_log(action, kind, target, note)` | write to the audit log |
-| `team_me()` | name, photo and role for the header |
-| `team_counts()` | numbers for Today |
+| `team_members`, `team_actions`, `team_templates` | who's on the team; audit log; editable message templates |
+| `profiles.heard_from` | "Where did you hear about Xanadu?" from every setup flow (e.g. `Instagram`, `Other: a podcast`) |
+| `profiles.community_removed` | set by the team from Safety; members can't undo it (guard trigger) and `in_community()` excludes them |
+| `messages: team reads team threads` policy | lets a verified team member read every member's thread with the team, so the Inbox updates live |
+| `am_team_member()`, `is_team()`, `team_is_admin()`, `team_require()`, `team_log()`, `team_me()` | the gate and helpers |
+| `team_counts()`, `team_signups(days)`, `team_heard_from()` | Today |
+| `team_list_applications()`, `team_review_member(member, approve/changes/decline/reopen, message)` | Applications (every answer from the setup forms) |
+| `team_list_offerings()`, `team_review_offering(offering, live/changes/review, message)` | Offerings |
+| `team_inbox()`, `team_reply(member, body)`, `team_member_thread(member)` | Inbox |
+| `team_list_members()`, `team_member_extra(member)` | Members |
+| `team_list_spaces()` | Spaces |
+| `team_list_reports()`, `team_resolve_report(report, dismiss/warn/remove, message)`, `team_restore_community(member)` | Safety |
+| `team_list_team()`, `team_add_member(email, role)` (admins only), `team_set_template(key, body)` | Settings |
+
+All team functions are `security definer`, check `is_team()` first, are executable by `authenticated` only (not `anon`), and write to the audit log when they change anything. Supabase's advisor flags them as "security definer callable by signed-in users": that's intended, the check is inside each function.
 
 ## Privacy
-The console never reads `direct_messages` (members' private Community chats); the team can't see them, by design. It shows each member's thread with the Xanadu team (`messages`) and nothing else.
+The console never reads `direct_messages` (members' private Community chats); the team can't see them, by design. It shows each member's thread with the Xanadu team (`messages`) and nothing else. Safety shows who reported whom and why, never the conversation.
 
-## Built
-1. Foundation: sign-in (email/password or Google), two-step setup and verify, Not authorised, sidebar/bottom-bar shell, Today (attention counts, growth numbers, recent activity), Settings.
-2. Members directory (`team_list_members`, `team_member_thread`): tabs by role, search, drawer with profile, way of living, team thread and history.
+## Screens
+Today (attention counts, totals, 30-day sign-ups chart, where people heard about us, recent activity) · Applications (Pending / Not finished / Approved / Declined, every form answer step by step, Approve / Ask for changes / Decline with editable templates, keys A C D J K) · Offerings (In review / Live / Needs changes / Past) · Inbox (live, spot and volunteer requests flagged, quick replies) · Members · Spaces (country and landscape filters) · Safety (dismiss, warn, remove from Community, allow back) · Settings (team, add helpers, templates, account).
 
-## Next (from claude/BACKEND-HANDOVER.md)
-2. Applications queue + review drawer + `team_review_member`.
-3. Offerings review. 4. Inbox + Members. 5. Today growth chart. 6. Spaces, Safety, Settings. 7. Emails (Resend), waitlist, CSV.
+## Later
+Approval emails (Resend + `notify` edge function), website waitlist, CSV export, swipe-to-decide on phones.

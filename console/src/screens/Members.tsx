@@ -136,10 +136,12 @@ function Avatar({ m, size = 'size-10' }: { m: Member; size?: string }) {
 function Drawer({ m, onClose }: { m: Member; onClose: () => void }) {
   const [thread, setThread] = useState<Msg[] | null>(null)
   const [acts, setActs] = useState<Act[]>([])
+  const [extra, setExtra] = useState<{ heard_from: string; community_removed: boolean; reports_against: number } | null>(null)
 
   useEffect(() => {
     setThread(null)
     supabase.rpc('team_member_thread', { p_member: m.id }).then(({ data }) => setThread((data as Msg[]) ?? []))
+    supabase.rpc('team_member_extra', { p_member: m.id }).then(({ data }) => setExtra(data as typeof extra))
     supabase.from('team_actions').select('id, action, note, created_at').eq('target_id', m.id).order('created_at', { ascending: false })
       .then(({ data }) => setActs((data as Act[]) ?? []))
     const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -174,7 +176,8 @@ function Drawer({ m, onClose }: { m: Member; onClose: () => void }) {
             {m.languages && <><dt className="text-faint">Languages</dt><dd className="text-text">{m.languages}</dd></>}
             <dt className="text-faint">Joined</dt><dd className="text-text">{day(m.created_at)}</dd>
             <dt className="text-faint">Last seen</dt><dd className="text-text">{day(m.last_sign_in_at)}</dd>
-            <dt className="text-faint">Community</dt><dd className="text-text">{m.community_visible ? 'Visible' : 'Not joined'}</dd>
+            <dt className="text-faint">Heard about us</dt><dd className="text-text">{extra?.heard_from || <span className="italic text-faint">Not answered</span>}</dd>
+            <dt className="text-faint">Community</dt><dd className="text-text">{extra?.community_removed ? 'Removed by the team' : m.community_visible ? 'Visible' : 'Not joined'}{extra?.reports_against ? ` · ${extra.reports_against} report${extra.reports_against > 1 ? 's' : ''}` : ''}</dd>
           </dl>
 
           {(landscapes.length > 0 || otherWays.length > 0) && (

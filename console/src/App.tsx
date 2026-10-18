@@ -5,9 +5,13 @@ import SignIn from './screens/SignIn'
 import NotAuthorised from './screens/NotAuthorised'
 import TwoStep from './screens/TwoStep'
 import Today from './screens/Today'
-import Soon from './screens/Soon'
 import Settings from './screens/Settings'
 import Members from './screens/Members'
+import Applications from './screens/Applications'
+import Offerings from './screens/Offerings'
+import Inbox from './screens/Inbox'
+import Spaces from './screens/Spaces'
+import Safety from './screens/Safety'
 import { Spinner } from './ui'
 
 function Door() {
@@ -20,12 +24,12 @@ function Door() {
     <Routes>
       <Route element={<Shell />}>
         <Route index element={<Today />} />
-        <Route path="applications" element={<Soon section="applications" />} />
-        <Route path="offerings" element={<Soon section="offerings" />} />
-        <Route path="inbox" element={<Soon section="inbox" />} />
+        <Route path="applications" element={<Applications />} />
+        <Route path="offerings" element={<Offerings />} />
+        <Route path="inbox" element={<Inbox />} />
         <Route path="members" element={<Members />} />
-        <Route path="spaces" element={<Soon section="spaces" />} />
-        <Route path="safety" element={<Soon section="safety" />} />
+        <Route path="spaces" element={<Spaces />} />
+        <Route path="safety" element={<Safety />} />
         <Route path="settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

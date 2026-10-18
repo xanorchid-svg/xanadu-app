@@ -29,6 +29,7 @@ export type Profile = {
   community_visible: boolean
   seeking: string
   lifestyle: string[]
+  heard_from: string
 }
 
 export const toDbRole = (r: Role): DbRole => r.toLowerCase() as DbRole
