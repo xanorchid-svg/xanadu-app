@@ -2,11 +2,14 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import type { Factor } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
-import { day, useTeamQuery, useTemplates } from '../lib/data'
+import { day, when, useTeamQuery, useTemplates } from '../lib/data'
 import { useGate } from '../gate'
 import { Icon, NAV } from '../Shell'
 import { Avatar, useToast } from '../parts'
 import { Button, Card, PageTitle } from '../ui'
+
+type EmailRow = { id: string; kind: string; status: 'queued' | 'sent' | 'failed' | 'skipped'; error: string | null; created_at: string; sent_at: string | null; name: string | null; email: string }
+const KIND: Record<string, string> = { welcome_seeker: 'Welcome (Seeker)', application_container: 'Application received (Container)', application_facilitator: 'Application received (Facilitator)' }
 
 type TeamRow = { user_id: string; role: 'admin' | 'reviewer'; added_at: string; email: string; name: string | null; photo_url: string | null }
 
@@ -69,6 +72,8 @@ export default function Settings() {
           </Card>
         </section>
       </div>
+
+      <Emails onRetried={(n) => toast.show(n ? `Sending ${n} email${n === 1 ? '' : 's'} again` : 'Nothing to retry')} />
 
       <section className="mt-8">
         <h2 className="mb-1 text-[12px] font-semibold uppercase tracking-[.16em] text-faint">Message templates</h2>
@@ -139,5 +144,48 @@ function Row({ label, value }: { label: string; value: string }) {
       <span className="text-[13px] text-faint">{label}</span>
       <span className="text-[14px] text-text">{value}</span>
     </div>
+  )
+}
+
+/** Welcome and application emails sent through Resend, newest first */
+function Emails({ onRetried }: { onRetried: (n: number) => void }) {
+  const log = useTeamQuery<EmailRow[]>('team_email_log', { p_limit: 30 })
+  const [busy, setBusy] = useState(false)
+  const failed = log.data?.filter((e) => e.status === 'failed').length ?? 0
+  async function retry() {
+    setBusy(true)
+    const { data } = await supabase.rpc('team_retry_emails')
+    setBusy(false); onRetried((data as number) ?? 0)
+    setTimeout(log.reload, 2500)
+  }
+  const tone = { sent: 'text-iri-sage', queued: 'text-gold-pale', failed: 'text-rose', skipped: 'text-faint' } as const
+  return (
+    <section className="mt-8">
+      <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h2 className="text-[12px] font-semibold uppercase tracking-[.16em] text-faint">Emails</h2>
+          <p className="mt-1 text-[13px] text-subtle">Members get one welcome email when they finish setting up: Seekers a welcome, Containers and Facilitators an “application received”. Sent through Resend from hello@dreamxanadu.com; replies go to networkxanadu@gmail.com.</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="quiet" className="h-9" onClick={log.reload}>Refresh</Button>
+          {failed > 0 && <Button className="h-9" onClick={retry} disabled={busy}>{busy ? 'Retrying…' : `Retry ${failed} failed`}</Button>}
+        </div>
+      </div>
+      <Card>
+        {!log.data?.length ? <p className="p-5 text-[13.5px] text-faint">No emails yet.</p> : (
+          <ul className="divide-y divide-line">
+            {log.data.map((e) => (
+              <li key={e.id} className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 text-[13.5px] sm:px-5">
+                <span className="min-w-0 flex-1 truncate text-text">{e.name || e.email} <span className="text-faint">· {e.email}</span></span>
+                <span className="text-subtle">{KIND[e.kind] ?? e.kind}</span>
+                <span className={`font-semibold capitalize ${tone[e.status]}`}>{e.status}</span>
+                <span className="text-[12px] text-faint">{when(e.sent_at ?? e.created_at)}</span>
+                {e.error && <span className="w-full text-[12px] text-rose">{e.error}</span>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </section>
   )
 }
