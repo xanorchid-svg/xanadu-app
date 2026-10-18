@@ -22,7 +22,8 @@ export default function SignIn() {
 
   async function withGoogle() {
     setError(null)
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } })
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/auth/callback` } })
+    // (a path is needed: Supabase's "https://backend.dreamxanadu.com/**" rule doesn't match the bare origin)
     if (error) setError(friendlyError(error.message))
   }
 
