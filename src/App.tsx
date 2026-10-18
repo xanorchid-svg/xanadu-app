@@ -23,6 +23,9 @@ import FindSpaces from './screens/facilitator/FindSpaces'
 import FacilitatorProfile from './screens/facilitator/Profile'
 import Community from './screens/community/Community'
 import Chat from './screens/community/Chat'
+import Messages from './screens/messages/Messages'
+import Thread from './screens/messages/Thread'
+import Compose from './screens/messages/Compose'
 
 /** Every page opens at the top: on navigation, on refresh, and when returning to a page. */
 function useScrollToTop() {
@@ -33,10 +36,10 @@ function useScrollToTop() {
   }, [location.pathname, location.search])
 }
 
-/** /messages: everyone's thread with the Xanadu team, with their own tab bar. */
-function MessagesFor() {
+/** /messages/team: the member's thread with the Xanadu team. */
+function TeamThread() {
   const { profile } = useAuth()
-  return <Inbox role={profile?.role === 'container' ? 'Container' : profile?.role === 'facilitator' ? 'Facilitator' : 'Seeker'} />
+  return <Inbox standalone role={profile?.role === 'container' ? 'Container' : profile?.role === 'facilitator' ? 'Facilitator' : 'Seeker'} />
 }
 
 function ApplyRedirect() {
@@ -70,7 +73,10 @@ export default function App() {
           <Route path="/space/:id" element={<RequireRole role="any"><Space /></RequireRole>} />
           <Route path="/saved" element={<RequireRole role="seeker"><Saved /></RequireRole>} />
           <Route path="/you" element={<RequireRole role="seeker"><You /></RequireRole>} />
-          <Route path="/messages" element={<RequireRole role="any"><MessagesFor /></RequireRole>} />
+          <Route path="/messages" element={<RequireRole role="any"><Messages /></RequireRole>} />
+          <Route path="/messages/team" element={<RequireRole role="any"><TeamThread /></RequireRole>} />
+          <Route path="/messages/new" element={<RequireRole role="any"><Compose /></RequireRole>} />
+          <Route path="/messages/:id" element={<RequireRole role="any"><Thread /></RequireRole>} />
 
           {/* Community: Seekers and Facilitators (Containers are sent to their home) */}
           <Route path="/community" element={<RequireRole role="any"><Community /></RequireRole>} />
@@ -84,11 +90,11 @@ export default function App() {
           <Route path="/container/new" element={<RequireRole role="container"><NewOffering /></RequireRole>} />
           <Route path="/container/offering" element={<RequireRole role="container"><ManageOffering /></RequireRole>} />
           <Route path="/container/space" element={<RequireRole role="container"><SpaceProfile /></RequireRole>} />
-          <Route path="/container/inbox" element={<RequireRole role="container"><Inbox role="Container" /></RequireRole>} />
+          <Route path="/container/inbox" element={<Navigate to="/messages" replace />} />
 
           <Route path="/facilitator" element={<RequireRole role="facilitator"><FacilitatorHome /></RequireRole>} />
           <Route path="/facilitator/spaces" element={<RequireRole role="facilitator"><FindSpaces /></RequireRole>} />
-          <Route path="/facilitator/inbox" element={<RequireRole role="facilitator"><Inbox role="Facilitator" /></RequireRole>} />
+          <Route path="/facilitator/inbox" element={<Navigate to="/messages" replace />} />
           <Route path="/facilitator/profile" element={<RequireRole role="facilitator"><FacilitatorProfile /></RequireRole>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />

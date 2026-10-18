@@ -4,6 +4,13 @@ import { action, day, fill, firstName, place, ROLE_LABEL, useTeamQuery, useTempl
 import { Answers, Avatar, Composer, Drawer, Section, Tabs, useToast } from '../parts'
 import { Button, Card, EmptyState, PageTitle, Spinner } from '../ui'
 
+/** Where the report was made. The console never shows the conversation itself. */
+export const fromWhere = (r: Report) => r.context === 'message' ? 'From a private message'
+  : r.context === 'space' ? `On their space page${r.context_label ? `: ${r.context_label}` : ''}`
+  : r.context === 'offering' ? `On an experience${r.context_label ? `: ${r.context_label}` : ''}`
+  : r.context === 'profile' ? 'On their profile' : 'In Community'
+const nameOf = (p: Report['reported']) => (p.role === 'container' && p.space_name ? p.space_name : p.name) || 'No name'
+
 type Tab = 'open' | 'resolved' | 'all'
 const TABS = [{ key: 'open', label: 'Open' }, { key: 'resolved', label: 'Resolved' }, { key: 'all', label: 'All' }] as const
 
@@ -47,9 +54,10 @@ export default function Safety() {
                   <Avatar src={r.reported.photo_url} size="size-11" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[14.5px] font-semibold text-text">
-                      {r.reported.name || 'No name'} <span className="font-normal text-faint">reported by {r.reporter.name || 'No name'}</span>
+                      {nameOf(r.reported)} <span className="font-normal text-faint">({ROLE_LABEL[r.reported.role]}) reported by {r.reporter.name || 'No name'}</span>
                     </p>
                     <p className="truncate text-[13px] text-subtle">{r.reason || 'No reason given'}</p>
+                    <p className="truncate text-[11.5px] text-gold-soft">{fromWhere(r)}</p>
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="text-[12px] text-faint">{day(r.created_at)}</p>
@@ -118,14 +126,16 @@ function ReportDrawer({ r, onClose, onDone }: { r: Report; onClose: () => void; 
       sub={<>{when(r.created_at)}{r.resolved ? <span className="text-iri-sage">Resolved: {action(r.resolved.action).replace(/^report /, '')}</span> : <span className="font-semibold text-rose">Open</span>}</>}>
       <Section title="Reason">
         <p className="whitespace-pre-line text-[14.5px] leading-relaxed text-text">{r.reason || 'No reason given'}</p>
+        <p className="mt-2 text-[13px] text-gold-soft">{fromWhere(r)}</p>
       </Section>
       <PersonBlock title="Reported" p={r.reported} extra={[
+        ...(r.reported.role === 'container' ? [['Space', r.reported.space_name ?? '—'] as [string, string]] : []),
         ['Reports against them', String(r.reported.reports_against)],
         ['In Community', removed ? 'Removed by the team' : r.reported.community_visible ? 'Yes' : 'Not visible'],
         ['Blocked by reporter', r.blocked ? 'Yes' : 'No'],
       ]} />
       <PersonBlock title="Reported by" p={r.reporter} />
-      <p className="text-[12.5px] text-faint">Their private Community chats are never shown in the console.</p>
+      <p className="text-[12.5px] text-faint">Members’ private messages and Community chats are never shown in the console. If you need to know more, ask the reporter in your Inbox.</p>
     </Drawer>
   )
 }

@@ -1,6 +1,7 @@
+import { useUnreadDot } from '../threads'
 import type { ReactNode } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-import { IconBack, IconCalendar, IconChat, IconCompass, IconHeart, IconHome, IconPeople, IconPin, IconPlus, IconUser } from './icons'
+import { IconBack, IconCalendar, IconChat, IconCompass, IconHome, IconPeople, IconPin, IconPlus, IconUser } from './icons'
 
 /** Full-height screen: scrolling content plus an optional fixed footer (tab bar or action bar). */
 export function Screen({ children, footer, header, className = '' }: { children: ReactNode; footer?: ReactNode; header?: ReactNode; className?: string }) {
@@ -122,15 +123,16 @@ export function Progress({ value }: { value: number }) {
 }
 
 /* ---------- Tab bars ---------- */
-type Tab = { to: string; label: string; icon: ReactNode; end?: boolean }
+type Tab = { to: string; label: string; icon: ReactNode; end?: boolean; dot?: boolean }
 
 function TabBar({ tabs, center, label }: { tabs: Tab[]; center?: Tab; label: string }) {
+  const unread = useUnreadDot()
   const item = (t: Tab) => (
     <NavLink key={t.to} to={t.to} end={t.end ?? true}
       className={({ isActive }) => `relative flex min-h-12 min-w-14 flex-col items-center justify-center gap-1 text-[10.5px] font-medium tracking-[0.01em] no-underline transition-colors ${isActive ? 'text-ink' : 'text-faint'}`}>
       {({ isActive }) => (
         <>
-          <span className={`transition-[filter,transform] duration-300 ${isActive ? 'scale-110 drop-shadow-[0_0_8px_rgba(181,139,224,.75)]' : ''}`}>{t.icon}</span>
+          <span className={`relative transition-[filter,transform] duration-300 ${isActive ? 'scale-110 drop-shadow-[0_0_8px_rgba(181,139,224,.75)]' : ''}`}>{t.icon}{t.dot && unread && <span aria-label="Unread messages" className="bg-iri-strong absolute -top-0.5 -right-1 h-2.5 w-2.5 rounded-full ring-2 ring-navy-deep" />}</span>
           {t.label}
           <span aria-hidden className={`bg-iri-strong absolute -bottom-0.5 h-[3px] rounded-full transition-all duration-300 ${isActive ? 'w-5 opacity-100' : 'w-0 opacity-0'}`} />
         </>
@@ -156,7 +158,7 @@ export const SeekerTabs = () => (
     { to: '/discover', label: 'Discover', icon: <IconCompass /> },
     { to: '/calendar', label: 'Calendar', icon: <IconCalendar /> },
     { to: '/community', label: 'Community', icon: <IconPeople size={22} />, end: false },
-    { to: '/saved', label: 'Saved', icon: <IconHeart /> },
+    { to: '/messages', label: 'Messages', icon: <IconChat />, end: false, dot: true },
     { to: '/you', label: 'You', icon: <IconUser /> },
   ]} />
 )
@@ -165,7 +167,7 @@ export const ContainerTabs = () => (
   <TabBar label="Host" center={{ to: '/container/new', label: 'New offering', icon: <IconPlus size={24} /> }} tabs={[
     { to: '/container', label: 'Home', icon: <IconHome /> },
     { to: '/container/offering', label: 'Offerings', icon: <IconCalendar /> },
-    { to: '/container/inbox', label: 'Inbox', icon: <IconChat /> },
+    { to: '/messages', label: 'Messages', icon: <IconChat />, end: false, dot: true },
     { to: '/container/space', label: 'Space', icon: <IconPin /> },
   ]} />
 )
@@ -175,7 +177,7 @@ export const FacilitatorTabs = () => (
     { to: '/facilitator', label: 'Home', icon: <IconHome /> },
     { to: '/facilitator/spaces', label: 'Spaces', icon: <IconPin /> },
     { to: '/community', label: 'Community', icon: <IconPeople size={22} />, end: false },
-    { to: '/facilitator/inbox', label: 'Inbox', icon: <IconChat /> },
+    { to: '/messages', label: 'Messages', icon: <IconChat />, end: false, dot: true },
     { to: '/facilitator/profile', label: 'Profile', icon: <IconUser /> },
   ]} />
 )

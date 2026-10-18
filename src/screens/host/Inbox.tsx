@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { BackButton, ContainerTabs, EmptyState, FacilitatorTabs, H1, Page, Screen, SeekerTabs } from '../../components/ui'
 import { IconSend } from '../../components/icons'
 import type { Role } from '../../data'
@@ -14,10 +14,11 @@ const fmt = (iso: string) => {
 }
 
 /** Inbox for every member: their thread with the Xanadu team, saved in the database. ?draft= opens it with a message started. */
-export default function Inbox({ role }: { role: Role }) {
+export default function Inbox({ role, standalone = false }: { role: Role; standalone?: boolean }) {
   const { messages, loading, send } = useMessages()
   const [params] = useSearchParams()
-  const [open, setOpen] = useState(() => !!params.get('draft'))
+  const navigate = useNavigate()
+  const [open, setOpen] = useState(() => standalone || !!params.get('draft'))
   const [draft, setDraft] = useState(() => params.get('draft') ?? '')
   const [error, setError] = useState('')
   const [sending, setSending] = useState(false)
@@ -50,8 +51,8 @@ export default function Inbox({ role }: { role: Role }) {
     return (
       <div className="flex h-full flex-col">
         <div className="flex items-center gap-3 border-b border-[#1F2B3E] px-4 pt-safe pb-3">
-          <BackButton onClick={() => setOpen(false)} />
-          <div className="flex flex-1 flex-col gap-0.5"><span className="text-[15px] font-semibold text-ink">Xanadu</span><span className="text-xs text-subtle">The Xanadu team · usually replies within a day</span></div>
+          <BackButton onClick={() => (standalone ? navigate('/messages') : setOpen(false))} />
+          <div className="flex flex-1 flex-col gap-0.5"><span className="text-[15px] font-semibold text-ink">Xanadu team</span><span className="text-xs text-subtle">Usually replies within a day</span></div>
         </div>
         <div className="flex flex-1 flex-col gap-2.5 overflow-y-auto p-4">
           {messages.map((m) => (

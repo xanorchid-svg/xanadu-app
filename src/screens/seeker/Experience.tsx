@@ -7,6 +7,7 @@ import { Loading, useAuth } from '../../auth'
 import { supabase } from '../../lib/supabase'
 import { placeLabel } from '../../data'
 import { useSaved, type Offering, type PublicSpace } from '../../store'
+import { ReportSheet } from '../../components/Report'
 
 type Row = Offering & { owner_id: string }
 
@@ -24,6 +25,8 @@ export default function Experience() {
   const [requested, setRequested] = useState(false)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
+  const [reporting, setReporting] = useState(false)
+  const [reported, setReported] = useState(false)
 
   useEffect(() => {
     let live = true
@@ -142,6 +145,10 @@ export default function Experience() {
             <span className="text-gold-soft" aria-hidden>›</span>
           </Link>
         )}
+        {space && !isOwner && (isSeeker || (profile?.role === 'facilitator' && profile.status === 'approved')) && (
+          <Link to={`/messages/new?to=${o.owner_id}&space=${space.id}&offering=${o.id}`}
+            className="-mt-2 flex min-h-12 items-center justify-center rounded-2xl border border-line-2 text-[15px] text-text no-underline">{`Message ${space.name}`}</Link>
+        )}
 
         {o.description && (
           <div className="flex flex-col gap-2">
@@ -170,7 +177,12 @@ export default function Experience() {
             ))}
           </div>
         )}
+        {!isOwner && (reported
+          ? <p className="m-0 text-center text-[13px] text-subtle">Thank you. Our team will look into it.</p>
+          : <button type="button" onClick={() => setReporting(true)} className="min-h-11 self-center text-[13px] text-subtle underline-offset-2 hover:underline">Report this experience</button>)}
       </div>
+      {reporting && <ReportSheet memberId={o.owner_id} name={space?.name || o.title} context="offering" contextId={o.id} onClose={() => setReporting(false)}
+        onDone={(blocked) => { setReporting(false); setReported(true); if (blocked) navigate(-1) }} />}
     </Screen>
   )
 }

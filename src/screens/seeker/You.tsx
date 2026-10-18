@@ -117,7 +117,7 @@ export default function You() {
 
         <section className="flex flex-col">
           <H2 className="mb-1.5 text-[22px]">Account</H2>
-          <Link to="/messages" className={row}>Messages <span className="text-[13px] text-gold-soft">Your thread with the Xanadu team ›</span></Link>
+          <Link to="/saved" className={row}>Saved <span className="text-[13px] text-gold-soft">Experiences and places you’ve hearted ›</span></Link>
           <div className={row}>Membership <span className="text-[13px] text-gold-soft">Founding Seeker · Free</span></div>
           <button type="button" onClick={() => { setDraft(me); setError(''); setEditing(true) }} className={`${row} w-full text-left`}>Profile <span className="text-[13px] text-gold-soft">Edit name, photo, region</span></button>
           <div className={row}>Where you live <span className="text-[13px] text-subtle">{me.region.trim() || 'Not added'}</span></div>

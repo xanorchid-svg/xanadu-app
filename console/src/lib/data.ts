@@ -45,8 +45,9 @@ export type Space = SpaceForm & {
 export type Person = { id: string; name: string | null; role: Role; photo_url: string | null; email: string | null; town: string | null; region: string | null }
 export type Report = {
   id: string; reason: string | null; created_at: string; blocked: boolean
+  context: 'community' | 'message' | 'space' | 'offering' | 'profile'; context_label: string | null
   reporter: Person
-  reported: Person & { community_visible: boolean; community_removed: boolean; reports_against: number }
+  reported: Person & { status: string; community_visible: boolean; community_removed: boolean; reports_against: number; space_name: string | null }
   resolved: { action: string; note: string | null; at: string } | null
 }
 

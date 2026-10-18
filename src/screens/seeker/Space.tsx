@@ -8,6 +8,7 @@ import { supabase } from '../../lib/supabase'
 import { LANDSCAPES, placeLabel, STAYS } from '../../data'
 import { LandChip } from '../../components/Lifestyle'
 import { fetchListings, useSaved, type Listing } from '../../store'
+import { ReportSheet } from '../../components/Report'
 
 type Row = {
   id: string; owner_id: string; name: string; town: string; region: string; country: string; about: string; practices: string[]; photos: string[]
@@ -25,6 +26,8 @@ export default function Space() {
   const [space, setSpace] = useState<Row | null | undefined>(undefined)
   const [listings, setListings] = useState<Listing[]>([])
   const [error, setError] = useState('')
+  const [reporting, setReporting] = useState(false)
+  const [reported, setReported] = useState(false)
 
   useEffect(() => {
     let live = true
@@ -49,6 +52,9 @@ export default function Space() {
   const isSeeker = profile?.role === 'seeker'
   const saved = isSaved('space', space.id)
   const ask = (topic: string) => `/messages?draft=${encodeURIComponent(topic)}`
+  // Seekers, and approved Facilitators, can message the space directly
+  const canMessage = !own && (isSeeker || (profile?.role === 'facilitator' && profile.status === 'approved'))
+  const message = (draft = '') => `/messages/new?to=${space.owner_id}&space=${space.id}${draft ? `&draft=${encodeURIComponent(draft)}` : ''}`
 
   const facts: [string, string][] = [
     [space.sleeps ? `Sleeps ${space.sleeps}` : 'Rooms', space.rooms],
@@ -80,6 +86,9 @@ export default function Space() {
           <h1 className="m-0 font-display text-[32px] font-medium text-ink">{space.name}</h1>
           <span className="text-sm text-muted">{`Retreat space · ${placeLabel(space)}`}</span>
           {own && <span className="text-[13px] text-subtle">This is how members see your space.</span>}
+          {canMessage && (
+            <Link to={message()} className="mt-2 flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-iri text-[15px] font-semibold text-navy no-underline hover:text-navy">{`Message ${space.name}`}</Link>
+          )}
           {error && <span role="alert" className="text-[13px] text-gold-pale">{error}</span>}
         </div>
         {space.about && <p className="m-0 text-[15px] leading-relaxed whitespace-pre-line text-muted">{space.about}</p>}
@@ -106,7 +115,7 @@ export default function Space() {
           <section className="flex flex-col gap-2 rounded-[18px] bg-plum p-4">
             <h2 className={h2}>Volunteer exchange</h2>
             <p className="m-0 text-[14px] leading-relaxed whitespace-pre-line text-muted">{space.volunteer_details || 'This space welcomes volunteers. Ask us for the details.'}</p>
-            {isSeeker && <Link to={ask(`Hi! I'd love to volunteer at ${space.name}. `)} className="flex min-h-11 items-center self-start rounded-xl bg-iri px-4 text-[13px] font-semibold text-navy no-underline hover:text-navy">Ask about volunteering</Link>}
+            {isSeeker && <Link to={message(`Hi! I'd love to volunteer at ${space.name}. `)} className="flex min-h-11 items-center self-start rounded-xl bg-iri px-4 text-[13px] font-semibold text-navy no-underline hover:text-navy">Ask about volunteering</Link>}
           </section>
         )}
         {facts.length > 0 && (
@@ -122,10 +131,15 @@ export default function Space() {
           {listings.length
             ? listings.map((e) => <ExperienceCard key={e.id} e={{ ...e, space }} />)
             : <span className="text-[13px] leading-normal text-subtle">No experiences scheduled yet.</span>}
-          {isSeeker && <Link to={ask(`Hi! I have a question about ${space.name}: `)} className="flex min-h-12 items-center justify-center rounded-2xl border border-line-2 text-[15px] text-text no-underline">Ask about this space</Link>}
+          {isSeeker && <Link to={ask(`Hi! I have a question about ${space.name}: `)} className="flex min-h-12 items-center justify-center rounded-2xl border border-line-2 text-[15px] text-text no-underline">Ask the Xanadu team</Link>}
         </section>
         <Reviews categories={['Space', 'Food', 'Hospitality', 'Location']} emptyText="Guests who book through Xanadu can review this space after their stay." />
+        {!own && (reported
+          ? <p className="m-0 text-center text-[13px] text-subtle">Thank you. Our team will look into it.</p>
+          : <button type="button" onClick={() => setReporting(true)} className="min-h-11 self-center text-[13px] text-subtle underline-offset-2 hover:underline">Report this space</button>)}
       </div>
+      {reporting && <ReportSheet memberId={space.owner_id} name={space.name} context="space" contextId={space.id} onClose={() => setReporting(false)}
+        onDone={(blocked) => { setReporting(false); setReported(true); if (blocked) navigate(-1) }} />}
     </Screen>
   )
 }

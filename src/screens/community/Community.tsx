@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ReportSheet } from '../../components/Report'
 import { Link, Navigate } from 'react-router-dom'
 import { Chip, EmptyState, FacilitatorTabs, Page, PrimaryButton, Screen, SeekerTabs, Segmented, Switch } from '../../components/ui'
 import { IconChat, IconPeople, IconPin } from '../../components/icons'
@@ -32,6 +33,8 @@ export default function Community() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [settings, setSettings] = useState(false)
+  const [reporting, setReporting] = useState<NearbyMember | null>(null)
+  const [notice, setNotice] = useState('')
 
   const userId = session?.user.id ?? ''
   const visible = !!profile?.community_visible
@@ -155,6 +158,7 @@ export default function Community() {
         )}
 
         {error && <p role="alert" className="m-0 text-[13px] text-gold-pale">{error}</p>}
+        {notice && <p role="status" className="m-0 rounded-xl bg-surface px-3.5 py-2.5 text-[13px] text-muted">{notice}</p>}
 
         <Segmented label="Community" options={TABS} value={tab} onChange={setTab} />
 
@@ -167,7 +171,7 @@ export default function Community() {
             {loading && !members.length
               ? <span className="text-[13px] text-subtle">Looking nearby…</span>
               : members.length
-                ? <div className="flex flex-col gap-2.5">{members.map((m) => <MemberCard key={m.id} m={m} act={act} me={userId} />)}</div>
+                ? <div className="flex flex-col gap-2.5">{members.map((m) => <MemberCard key={m.id} m={m} act={act} me={userId} onReport={() => setReporting(m)} />)}</div>
                 : (
                   <EmptyState icon={<IconPeople size={32} />} title={`No one within ${radius} miles yet`}
                     action={<button type="button" onClick={invite} className="flex min-h-11 items-center text-sm font-semibold text-gold-soft">{inviteNote || 'Invite a friend'}</button>}>
@@ -193,11 +197,15 @@ export default function Community() {
             )
         )}
       </Page>
+      {reporting && (
+        <ReportSheet memberId={reporting.id} name={reporting.name} context="community" onClose={() => setReporting(null)}
+          onDone={(blocked) => { setReporting(null); setNotice('Thank you. Our team will look into it.'); if (blocked) reload() }} />
+      )}
     </Screen>
   )
 }
 
-function MemberCard({ m, act, me }: { m: NearbyMember; act: (fn: () => Promise<string | null>) => void; me: string }) {
+function MemberCard({ m, act, me, onReport }: { m: NearbyMember; act: (fn: () => Promise<string | null>) => void; me: string; onReport: () => void }) {
   let action
   if (m.connection_status === 'accepted') action = <Link to={`/community/chat/${m.connection_id}`} className={`${btn} flex items-center bg-iri text-navy no-underline hover:text-navy`}>Message</Link>
   else if (m.connection_status === 'pending' && m.incoming) action = (
@@ -219,6 +227,7 @@ function MemberCard({ m, act, me }: { m: NearbyMember; act: (fn: () => Promise<s
         {m.practices?.length > 0 && <span className="truncate text-xs text-subtle">{m.practices.slice(0, 3).join(' · ')}</span>}
       </div>
       {action}
+      <button type="button" onClick={onReport} aria-label={`Report ${m.name.trim() || 'this member'}`} className="-mr-1.5 flex h-10 w-8 flex-none items-center justify-center text-lg text-faint">⋯</button>
     </div>
   )
 }
