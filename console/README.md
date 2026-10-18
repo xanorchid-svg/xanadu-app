@@ -30,8 +30,12 @@ npx tsc -b && npm run build
 | `team_me()` | name, photo and role for the header |
 | `team_counts()` | numbers for Today |
 
+## Privacy
+The console never reads `direct_messages` (members' private Community chats); the team can't see them, by design. It shows each member's thread with the Xanadu team (`messages`) and nothing else.
+
 ## Built
 1. Foundation: sign-in (email/password or Google), two-step setup and verify, Not authorised, sidebar/bottom-bar shell, Today (attention counts, growth numbers, recent activity), Settings.
+2. Members directory (`team_list_members`, `team_member_thread`): tabs by role, search, drawer with profile, way of living, team thread and history.
 
 ## Next (from claude/BACKEND-HANDOVER.md)
 2. Applications queue + review drawer + `team_review_member`.

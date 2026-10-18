@@ -7,9 +7,9 @@ type Item = { to: string; label: string; icon: string; phone?: boolean }
 export const NAV: Item[] = [
   { to: '/', label: 'Today', icon: 'M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4M12 8a4 4 0 100 8 4 4 0 000-8z', phone: true },
   { to: '/applications', label: 'Applications', icon: 'M9 4h6M8 4H6a1 1 0 00-1 1v15a1 1 0 001 1h12a1 1 0 001-1V5a1 1 0 00-1-1h-2M9 12l2 2 4-4', phone: true },
-  { to: '/offerings', label: 'Offerings', icon: 'M4 7h16v13H4zM4 7l2-3h12l2 3M9 12h6', phone: true },
+  { to: '/offerings', label: 'Offerings', icon: 'M4 7h16v13H4zM4 7l2-3h12l2 3M9 12h6' },
   { to: '/inbox', label: 'Inbox', icon: 'M4 5h16v11H8l-4 4zM8 9h8M8 12h5', phone: true },
-  { to: '/members', label: 'Members', icon: 'M9 11a3 3 0 100-6 3 3 0 000 6zM3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 5.2a3 3 0 010 5.6M18 14.4c1.8.9 3 2.9 3 5.6' },
+  { to: '/members', label: 'Members', icon: 'M9 11a3 3 0 100-6 3 3 0 000 6zM3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 5.2a3 3 0 010 5.6M18 14.4c1.8.9 3 2.9 3 5.6', phone: true },
   { to: '/spaces', label: 'Spaces', icon: 'M3 20h18M5 20V10l7-6 7 6v10M10 20v-5h4v5' },
   { to: '/safety', label: 'Safety', icon: 'M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z' },
   { to: '/settings', label: 'Settings', icon: 'M12 9a3 3 0 100 6 3 3 0 000-6zM19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z', phone: true },

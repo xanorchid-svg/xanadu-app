@@ -7,6 +7,7 @@ import TwoStep from './screens/TwoStep'
 import Today from './screens/Today'
 import Soon from './screens/Soon'
 import Settings from './screens/Settings'
+import Members from './screens/Members'
 import { Spinner } from './ui'
 
 function Door() {
@@ -22,7 +23,7 @@ function Door() {
         <Route path="applications" element={<Soon section="applications" />} />
         <Route path="offerings" element={<Soon section="offerings" />} />
         <Route path="inbox" element={<Soon section="inbox" />} />
-        <Route path="members" element={<Soon section="members" />} />
+        <Route path="members" element={<Members />} />
         <Route path="spaces" element={<Soon section="spaces" />} />
         <Route path="safety" element={<Soon section="safety" />} />
         <Route path="settings" element={<Settings />} />
