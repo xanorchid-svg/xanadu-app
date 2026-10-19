@@ -1,0 +1,80 @@
+/**
+ * Instagram & Facebook posts prepared by Claude (the content role).
+ * Slides live in /public/social/<id>/NN.jpg, so each one has a stable public link
+ * (backend.dreamxanadu.com/social/<id>/NN.jpg) that Metricool can fetch.
+ * Every post goes to Metricool as a DRAFT. Xan checks it there and schedules it herself.
+ * To add a post: render the slides, drop them in public/social/<id>/, add an entry here.
+ */
+export type SocialPost = {
+  id: string
+  title: string
+  /** planned publish time, America/Chicago */
+  date: string
+  format: 'Single image' | 'Carousel' | 'Reel'
+  audience: 'Seekers' | 'Spaces & guides' | 'Everyone'
+  slides: number
+  caption: string
+  /** AI imagery is mood only, never a real place or member (see claude/CONTENT-RULES.md) */
+  aiImagery: boolean
+  status: 'draft' | 'scheduled' | 'posted'
+}
+
+export const POSTS: SocialPost[] = [
+  {
+    id: '01-begins',
+    title: 'Xanadu begins with you',
+    date: '2026-10-21T10:00',
+    format: 'Single image',
+    audience: 'Everyone',
+    slides: 1,
+    aiImagery: true,
+    status: 'draft',
+    caption: `Xanadu begins with you.
+
+Some of us aren't looking for a holiday. We're looking for a place to live differently for a while: a week, a month, a season.
+
+Xanadu is a network for awakening places. We match you with spaces and guides we've personally reviewed, starting in Nosara, Costa Rica.
+
+The doors open soon. Join the waitlist (link in bio).
+
+#xanadu #nosara #costarica #wellnesstravel #slowtravel`,
+  },
+  {
+    id: '02-what-is-xanadu',
+    title: 'What is Xanadu',
+    date: '2026-10-22T10:00',
+    format: 'Carousel',
+    audience: 'Seekers',
+    slides: 6,
+    aiImagery: true,
+    status: 'draft',
+    caption: `A network for awakening places.
+
+You tell us how long you want to stay, how you want to spend your days and the kind of land that calls you. We introduce you to retreats, classes, trainings, volunteer exchanges and long stays, with places and guides we've personally reviewed.
+
+We're beginning in Nosara, Costa Rica. Join the waitlist (link in bio).
+
+#xanadu #nosara #costarica #yogaretreat #volunteerabroad #slowtravel #retreat`,
+  },
+  {
+    id: '03-why-join',
+    title: 'Why join the founding circle',
+    date: '2026-10-23T10:00',
+    format: 'Carousel',
+    audience: 'Spaces & guides',
+    slides: 5,
+    aiImagery: true,
+    status: 'draft',
+    caption: `For the spaces and guides of Nosara.
+
+We're inviting 15 spaces and 15 guides to be Xanadu's founding circle. It's free, with no commission. You get guests and collaborators matched to what you hold, a personally reviewed ✦ profile, and our storytelling behind you.
+
+I'll be in Nosara in early November to meet each of you in person.
+
+Apply to the founding circle (link in bio), or send me a message.
+
+#nosara #nosaracostarica #guanacaste #retreatcenter #retreatleader #yogateacher #foundingmember`,
+  },
+]
+
+export const slideUrl = (p: SocialPost, n: number) => `/social/${p.id}/${String(n).padStart(2, '0')}.jpg`

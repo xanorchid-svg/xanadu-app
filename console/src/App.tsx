@@ -17,6 +17,7 @@ const Inbox = lazy(() => import('./screens/Inbox'))
 const Spaces = lazy(() => import('./screens/Spaces'))
 const Safety = lazy(() => import('./screens/Safety'))
 const Emails = lazy(() => import('./screens/Emails'))
+const Instagram = lazy(() => import('./screens/Instagram'))
 
 function Door() {
   const { state } = useGate()
@@ -36,6 +37,7 @@ function Door() {
         <Route path="spaces" element={<Spaces />} />
         <Route path="safety" element={<Safety />} />
         <Route path="emails" element={<Emails />} />
+        <Route path="instagram" element={<Instagram />} />
         <Route path="settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
