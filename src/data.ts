@@ -23,6 +23,7 @@ export type Role = 'Seeker' | 'Container' | 'Facilitator'
 
 export const PRACTICES = [
   'Yoga', 'Breathwork', 'Meditation', 'Sound', 'Ecstatic dance', 'Kirtan', 'Trainings', "Women's", "Men's",
+  'Plant medicine', 'Residencies', 'Recovery programs',
 ] as const
 
 /**

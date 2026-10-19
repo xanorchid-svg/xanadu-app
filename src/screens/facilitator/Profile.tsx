@@ -7,7 +7,7 @@ import { PRACTICES } from '../../data'
 
 const VIEWS = ['My profile', 'As Seekers see it'] as const
 const h2 = 'm-0 font-display text-[22px] font-semibold text-ink'
-const FAC_PRACTICES = PRACTICES.filter((p) => p !== 'Trainings')
+const FAC_PRACTICES = PRACTICES.filter((p) => p !== 'Trainings' && p !== 'Residencies')
 
 export default function FacilitatorProfile() {
   const [profile, save] = useFacilitatorProfile()

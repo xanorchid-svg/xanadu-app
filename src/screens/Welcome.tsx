@@ -286,7 +286,7 @@ function FacilitatorWelcome() {
       {step === 1 && (
         <>
           <Title sub="Seekers find you by what you hold.">Your practice</Title>
-          <PracticePicker label="What you offer" options={HOST_PRACTICES} value={practices} onChange={setPractices} />
+          <PracticePicker label="What you offer" options={HOST_PRACTICES.filter((p) => p !== 'Residencies')} value={practices} onChange={setPractices} />
           <TextField label="Languages" value={languages} onChange={setLanguages} placeholder="e.g. English, Español" />
           <TextArea label="About you" value={about} onChange={setAbout} rows={6} placeholder="How you came to this work and what people can expect when they sit with you." />
         </>
