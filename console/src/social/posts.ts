@@ -76,6 +76,42 @@ Apply to the founding circle (link in bio), or send me a message.
 #nosara #nosaracostarica #guanacaste #retreatcenter #retreatleader #yogateacher #foundingmember`,
   },
   {
+    id: '04-some-places',
+    title: 'Some places call you back (reel)',
+    date: '2026-10-24T10:00',
+    format: 'Reel',
+    audience: 'Seekers',
+    slides: 1,
+    aiImagery: true,
+    status: 'draft',
+    caption: `Some places call you back.
+
+Xanadu is being built for the people who answer. Starting in Nosara, Costa Rica.
+
+Join the waitlist (link in bio).
+
+#nosara #costarica #puravida #guanacaste #slowtravel`,
+  },
+  {
+    id: '05-why-im-building',
+    title: "Why I'm building Xanadu (reel)",
+    date: '2026-10-25T10:00',
+    format: 'Reel',
+    audience: 'Spaces & guides',
+    slides: 1,
+    aiImagery: false,
+    status: 'draft',
+    caption: `Why I'm building Xanadu.
+
+I kept meeting incredible spaces and guides, and people searching for exactly them. They couldn't find each other.
+
+I'll be in Nosara in early November, meeting the spaces and guides joining our founding circle. If that's you, apply (link in bio) or send me a message. I'd love to meet.
+
+Xan ✦
+
+#xanadu #founder #nosara #womenfounders #retreatleader`,
+  },
+  {
     id: '06-a-day',
     title: 'A day in a season-long stay',
     date: '2026-10-26T10:00',
@@ -147,3 +183,5 @@ Seekers: join the waitlist.
 ]
 
 export const slideUrl = (p: SocialPost, n: number) => `/social/${p.id}/${String(n).padStart(2, '0')}.jpg`
+/** Reels: the video lives next to its cover (01.jpg) as reel.mp4 */
+export const videoUrl = (p: SocialPost) => `/social/${p.id}/reel.mp4`

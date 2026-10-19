@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { POSTS, slideUrl, type SocialPost } from '../social/posts'
+import { POSTS, slideUrl, videoUrl, type SocialPost } from '../social/posts'
 import { useToast } from '../parts'
 import { Button, Card, PageTitle } from '../ui'
 
@@ -52,7 +52,11 @@ export default function Instagram() {
               {isOpen && (
                 <div className="border-t border-line px-5 py-5">
                   <div className="-mx-5 flex snap-x gap-3 overflow-x-auto px-5 pb-3">
-                    {Array.from({ length: p.slides }, (_, i) => (
+                    {p.format === 'Reel' && (
+                      <video src={videoUrl(p)} poster={slideUrl(p, 1)} controls playsInline preload="none"
+                        className="h-[427px] w-[240px] shrink-0 snap-start rounded-xl bg-navy object-cover ring-1 ring-line sm:h-[533px] sm:w-[300px]" />
+                    )}
+                    {p.format !== 'Reel' && Array.from({ length: p.slides }, (_, i) => (
                       <a key={i} href={slideUrl(p, i + 1)} target="_blank" rel="noreferrer" className="shrink-0 snap-start">
                         <img src={slideUrl(p, i + 1)} alt={`${p.title}, slide ${i + 1}`} loading="lazy"
                           className="h-[300px] w-[240px] rounded-xl object-cover ring-1 ring-line sm:h-[375px] sm:w-[300px]" />
@@ -63,6 +67,9 @@ export default function Instagram() {
                     <pre className="max-h-80 overflow-y-auto whitespace-pre-wrap rounded-xl bg-navy/70 p-4 font-sans text-[13.5px] leading-relaxed text-text ring-1 ring-line">{p.caption}</pre>
                     <div className="flex flex-row flex-wrap gap-2 md:flex-col">
                       <Button variant="quiet" className="h-10" onClick={() => copy(p.caption)}>Copy caption</Button>
+                      {p.format === 'Reel' && (
+                        <a href={videoUrl(p)} download className="text-[12.5px] text-subtle underline-offset-2 hover:text-text">Download reel (MP4)</a>
+                      )}
                       {Array.from({ length: p.slides }, (_, i) => (
                         <a key={i} href={slideUrl(p, i + 1)} download className="text-[12.5px] text-subtle underline-offset-2 hover:text-text">Download slide {i + 1}</a>
                       ))}
