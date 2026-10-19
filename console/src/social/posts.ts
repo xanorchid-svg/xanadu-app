@@ -93,17 +93,17 @@ Join the waitlist (link in bio).
 #nosara #costarica #puravida #guanacaste #slowtravel`,
   },
   {
-    id: '05-barely-a-season',
-    title: "You've BARELY done a season (reel)",
+    id: '05-a-season',
+    title: 'A season is a way of living (reel)',
     date: '2026-10-25T10:00',
     format: 'Reel',
     audience: 'Seekers',
     slides: 1,
     aiImagery: true,
     status: 'draft',
-    caption: `You've done a retreat. You've barely done a season. 🌊
+    caption: `A week is a holiday. A season is a way of living. 🌊
 
-Week 1, you sleep. Week 2, your phone forgets you. By week 4, you're not leaving.
+Week one, you finally sleep. Week two, you stop checking your phone. By week four, it starts to feel like home.
 
 Xanadu matches you with places and guides we've personally reviewed, for a week, a month or a season. Starting in Nosara, Costa Rica.
 
