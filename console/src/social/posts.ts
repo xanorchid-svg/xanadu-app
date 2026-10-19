@@ -93,23 +93,23 @@ Join the waitlist (link in bio).
 #nosara #costarica #puravida #guanacaste #slowtravel`,
   },
   {
-    id: '05-why-im-building',
-    title: "Why I'm building Xanadu (reel)",
+    id: '05-barely-a-season',
+    title: "You've BARELY done a season (reel)",
     date: '2026-10-25T10:00',
     format: 'Reel',
-    audience: 'Spaces & guides',
+    audience: 'Seekers',
     slides: 1,
-    aiImagery: false,
+    aiImagery: true,
     status: 'draft',
-    caption: `Why I'm building Xanadu.
+    caption: `You've done a retreat. You've barely done a season. 🌊
 
-I kept meeting incredible spaces and guides, and people searching for exactly them. They couldn't find each other.
+Week 1, you sleep. Week 2, your phone forgets you. By week 4, you're not leaving.
 
-I'll be in Nosara in early November, meeting the spaces and guides joining our founding circle. If that's you, apply (link in bio) or send me a message. I'd love to meet.
+Xanadu matches you with places and guides we've personally reviewed, for a week, a month or a season. Starting in Nosara, Costa Rica.
 
-Xan ✦
+Send this to the friend who needs a month, not a week. Join the waitlist (link in bio).
 
-#xanadu #founder #nosara #womenfounders #retreatleader`,
+#slowtravel #longstay #nosara #costarica #digitalnomad`,
   },
   {
     id: '06-a-day',
