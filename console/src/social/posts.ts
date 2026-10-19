@@ -180,6 +180,84 @@ Seekers: join the waitlist.
 
 #nosara #nosaracostarica #guanacaste #retreatcenter #retreatleader #foundingmember`,
   },
+  {
+    id: '10-just-one-week',
+    title: 'POV: you said "just one week" (reel)',
+    date: '2026-10-30T10:00',
+    format: 'Reel',
+    audience: 'Seekers',
+    slides: 1,
+    aiImagery: true,
+    status: 'draft',
+    caption: `POV: you said “just one week.” 😅
+
+Week six. You know the tides, you have a favourite café, and you're extending. Again.
+
+Xanadu is for the stays that turn into seasons: places and guides we've personally reviewed, starting in Nosara, Costa Rica.
+
+Tag the friend who always extends. Join the waitlist (link in bio).
+
+#slowtravel #longstay #nosara #costarica #digitalnomad`,
+  },
+  {
+    id: '11-which-stay',
+    title: 'Quiz: which stay are you?',
+    date: '2026-11-01T10:00',
+    format: 'Carousel',
+    audience: 'Seekers',
+    slides: 5,
+    aiImagery: true,
+    status: 'draft',
+    caption: `Which stay are you? 👇
+
+A · The sunrise shala
+B · The surf month
+C · The slow remote season
+
+Tell us in the comments. When the doors open, we'll match you with places and guides we've personally reviewed, starting in Nosara, Costa Rica.
+
+Join the waitlist (link in bio).
+
+#nosara #yogaretreat #surftrip #remotework #slowtravel`,
+  },
+  {
+    id: '12-signs',
+    title: 'Signs you need a season, not a holiday',
+    date: '2026-11-03T10:00',
+    format: 'Carousel',
+    audience: 'Seekers',
+    slides: 7,
+    aiImagery: false,
+    status: 'draft',
+    caption: `Signs you need a season, not a holiday.
+
+Which one is you? Be honest. 👀
+
+A week is a holiday. A season is a way of living. Xanadu matches you with places and guides we've personally reviewed, for a week, a month or a season.
+
+Send this to the friend who needs one. Join the waitlist (link in bio).
+
+#slowtravel #longstay #nosara #costarica #worklifebalance`,
+  },
+  {
+    id: '13-week-vs-season',
+    title: 'A week vs a season',
+    date: '2026-11-05T10:00',
+    format: 'Carousel',
+    audience: 'Seekers',
+    slides: 6,
+    aiImagery: true,
+    status: 'draft',
+    caption: `A week vs a season. 🌊
+
+Save this for the next time someone asks why you're staying so long.
+
+Xanadu matches you with places and guides we've personally reviewed, for a week, a month or a season. Starting in Nosara, Costa Rica.
+
+Which one are you planning? Tell us below. Join the waitlist (link in bio).
+
+#slowtravel #longstay #nosara #costarica #digitalnomad`,
+  },
 ]
 
 export const slideUrl = (p: SocialPost, n: number) => `/social/${p.id}/${String(n).padStart(2, '0')}.jpg`
