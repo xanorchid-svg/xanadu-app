@@ -7,6 +7,7 @@ const METRICOOL = 'https://app.metricool.com/planner?blogId=7525297'
 const STATUS: Record<SocialPost['status'], { label: string; cls: string }> = {
   draft: { label: 'Draft in Metricool', cls: 'bg-gold/15 text-gold-pale ring-1 ring-gold/40' },
   scheduled: { label: 'Scheduled', cls: 'ring-iri text-ink' },
+  manual: { label: 'Post manually', cls: 'bg-iri-teal/15 text-text ring-1 ring-iri-teal/50' },
   posted: { label: 'Posted', cls: 'bg-slate/30 text-subtle ring-1 ring-slate' },
 }
 
@@ -30,12 +31,12 @@ export default function Instagram() {
       </PageTitle>
 
       <p className="mb-6 max-w-2xl text-[14px] leading-relaxed text-subtle">
-        Each post below is waiting in Metricool as a draft. Check the slides and caption here or there, then schedule it in Metricool.
+        Posts marked “Draft in Metricool” are waiting there for you to schedule. Posts marked “Post manually” are yours to post from the app: download the image and copy the caption.
         Nothing goes live until you do. Images are AI-generated for mood and checked for hands, faces, text and physics.
       </p>
 
       <div className="space-y-5">
-        {POSTS.map((p) => {
+        {[...POSTS].sort((a, b) => a.date.localeCompare(b.date)).map((p) => {
           const s = STATUS[p.status]
           const isOpen = open === p.id
           return (

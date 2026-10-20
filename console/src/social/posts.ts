@@ -16,7 +16,7 @@ export type SocialPost = {
   caption: string
   /** AI imagery is mood only, never a real place or member (see claude/CONTENT-RULES.md) */
   aiImagery: boolean
-  status: 'draft' | 'scheduled' | 'posted'
+  status: 'draft' | 'scheduled' | 'posted' | 'manual'
 }
 
 export const POSTS: SocialPost[] = [
@@ -297,6 +297,100 @@ Xanadu is a marketplace for retreat centers, studios and guides. Fill your class
 Founding circle in Nosara: free to join, no commission. Spaces and guides, apply (link in bio).
 
 #nosara #retreatcenter #yogateacher #retreatleader #guanacaste`,
+  },
+  {
+    id: '16-pace-of-nature',
+    title: 'Quote · Adopt the pace of nature',
+    date: '2026-10-22T18:00',
+    format: 'Single image',
+    audience: 'Everyone',
+    slides: 1,
+    aiImagery: false,
+    status: 'manual',
+    caption: `“Adopt the pace of nature: her secret is patience.” Ralph Waldo Emerson
+
+Where in your life could you slow down this week? 🌿
+
+#slowliving #nature #mindfulness #wellness`,
+  },
+  {
+    id: '17-rest-is-rhythm',
+    title: 'Note · Rest is part of the rhythm',
+    date: '2026-10-24T18:00',
+    format: 'Single image',
+    audience: 'Everyone',
+    slides: 1,
+    aiImagery: false,
+    status: 'manual',
+    caption: `Rest is not a reward. It's part of the rhythm. ✦
+
+Save this for the week you need the reminder.
+
+#rest #slowliving #wellbeing #selfcare`,
+  },
+  {
+    id: '18-morning-light',
+    title: 'Wellness · Step outside in the first hour',
+    date: '2026-10-27T18:00',
+    format: 'Single image',
+    audience: 'Everyone',
+    slides: 1,
+    aiImagery: false,
+    status: 'manual',
+    caption: `A small ritual: step outside in the first hour of your day. ☀️
+
+Morning daylight helps set your body clock, so you wake more alert and wind down more easily at night. No phone, no plan. Just light.
+
+Will you try it tomorrow?
+
+#morningroutine #wellness #sleep #slowliving`,
+  },
+  {
+    id: '19-deliberately',
+    title: 'Quote · Live deliberately',
+    date: '2026-10-31T18:00',
+    format: 'Single image',
+    audience: 'Everyone',
+    slides: 1,
+    aiImagery: false,
+    status: 'manual',
+    caption: `“I went to the woods because I wished to live deliberately.” Henry David Thoreau, Walden
+
+What would living deliberately look like for you? Tell us below. 🌲
+
+#slowliving #intentionalliving #nature #mindfulness`,
+  },
+  {
+    id: '20-two-hours',
+    title: 'Wellness · 120 minutes a week in nature',
+    date: '2026-11-02T18:00',
+    format: 'Single image',
+    audience: 'Everyone',
+    slides: 1,
+    aiImagery: false,
+    status: 'manual',
+    caption: `120 minutes a week. 🌿
+
+In a study of nearly 20,000 people, those who spent at least two hours a week in nature were more likely to report good health and well-being (White et al., Scientific Reports, 2019).
+
+It doesn't have to be all at once. How are you getting your two hours this week?
+
+#nature #wellness #wellbeing #getoutside`,
+  },
+  {
+    id: '21-not-in-a-hurry',
+    title: 'Note · Not found in a hurry',
+    date: '2026-11-05T18:00',
+    format: 'Single image',
+    audience: 'Everyone',
+    slides: 1,
+    aiImagery: false,
+    status: 'manual',
+    caption: `Not everything worth finding is found in a hurry. ✦
+
+Send this to someone who needs to slow down.
+
+#slowliving #slowtravel #mindfulness #wellbeing`,
   },
 ]
 
