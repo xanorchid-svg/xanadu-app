@@ -85,9 +85,30 @@ Apply to the founding circle (link in bio), or send me a message.
 #nosara #nosaracostarica #guanacaste #retreatcenter #retreatleader #yogateacher #foundingmember`,
   },
   {
+    id: '27-follow-along',
+    title: 'Want to find out more? Follow along (teaser reel)',
+    date: '2026-10-30T10:00',
+    format: 'Reel',
+    cover: 'photo',
+    imagery: 'AI',
+    audience: 'Everyone',
+    slides: 1,
+    aiImagery: true,
+    status: 'draft',
+    caption: `Want to find out more? Follow along. ✦
+
+Looking for alternative ways of living, but don't know where to start? Xanadu starts with you.
+
+xan·a·du (noun): an idyllic, exotic, or luxurious place. (Merriam-Webster)
+
+Join the waitlist (link in bio).
+
+#xanadu #slowliving #alternativeliving #nosara #costarica`,
+  },
+  {
     id: '04-some-places',
     title: 'Some places call you back (reel)',
-    date: '2026-10-30T10:00',
+    date: '2026-12-21T10:00',
     format: 'Reel',
     cover: 'photo',
     imagery: 'AI',
@@ -146,7 +167,7 @@ That's what Xanadu is for. Join the waitlist (link in bio).
   {
     id: '07-reviewed',
     title: 'Every space is personally reviewed ✦',
-    date: '2026-12-21T10:00',
+    date: '2026-11-23T10:00',
     format: 'Carousel',
     cover: 'photo',
     imagery: 'AI',
@@ -334,7 +355,7 @@ Founding circle in Nosara: free to join, no commission. Spaces and guides, apply
   {
     id: '16-pace-of-nature',
     title: 'Adopt the pace of nature (4 ways)',
-    date: '2026-11-02T10:00',
+    date: '2026-12-18T10:00',
     format: 'Carousel',
     cover: 'white',
     imagery: 'Graphic only',
@@ -530,9 +551,9 @@ Tag who you'd go with. Join the waitlist (link in bio).
   {
     id: '26-do-both',
     title: 'btw, it\'s cool to do both (split-screen carousel)',
-    date: '2026-11-23T10:00',
+    date: '2026-11-02T10:00',
     format: 'Carousel',
-    cover: 'photo',
+    cover: 'white',
     imagery: 'AI',
     audience: 'Everyone',
     slides: 7,

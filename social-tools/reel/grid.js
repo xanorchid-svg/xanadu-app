@@ -6,7 +6,8 @@ const C = '/home/claude/xanadu-app/console/public/social';
 const IG = '/home/claude/ig';
 // newest first: [folder, isReel, date]
 const ORDER = [
-  ['07-reviewed', 0, 'Dec 21'],
+  ['04-some-places', 1, 'Dec 21'],
+  ['16-pace-of-nature', 0, 'Dec 18'],
   ['25-your-sign', 1, 'Dec 16'],
   ['21-not-in-a-hurry', 0, 'Dec 14'],
   ['15-grows-together', 1, 'Dec 11'],
@@ -17,7 +18,7 @@ const ORDER = [
   ['19-deliberately', 0, 'Nov 30'],
   ['23-day-1-vs-day-30', 1, 'Nov 27'],
   ['13-week-vs-season', 0, 'Nov 25'],
-  ['26-do-both', 0, 'Nov 23'],
+  ['07-reviewed', 0, 'Nov 23'],
   ['18-morning-light', 0, 'Nov 20'],
   ['08-who', 0, 'Nov 18'],
   ['14-three-ways-in', 1, 'Nov 16'],
@@ -26,8 +27,8 @@ const ORDER = [
   ['10-just-one-week', 1, 'Nov 9'],
   ['20-two-hours', 0, 'Nov 6'],
   ['05-a-season', 1, 'Nov 4'],
-  ['16-pace-of-nature', 0, 'Nov 2'],
-  ['04-some-places', 1, 'Oct 30'],
+  ['26-do-both', 0, 'Nov 2'],
+  ['27-follow-along', 1, 'Oct 30'],
   ['09-circle', 0, 'Oct 28'],
   ['02-what-is-xanadu', 0, 'Oct 26'],
   ['22-unpopular-opinion', 1, 'Oct 23'],

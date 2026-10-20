@@ -9,7 +9,7 @@ const F = (p) => 'file://' + p;
 const font = (fam, file, w, style = 'normal') =>
   `@font-face{font-family:'${fam}';src:url('${F(IG + '/node_modules/@fontsource/' + file)}') format('woff2');font-weight:${w};font-style:${style}}`;
 const IMG = path.join(__dirname, 'img2');
-// Oct 19 v2 (Xan): stacked top/bottom halves, photo cover, all-new AI images not used anywhere else.
+// Oct 19 v2 (Xan): stacked top/bottom halves, original white type cover (Xan, Oct 20), all-new AI images not used anywhere else.
 const PAIRS = [
   [['work', '50% 45%', 'work hard'], ['sunset', '50% 55%', 'log off at sunset']],
   [['surf', '50% 55%', 'surf at sunrise'], ['hammock', '50% 55%', 'do absolutely nothing']],
@@ -48,7 +48,7 @@ em{font-style:italic;background:linear-gradient(115deg,#9DBB7A,#6FB7BF,#8F9BE6,#
 .rule{width:140px;height:2px;margin:46px 0 34px;background:linear-gradient(115deg,#9DBB7A,#6FB7BF,#8F9BE6,#B58BE0,#E09AC4,#E8BF8A)}
 .cta{font-family:Manrope;font-weight:600;font-size:28px;letter-spacing:.28em;padding-left:.28em;text-transform:uppercase;color:#D2B488}`;
 const slides = [];
-slides.push(`<div class="pc"><img src="${F(IMG + '/cover.jpg')}"></div><div class="pct"><div class="btw3">btw,</div><div class="big3">it’s cool<br>to do <em>both.</em></div></div><div class="swipe">swipe →</div>`);
+slides.push(`<div class="ivc"><div class="btw2">btw,</div><div class="big2">it’s cool<br>to do <em class="d">both.</em></div><div class="sw2">swipe →</div></div>`);
 PAIRS.forEach(([a, b], i) => slides.push(
   `<div class="half l"><img src="${F(IMG + '/' + a[0] + '.jpg')}" style="object-position:${a[1]}"><div class="cap">${a[2]}</div></div>`
   + `<div class="half r"><img src="${F(IMG + '/' + b[0] + '.jpg')}" style="object-position:${b[1]}"><div class="cap">${b[2]}</div></div>`
