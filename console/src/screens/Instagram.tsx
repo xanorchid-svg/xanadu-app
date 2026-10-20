@@ -31,8 +31,9 @@ export default function Instagram() {
       </PageTitle>
 
       <p className="mb-6 max-w-2xl text-[14px] leading-relaxed text-subtle">
-        Posts marked “Draft in Metricool” are waiting there for you to schedule. Posts marked “Post manually” are yours to post from the app: download the image and copy the caption.
-        Nothing goes live until you do. Images are AI-generated for mood and checked for hands, faces, text and physics.
+        Every post is waiting in Metricool as a draft for you to schedule: one reel a week, never two reels in a row, and the grid rotates white → photo → navy → photo.
+        Reels are phone-reminder posts, so Metricool pings you and you add a trending sound in Instagram. Nothing goes live until you do.
+        Photos are either AI-generated for mood (checked for hands, faces, text and physics) or free licensed stock footage (Mixkit).
       </p>
 
       <div className="space-y-5">

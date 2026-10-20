@@ -42,7 +42,7 @@ The doors open soon. Join the waitlist (link in bio).
   {
     id: '02-what-is-xanadu',
     title: 'What is Xanadu',
-    date: '2026-10-22T10:00',
+    date: '2026-10-26T10:00',
     format: 'Carousel',
     audience: 'Seekers',
     slides: 6,
@@ -59,7 +59,7 @@ We're beginning in Nosara, Costa Rica. Join the waitlist (link in bio).
   {
     id: '03-why-join',
     title: 'Why join the founding circle',
-    date: '2026-10-23T10:00',
+    date: '2026-11-13T10:00',
     format: 'Carousel',
     audience: 'Spaces & guides',
     slides: 5,
@@ -69,7 +69,7 @@ We're beginning in Nosara, Costa Rica. Join the waitlist (link in bio).
 
 We're inviting 15 spaces and 15 guides to be Xanadu's founding circle. It's free, with no commission. You get guests and collaborators matched to what you hold, a personally reviewed ✦ profile, and our storytelling behind you.
 
-I'll be in Nosara in early November to meet each of you in person.
+I'm in Nosara this month to meet each of you in person.
 
 Apply to the founding circle (link in bio), or send me a message.
 
@@ -78,7 +78,7 @@ Apply to the founding circle (link in bio), or send me a message.
   {
     id: '04-some-places',
     title: 'Some places call you back (reel)',
-    date: '2026-10-24T10:00',
+    date: '2026-10-30T10:00',
     format: 'Reel',
     audience: 'Seekers',
     slides: 1,
@@ -95,7 +95,7 @@ Join the waitlist (link in bio).
   {
     id: '05-a-season',
     title: 'A season is a way of living (reel)',
-    date: '2026-10-25T10:00',
+    date: '2026-11-04T10:00',
     format: 'Reel',
     audience: 'Seekers',
     slides: 1,
@@ -114,7 +114,7 @@ Send this to the friend who needs a month, not a week. Join the waitlist (link i
   {
     id: '06-a-day',
     title: 'A day in a season-long stay',
-    date: '2026-10-26T10:00',
+    date: '2026-12-02T10:00',
     format: 'Carousel',
     audience: 'Seekers',
     slides: 6,
@@ -131,7 +131,7 @@ That's what Xanadu is for. Join the waitlist (link in bio).
   {
     id: '07-reviewed',
     title: 'Every space is personally reviewed ✦',
-    date: '2026-10-27T10:00',
+    date: '2026-11-23T10:00',
     format: 'Carousel',
     audience: 'Seekers',
     slides: 5,
@@ -148,7 +148,7 @@ Join the waitlist (link in bio).
   {
     id: '08-who',
     title: "Who we're looking for",
-    date: '2026-10-28T10:00',
+    date: '2026-11-18T10:00',
     format: 'Carousel',
     audience: 'Spaces & guides',
     slides: 6,
@@ -158,14 +158,14 @@ Join the waitlist (link in bio).
 
 Xanadu's founding circle in Nosara is 15 spaces and 15 guides. We're looking for retreat centers, eco-lodges, studios and land that hold people well, and for the teachers and guides who hold the room.
 
-If that's you, apply (link in bio). I'll be in Nosara in early November to meet you.
+If that's you, apply (link in bio). I'm in Nosara this month to meet you.
 
 #nosara #guanacaste #retreatcenter #ecolodge #retreatleader #yogateacher #breathwork`,
   },
   {
     id: '09-circle',
     title: 'The founding circle is forming in Nosara',
-    date: '2026-10-29T10:00',
+    date: '2026-10-28T10:00',
     format: 'Single image',
     audience: 'Spaces & guides',
     slides: 1,
@@ -183,7 +183,7 @@ Seekers: join the waitlist.
   {
     id: '10-just-one-week',
     title: 'POV: you said "just one week" (reel)',
-    date: '2026-10-30T10:00',
+    date: '2026-11-09T10:00',
     format: 'Reel',
     audience: 'Seekers',
     slides: 1,
@@ -202,7 +202,7 @@ Tag the friend who always extends. Join the waitlist (link in bio).
   {
     id: '11-which-stay',
     title: 'Quiz: which stay are you?',
-    date: '2026-11-01T10:00',
+    date: '2026-12-07T10:00',
     format: 'Carousel',
     audience: 'Seekers',
     slides: 5,
@@ -223,7 +223,7 @@ Join the waitlist (link in bio).
   {
     id: '12-signs',
     title: 'Signs you need a season, not a vacation',
-    date: '2026-10-31T10:00',
+    date: '2026-12-09T10:00',
     format: 'Carousel',
     audience: 'Seekers',
     slides: 7,
@@ -242,7 +242,7 @@ Send this to the friend who needs one. Join the waitlist (link in bio).
   {
     id: '13-week-vs-season',
     title: 'A week vs a season',
-    date: '2026-10-26T18:00',
+    date: '2026-11-25T10:00',
     format: 'Carousel',
     audience: 'Seekers',
     slides: 7,
@@ -261,7 +261,7 @@ Which one are you planning? Tell us below. Join the waitlist (link in bio).
   {
     id: '14-three-ways-in',
     title: 'Three ways into Xanadu (reel)',
-    date: '2026-11-02T10:00',
+    date: '2026-11-16T10:00',
     format: 'Reel',
     audience: 'Everyone',
     slides: 1,
@@ -282,7 +282,7 @@ Which one are you? Tell us below. Seekers: join the waitlist. Spaces and guides:
   {
     id: '15-grows-together',
     title: 'What grows here grows together (reel)',
-    date: '2026-11-03T10:00',
+    date: '2026-12-11T10:00',
     format: 'Reel',
     audience: 'Spaces & guides',
     slides: 1,
@@ -301,12 +301,12 @@ Founding circle in Nosara: free to join, no commission. Spaces and guides, apply
   {
     id: '16-pace-of-nature',
     title: 'Adopt the pace of nature (4 ways)',
-    date: '2026-10-21T18:00',
+    date: '2026-12-18T10:00',
     format: 'Carousel',
     audience: 'Everyone',
     slides: 6,
     aiImagery: false,
-    status: 'manual',
+    status: 'draft',
     caption: `“Adopt the pace of nature: her secret is patience.” Ralph Waldo Emerson
 
 Where in your life could you slow down this week? 🌿
@@ -316,12 +316,12 @@ Where in your life could you slow down this week? 🌿
   {
     id: '17-rest-is-rhythm',
     title: 'Rest is part of the rhythm (kinds of rest)',
-    date: '2026-10-23T18:00',
+    date: '2026-11-11T10:00',
     format: 'Carousel',
     audience: 'Everyone',
     slides: 7,
-    aiImagery: false,
-    status: 'manual',
+    aiImagery: true,
+    status: 'draft',
     caption: `Rest is not a reward. It's part of the rhythm. ✦
 
 Save this for the week you need the reminder.
@@ -331,12 +331,12 @@ Save this for the week you need the reminder.
   {
     id: '18-morning-light',
     title: 'A morning-light ritual',
-    date: '2026-10-25T18:00',
+    date: '2026-11-20T10:00',
     format: 'Carousel',
     audience: 'Everyone',
     slides: 6,
     aiImagery: false,
-    status: 'manual',
+    status: 'draft',
     caption: `A small ritual: step outside in the first hour of your day. ☀️
 
 Morning daylight helps set your body clock, so you wake more alert and wind down more easily at night. No phone, no plan. Just light.
@@ -348,12 +348,12 @@ Will you try it tomorrow?
   {
     id: '19-deliberately',
     title: 'Five questions for living deliberately',
-    date: '2026-10-27T18:00',
+    date: '2026-11-30T10:00',
     format: 'Carousel',
     audience: 'Everyone',
     slides: 8,
-    aiImagery: false,
-    status: 'manual',
+    aiImagery: true,
+    status: 'draft',
     caption: `“I went to the woods because I wished to live deliberately.” Henry David Thoreau, Walden
 
 What would living deliberately look like for you? Tell us below. 🌲
@@ -363,12 +363,12 @@ What would living deliberately look like for you? Tell us below. 🌲
   {
     id: '20-two-hours',
     title: '120 minutes a week in nature',
-    date: '2026-10-24T18:00',
+    date: '2026-11-06T10:00',
     format: 'Carousel',
     audience: 'Everyone',
     slides: 6,
     aiImagery: false,
-    status: 'manual',
+    status: 'draft',
     caption: `120 minutes a week. 🌿
 
 In a study of nearly 20,000 people, those who spent at least two hours a week in nature were more likely to report good health and well-being (White et al., Scientific Reports, 2019).
@@ -380,17 +380,118 @@ It doesn't have to be all at once. How are you getting your two hours this week?
   {
     id: '21-not-in-a-hurry',
     title: 'Things you only find slowly',
-    date: '2026-10-22T18:00',
+    date: '2026-12-14T10:00',
     format: 'Carousel',
     audience: 'Everyone',
     slides: 6,
     aiImagery: false,
-    status: 'manual',
+    status: 'draft',
     caption: `Not everything worth finding is found in a hurry. ✦
 
 Send this to someone who needs to slow down.
 
 #slowliving #slowtravel #mindfulness #wellbeing`,
+  },
+  {
+    id: '22-unpopular-opinion',
+    title: 'Unpopular opinion: you can\'t really rest in 7 days (video reel)',
+    date: '2026-10-23T10:00',
+    format: 'Reel',
+    audience: 'Seekers',
+    slides: 1,
+    aiImagery: false,
+    status: 'draft',
+    caption: `Unpopular opinion: you can't really rest in 7 days. 🌊
+
+Days 1–3, your body is still at work. Days 4–5, you finally slow down. Day 6, you start packing. Day 7, back to the inbox.
+
+Agree or disagree? Tell us below. 👇
+
+Xanadu is for longer stays: a week, a month or a season, in places and with guides we've personally reviewed. Starting in Nosara, Costa Rica. Join the waitlist (link in bio).
+
+#slowtravel #longstay #rest #nosara #costarica`,
+  },
+  {
+    id: '23-day-1-vs-day-30',
+    title: 'Day 1 vs Day 30 of a season-long stay (video reel)',
+    date: '2026-11-27T10:00',
+    format: 'Reel',
+    audience: 'Seekers',
+    slides: 1,
+    aiImagery: false,
+    status: 'draft',
+    caption: `Day 1 vs Day 30 of a season-long stay. ☀️
+
+Day 1: still answering emails. Day 30: you answer to the tide.
+Day 1: laptop open at breakfast. Day 30: you forgot the password.
+Day 1: counting the days left. Day 30: not counting anymore.
+
+Which day are you on? Send this to someone still on Day 1.
+
+Xanadu matches you with places and guides we've personally reviewed, for a week, a month or a season. Join the waitlist (link in bio).
+
+#slowtravel #longstay #digitalnomad #nosara #costarica`,
+  },
+  {
+    id: '24-cost-nothing',
+    title: 'Things that cost nothing on a season-long stay (video reel)',
+    date: '2026-12-04T10:00',
+    format: 'Reel',
+    audience: 'Everyone',
+    slides: 1,
+    aiImagery: false,
+    status: 'draft',
+    caption: `Things that cost nothing on a season-long stay. 🌅
+
+01 The sound of the waves
+02 A sunset every night
+03 Nowhere to be
+04 Watching the tide come in
+05 Mornings that start slowly
+
+The only cost is time. What would you add? Save this for when you're planning.
+
+Join the waitlist (link in bio).
+
+#slowliving #slowtravel #simplepleasures #nosara #costarica`,
+  },
+  {
+    id: '25-your-sign',
+    title: 'This is your sign (video reel)',
+    date: '2026-12-16T10:00',
+    format: 'Reel',
+    audience: 'Seekers',
+    slides: 1,
+    aiImagery: false,
+    status: 'draft',
+    caption: `If you're reading this, this is your sign. ✦
+
+Take the month, not the week. Give yourself time to arrive. Bring someone, or meet them there.
+
+Make 2027 the year you stay.
+
+Tag who you'd go with. Join the waitlist (link in bio).
+
+#slowtravel #2027goals #longstay #nosara #costarica`,
+  },
+  {
+    id: '26-do-both',
+    title: 'btw, it\'s cool to do both (split-screen carousel)',
+    date: '2026-11-02T10:00',
+    format: 'Carousel',
+    audience: 'Everyone',
+    slides: 7,
+    aiImagery: false,
+    status: 'draft',
+    caption: `btw, it's cool to do both. ✦
+
+Work hard and log off at sunset. Surf at sunrise and do absolutely nothing. Meet everyone and spend a day alone. Move your body and rest without guilt. Plan every detail and let the place change the plan.
+
+A good stay has room for all of it. Which pair is you? Tell us below. 👇
+
+Xanadu matches you with places and guides we've personally reviewed, for a week, a month or a season. Join the waitlist (link in bio).
+
+#slowliving #slowtravel #balance #nosara #costarica`,
   },
 ]
 
