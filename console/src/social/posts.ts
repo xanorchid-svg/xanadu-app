@@ -31,7 +31,7 @@ export const POSTS: SocialPost[] = [
     status: 'draft',
     caption: `Xanadu begins with you.
 
-Some of us aren't looking for a holiday. We're looking for a place to live differently for a while: a week, a month, a season.
+Some of us aren't looking for a vacation. We're looking for a place to live differently for a while: a week, a month, a season.
 
 Xanadu is a network for awakening places. We match you with spaces and guides we've personally reviewed, starting in Nosara, Costa Rica.
 
@@ -101,7 +101,7 @@ Join the waitlist (link in bio).
     slides: 1,
     aiImagery: true,
     status: 'draft',
-    caption: `A week is a holiday. A season is a way of living. 🌊
+    caption: `A week is a vacation. A season is a way of living. 🌊
 
 Week one, you finally sleep. Week two, you stop checking your phone. By week four, it starts to feel like home.
 
@@ -156,7 +156,7 @@ Join the waitlist (link in bio).
     status: 'draft',
     caption: `Who we're looking for.
 
-Xanadu's founding circle in Nosara is 15 spaces and 15 guides. We're looking for retreat centres, eco-lodges, studios and land that hold people well, and for the teachers and guides who hold the room.
+Xanadu's founding circle in Nosara is 15 spaces and 15 guides. We're looking for retreat centers, eco-lodges, studios and land that hold people well, and for the teachers and guides who hold the room.
 
 If that's you, apply (link in bio). I'll be in Nosara in early November to meet you.
 
@@ -191,7 +191,7 @@ Seekers: join the waitlist.
     status: 'draft',
     caption: `POV: you said “just one week.” 😅
 
-Week six. You know the tides, you have a favourite café, and you're extending. Again.
+Week six. You know the tides, you have a favorite café, and you're extending. Again.
 
 Xanadu is for the stays that turn into seasons: places and guides we've personally reviewed, starting in Nosara, Costa Rica.
 
@@ -222,18 +222,18 @@ Join the waitlist (link in bio).
   },
   {
     id: '12-signs',
-    title: 'Signs you need a season, not a holiday',
+    title: 'Signs you need a season, not a vacation',
     date: '2026-11-03T10:00',
     format: 'Carousel',
     audience: 'Seekers',
     slides: 7,
     aiImagery: false,
     status: 'draft',
-    caption: `Signs you need a season, not a holiday.
+    caption: `Signs you need a season, not a vacation.
 
 Which one is you? Be honest. 👀
 
-A week is a holiday. A season is a way of living. Xanadu matches you with places and guides we've personally reviewed, for a week, a month or a season.
+A week is a vacation. A season is a way of living. Xanadu matches you with places and guides we've personally reviewed, for a week, a month or a season.
 
 Send this to the friend who needs one. Join the waitlist (link in bio).
 
@@ -257,6 +257,46 @@ Xanadu matches you with places and guides we've personally reviewed, for a week,
 Which one are you planning? Tell us below. Join the waitlist (link in bio).
 
 #slowtravel #longstay #nosara #costarica #digitalnomad`,
+  },
+  {
+    id: '14-three-ways-in',
+    title: 'Three ways into Xanadu (reel)',
+    date: '2026-11-04T10:00',
+    format: 'Reel',
+    audience: 'Everyone',
+    slides: 1,
+    aiImagery: false,
+    status: 'draft',
+    caption: `Three ways into Xanadu. ✦
+
+Seekers come to stay, looking for a place and people that fit how they want to live.
+Containers are the places that hold the stay: retreat centers, eco-lodges, studios and land.
+Facilitators are the guides who hold the room: teachers, breathworkers, sound and movement guides.
+
+Xanadu brings them together, with every place and guide personally reviewed.
+
+Which one are you? Tell us below. Seekers: join the waitlist. Spaces and guides: apply (link in bio).
+
+#xanadu #nosara #retreatcenter #retreatleader #slowtravel`,
+  },
+  {
+    id: '15-grows-together',
+    title: 'What grows here grows together (reel)',
+    date: '2026-11-02T10:00',
+    format: 'Reel',
+    audience: 'Spaces & guides',
+    slides: 1,
+    aiImagery: true,
+    status: 'draft',
+    caption: `What grows here grows together. 🌿
+
+You hold the space. We bring the people: guests looking for exactly what your place or practice holds.
+
+Xanadu is a marketplace for retreat centers, studios and guides. Fill your classes, fill your retreats and find your next room, with every member personally reviewed.
+
+Founding circle in Nosara: free to join, no commission. Spaces and guides, apply (link in bio).
+
+#nosara #retreatcenter #yogateacher #retreatleader #guanacaste`,
   },
 ]
 
