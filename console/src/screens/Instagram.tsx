@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { supabase } from '../lib/supabase'
 import { POSTS, slideUrl, videoUrl, type SocialPost } from '../social/posts'
 import { useToast } from '../parts'
 import { Button, Card, PageTitle } from '../ui'
@@ -30,6 +31,60 @@ const GROUPS: Group[] = [
   },
 ]
 type Filters = Record<string, string[]>
+type Req = { id: string; post_id: string; note: string; status: 'open' | 'in_progress' | 'done' | 'wont_do'; reply: string | null; created_at: string }
+const REQ_STATUS: Record<Req['status'], { label: string; cls: string }> = {
+  open: { label: 'Waiting for Claude', cls: 'bg-gold/15 text-gold-pale ring-1 ring-gold/40' },
+  in_progress: { label: 'Claude is on it', cls: 'bg-iri-teal/15 text-text ring-1 ring-iri-teal/50' },
+  done: { label: 'Done', cls: 'bg-slate/30 text-subtle ring-1 ring-slate' },
+  wont_do: { label: 'Not changed', cls: 'bg-slate/30 text-subtle ring-1 ring-slate' },
+}
+const ago = (d: string) => new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+
+/** Change requests for one post (or 'general'): Xan writes, Claude reads open ones, edits, and replies. */
+function Requests({ postId, reqs, reload, placeholder }: { postId: string; reqs: Req[]; reload: () => void; placeholder: string }) {
+  const toast = useToast()
+  const [note, setNote] = useState('')
+  const [busy, setBusy] = useState(false)
+  const mine = reqs.filter((r) => r.post_id === postId)
+  async function send() {
+    if (!note.trim()) return
+    setBusy(true)
+    const { error } = await supabase.from('social_requests').insert({ post_id: postId, note: note.trim() })
+    setBusy(false)
+    if (error) { toast.show('Could not save. Try again.'); return }
+    setNote(''); toast.show('Sent to Claude'); reload()
+  }
+  async function remove(id: string) {
+    const { error } = await supabase.from('social_requests').delete().eq('id', id)
+    if (error) toast.show('Could not remove'); else reload()
+  }
+  return (
+    <div className="mt-5 rounded-xl bg-navy/50 p-4 ring-1 ring-line">
+      <p className="mb-2 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-faint">Changes for Claude</p>
+      {mine.length > 0 && (
+        <ul className="mb-3 space-y-2">
+          {mine.map((r) => (
+            <li key={r.id} className="rounded-lg bg-navy/70 p-3 ring-1 ring-line">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`inline-flex h-5 items-center rounded-full px-2 text-[11px] font-semibold ${REQ_STATUS[r.status].cls}`}>{REQ_STATUS[r.status].label}</span>
+                <span className="text-[11.5px] text-faint">{ago(r.created_at)}</span>
+                {r.status === 'open' && <button onClick={() => remove(r.id)} className="ml-auto text-[11.5px] text-faint hover:text-text">Remove</button>}
+              </div>
+              <p className="mt-1.5 whitespace-pre-wrap text-[13.5px] leading-relaxed text-text">{r.note}</p>
+              {r.reply && <p className="mt-2 whitespace-pre-wrap border-l-2 border-gold/50 pl-3 text-[13px] leading-relaxed text-subtle"><span className="font-semibold text-gold-pale">Claude: </span>{r.reply}</p>}
+            </li>
+          ))}
+        </ul>
+      )}
+      <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder={placeholder}
+        className="w-full resize-y rounded-lg bg-navy/80 p-3 text-[13.5px] text-text ring-1 ring-line placeholder:text-faint focus:outline-none focus:ring-gold/60" />
+      <div className="mt-2 flex items-center justify-between gap-3">
+        <p className="text-[11.5px] text-faint">Claude picks these up when you say “check the console requests.”</p>
+        <Button className="h-9" onClick={send} disabled={busy || !note.trim()}>{busy ? 'Sending…' : 'Send to Claude'}</Button>
+      </div>
+    </div>
+  )
+}
 const STORE = 'xa-ig-filters'
 
 function fmt(date: string) {
@@ -43,6 +98,14 @@ export default function Instagram() {
   const [view, setView] = useState<'list' | 'grid'>(() => { try { return (localStorage.getItem(STORE + '-view') as 'list' | 'grid') || 'list' } catch { return 'list' } })
   const [filters, setFilters] = useState<Filters>(() => { try { return JSON.parse(localStorage.getItem(STORE) || '{}') } catch { return {} } })
   useEffect(() => { try { localStorage.setItem(STORE, JSON.stringify(filters)); localStorage.setItem(STORE + '-view', view) } catch { /* private mode */ } }, [filters, view])
+
+  const [reqs, setReqs] = useState<Req[]>([])
+  const loadReqs = useCallback(async () => {
+    const { data } = await supabase.from('social_requests').select('id, post_id, note, status, reply, created_at').order('created_at')
+    setReqs((data as Req[]) || [])
+  }, [])
+  useEffect(() => { loadReqs() }, [loadReqs])
+  const openCount = (id: string) => reqs.filter((r) => r.post_id === id && (r.status === 'open' || r.status === 'in_progress')).length
 
   const matches = (p: SocialPost, skip?: string) => GROUPS.every((g) => g.key === skip || !filters[g.key]?.length || filters[g.key].includes(g.get(p)))
   const shown = useMemo(() => [...POSTS].sort((a, b) => a.date.localeCompare(b.date)).filter((p) => matches(p)), [filters]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -70,6 +133,10 @@ export default function Instagram() {
         Reels are phone-reminder posts, so Metricool pings you and you add a trending sound in Instagram. Nothing goes live until you do.
         Photos are either AI-generated for mood (checked for hands, faces, text and physics) or free licensed stock footage (Mixkit).
       </p>
+
+      <Card className="mb-6 px-5 pb-5 pt-1">
+        <Requests postId="general" reqs={reqs} reload={loadReqs} placeholder="Anything not tied to one post: new post ideas, moving dates, the grid, captions in general…" />
+      </Card>
 
       <Card className="mb-6 px-5 py-4">
         <div className="space-y-3">
@@ -111,6 +178,7 @@ export default function Instagram() {
             <button key={p.id} onClick={() => jump(p.id)} className="relative aspect-[3/4] overflow-hidden bg-navy" title={p.title}>
               <img src={slideUrl(p, 1)} alt={p.title} loading="lazy" className="size-full object-cover" />
               <span className="absolute right-1.5 top-1 text-[12px] text-white [text-shadow:0_1px_4px_rgba(0,0,0,.6)]">{p.format === 'Reel' ? '▶' : p.slides > 1 ? '❐' : ''}</span>
+              {openCount(p.id) > 0 && <span className="absolute left-1.5 top-1.5 size-2.5 rounded-full bg-iri-teal ring-2 ring-navy" title="Changes requested" />}
               <span className="absolute bottom-1 left-1 rounded-md bg-navy/60 px-1.5 text-[10.5px] font-semibold text-white">{new Date(p.date).toLocaleString('en-US', { month: 'short', day: 'numeric' })}</span>
             </button>
           ))}
@@ -132,6 +200,7 @@ export default function Instagram() {
                       {fmt(p.date)} · {p.format}{p.slides > 1 ? ` · ${p.slides} slides` : ''} · for {p.audience} · {p.imagery === 'Stock footage' ? 'real footage' : p.imagery === 'AI' ? 'AI photos' : 'type only'}
                     </p>
                   </div>
+                  {openCount(p.id) > 0 && <span className="inline-flex h-6 items-center rounded-full bg-iri-teal/15 px-2.5 text-[11.5px] font-semibold text-text ring-1 ring-iri-teal/50">{openCount(p.id)} change{openCount(p.id) > 1 ? 's' : ''} requested</span>}
                   <span className={`inline-flex h-6 items-center rounded-full px-2.5 text-[11.5px] font-semibold ${s.cls}`}>{s.label}</span>
                 </button>
 
@@ -161,6 +230,7 @@ export default function Instagram() {
                         ))}
                       </div>
                     </div>
+                    <Requests postId={p.id} reqs={reqs} reload={loadReqs} placeholder="What should change? e.g. “Swap slide 3 for a beach photo”, “Shorter caption”, “Move to Nov 5”." />
                   </div>
                 )}
               </Card>
