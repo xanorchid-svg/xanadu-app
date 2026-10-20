@@ -146,7 +146,7 @@ That's what Xanadu is for. Join the waitlist (link in bio).
   {
     id: '07-reviewed',
     title: 'Every space is personally reviewed ✦',
-    date: '2026-11-23T10:00',
+    date: '2026-12-21T10:00',
     format: 'Carousel',
     cover: 'photo',
     imagery: 'AI',
@@ -334,7 +334,7 @@ Founding circle in Nosara: free to join, no commission. Spaces and guides, apply
   {
     id: '16-pace-of-nature',
     title: 'Adopt the pace of nature (4 ways)',
-    date: '2026-12-18T10:00',
+    date: '2026-11-02T10:00',
     format: 'Carousel',
     cover: 'white',
     imagery: 'Graphic only',
@@ -530,13 +530,13 @@ Tag who you'd go with. Join the waitlist (link in bio).
   {
     id: '26-do-both',
     title: 'btw, it\'s cool to do both (split-screen carousel)',
-    date: '2026-11-02T10:00',
+    date: '2026-11-23T10:00',
     format: 'Carousel',
-    cover: 'white',
-    imagery: 'Stock footage',
+    cover: 'photo',
+    imagery: 'AI',
     audience: 'Everyone',
     slides: 7,
-    aiImagery: false,
+    aiImagery: true,
     status: 'draft',
     caption: `btw, it's cool to do both. ✦
 
