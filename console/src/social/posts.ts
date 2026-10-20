@@ -223,7 +223,7 @@ Join the waitlist (link in bio).
   {
     id: '12-signs',
     title: 'Signs you need a season, not a vacation',
-    date: '2026-11-03T10:00',
+    date: '2026-10-31T10:00',
     format: 'Carousel',
     audience: 'Seekers',
     slides: 7,
@@ -242,10 +242,10 @@ Send this to the friend who needs one. Join the waitlist (link in bio).
   {
     id: '13-week-vs-season',
     title: 'A week vs a season',
-    date: '2026-11-05T10:00',
+    date: '2026-10-26T18:00',
     format: 'Carousel',
     audience: 'Seekers',
-    slides: 6,
+    slides: 7,
     aiImagery: true,
     status: 'draft',
     caption: `A week vs a season. 🌊
@@ -261,7 +261,7 @@ Which one are you planning? Tell us below. Join the waitlist (link in bio).
   {
     id: '14-three-ways-in',
     title: 'Three ways into Xanadu (reel)',
-    date: '2026-11-04T10:00',
+    date: '2026-11-02T10:00',
     format: 'Reel',
     audience: 'Everyone',
     slides: 1,
@@ -282,7 +282,7 @@ Which one are you? Tell us below. Seekers: join the waitlist. Spaces and guides:
   {
     id: '15-grows-together',
     title: 'What grows here grows together (reel)',
-    date: '2026-11-02T10:00',
+    date: '2026-11-03T10:00',
     format: 'Reel',
     audience: 'Spaces & guides',
     slides: 1,
@@ -300,11 +300,11 @@ Founding circle in Nosara: free to join, no commission. Spaces and guides, apply
   },
   {
     id: '16-pace-of-nature',
-    title: 'Quote · Adopt the pace of nature',
-    date: '2026-10-22T18:00',
-    format: 'Single image',
+    title: 'Adopt the pace of nature (4 ways)',
+    date: '2026-10-21T18:00',
+    format: 'Carousel',
     audience: 'Everyone',
-    slides: 1,
+    slides: 6,
     aiImagery: false,
     status: 'manual',
     caption: `“Adopt the pace of nature: her secret is patience.” Ralph Waldo Emerson
@@ -315,11 +315,11 @@ Where in your life could you slow down this week? 🌿
   },
   {
     id: '17-rest-is-rhythm',
-    title: 'Note · Rest is part of the rhythm',
-    date: '2026-10-24T18:00',
-    format: 'Single image',
+    title: 'Rest is part of the rhythm (kinds of rest)',
+    date: '2026-10-23T18:00',
+    format: 'Carousel',
     audience: 'Everyone',
-    slides: 1,
+    slides: 7,
     aiImagery: false,
     status: 'manual',
     caption: `Rest is not a reward. It's part of the rhythm. ✦
@@ -330,11 +330,11 @@ Save this for the week you need the reminder.
   },
   {
     id: '18-morning-light',
-    title: 'Wellness · Step outside in the first hour',
-    date: '2026-10-27T18:00',
-    format: 'Single image',
+    title: 'A morning-light ritual',
+    date: '2026-10-25T18:00',
+    format: 'Carousel',
     audience: 'Everyone',
-    slides: 1,
+    slides: 6,
     aiImagery: false,
     status: 'manual',
     caption: `A small ritual: step outside in the first hour of your day. ☀️
@@ -347,11 +347,11 @@ Will you try it tomorrow?
   },
   {
     id: '19-deliberately',
-    title: 'Quote · Live deliberately',
-    date: '2026-10-31T18:00',
-    format: 'Single image',
+    title: 'Five questions for living deliberately',
+    date: '2026-10-27T18:00',
+    format: 'Carousel',
     audience: 'Everyone',
-    slides: 1,
+    slides: 8,
     aiImagery: false,
     status: 'manual',
     caption: `“I went to the woods because I wished to live deliberately.” Henry David Thoreau, Walden
@@ -362,11 +362,11 @@ What would living deliberately look like for you? Tell us below. 🌲
   },
   {
     id: '20-two-hours',
-    title: 'Wellness · 120 minutes a week in nature',
-    date: '2026-11-02T18:00',
-    format: 'Single image',
+    title: '120 minutes a week in nature',
+    date: '2026-10-24T18:00',
+    format: 'Carousel',
     audience: 'Everyone',
-    slides: 1,
+    slides: 6,
     aiImagery: false,
     status: 'manual',
     caption: `120 minutes a week. 🌿
@@ -379,11 +379,11 @@ It doesn't have to be all at once. How are you getting your two hours this week?
   },
   {
     id: '21-not-in-a-hurry',
-    title: 'Note · Not found in a hurry',
-    date: '2026-11-05T18:00',
-    format: 'Single image',
+    title: 'Things you only find slowly',
+    date: '2026-10-22T18:00',
+    format: 'Carousel',
     audience: 'Everyone',
-    slides: 1,
+    slides: 6,
     aiImagery: false,
     status: 'manual',
     caption: `Not everything worth finding is found in a hurry. ✦
