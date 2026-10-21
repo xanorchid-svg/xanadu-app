@@ -95,13 +95,13 @@ Apply to the founding circle (link in bio), or send me a message.
     slides: 1,
     aiImagery: true,
     status: 'draft',
-    caption: `Want to find out more? Follow along. ✦
+    caption: `Xanadu starts with you. ✦
 
-Looking for alternative ways of living, but don't know where to start? Xanadu starts with you.
+Looking for alternative ways of living, but don't know where to start?
 
 xan·a·du (noun): an idyllic, exotic, or luxurious place. (Merriam-Webster)
 
-Join the waitlist (link in bio).
+Want to find out more? Follow along, and join the waitlist (link in bio).
 
 #xanadu #slowliving #alternativeliving #nosara #costarica`,
   },
