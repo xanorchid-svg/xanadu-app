@@ -17,7 +17,7 @@ export type Filters = {
   when: 'flexible' | 'dates'
   from: string
   to: string
-  flex: 0 | 3 | 7 // days either side of the picked dates
+  flex: 0 | 3 | 7 | 14 // days either side of the picked dates
   lengths: Length[]
   work: Work
   maxPrice: number | null // null = any price
@@ -30,7 +30,7 @@ export const NO_FILTERS: Filters = { types: [], country: '', region: '', when: '
 export const TYPES: [Kind, string][] = [['Retreat', 'Retreat'], ['Training', 'Training'], ['Drop-in', 'Class or session']]
 export const LENGTHS: [Length, string][] = [['day', 'A day'], ['weekend', 'A weekend'], ['weeks', '1–3 weeks'], ['month', 'A month or more']]
 export const WORK: [Work, string][] = [['none', 'No, just be'], ['remote', 'Remotely'], ['volunteer', 'Volunteer exchange']]
-export const FLEX: [Filters['flex'], string][] = [[0, 'Exact dates'], [3, '± 3 days'], [7, '± 1 week']]
+export const FLEX: [Filters['flex'], string][] = [[0, 'Exact dates'], [3, '± 3 days'], [7, '± 1 week'], [14, '± 2 weeks']]
 export const SORTS: [Filters['sort'], string][] = [['match', 'Best match'], ['soon', 'Soonest'], ['price', 'Price, low to high']]
 
 const KEY = 'xa-discover-filters-v2'

@@ -16,6 +16,9 @@ const fmt = (s: string, o: Intl.DateTimeFormatOptions) => at(s).toLocaleDateStri
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 type View = 'Month' | 'Week' | 'Day'
+type Flex = 0 | 3 | 7 | 14
+const FLEX: [Flex, string][] = [[0, 'Exact'], [3, '± 3 days'], [7, '± 1 week'], [14, '± 2 weeks']]
+const shift = (s: string, n: number) => iso(add(at(s), n))
 /** Runs on this day? */
 const runs = (e: Listing, d: string) => !!e.start_date && e.start_date <= d && (e.end_date || e.start_date) >= d
 /** Overlaps these dates? */
@@ -24,6 +27,7 @@ const overlaps = (e: Listing, a: string, b: string) => !!e.start_date && e.start
 /**
  * Every live experience by date. Month, Week or Day view, arrows to move through time.
  * In Month view tap a date to see that day, or tap a second date to pick a range.
+ * "Flexible" widens the chosen dates by up to two weeks either side: exact matches first, then what's nearby.
  */
 export default function Calendar() {
   const today = useMemo(() => iso(new Date()), [])
@@ -33,6 +37,7 @@ export default function Calendar() {
   const [to, setTo] = useState('') // '' = a single day
   const [picking, setPicking] = useState(false) // a first date was just tapped: the next later tap ends the range
   const [place, setPlace] = useState('Everywhere')
+  const [flex, setFlex] = useState<Flex>(0)
   const { listings, loading } = useListings()
 
   const countries = Array.from(new Set(listings.map((e) => e.space?.country.trim()).filter(Boolean) as string[])).sort()
@@ -88,21 +93,33 @@ export default function Calendar() {
             <span className="font-display text-[22px] leading-tight text-ink">{title}</span>
             {arrows}
           </div>
-          {view === 'Month' && <MonthGrid cursor={c} today={today} from={from} to={to} busyOn={busyOn} onPick={pick} />}
+          {view === 'Month' && <MonthGrid cursor={c} today={today} from={from} to={to} flex={flex} busyOn={busyOn} onPick={pick} />}
           {view === 'Week' && <WeekStrip cursor={c} today={today} selected={from} busyOn={busyOn} onPick={(d) => { setView('Day'); setCursor(d); setFrom(d); setTo('') }} />}
         </div>
 
         {loading ? <span className="text-[13px] text-subtle">Finding experiences…</span>
           : view === 'Week' ? <WeekAgenda cursor={c} list={dated} onDay={(d) => { setView('Day'); setCursor(d); setFrom(d); setTo('') }} empty={empty} />
-            : <Picked from={view === 'Day' ? cursor : from} to={view === 'Day' ? '' : to} list={dated} empty={empty} onClear={to ? () => setTo('') : undefined} />}
+            : (
+              <>
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs tracking-[0.14em] text-subtle uppercase">Flexible?</span>
+                  <div className="flex flex-wrap gap-2">
+                    {FLEX.map(([k, label]) => <Chip key={k} solid on={flex === k} onClick={() => setFlex(k)}>{label}</Chip>)}
+                  </div>
+                </div>
+                <Picked from={view === 'Day' ? cursor : from} to={view === 'Day' ? '' : to} flex={flex} list={dated} empty={empty} onClear={to ? () => setTo('') : undefined} />
+              </>
+            )}
       </Page>
     </Screen>
   )
 }
 
-function MonthGrid({ cursor, today, from, to, busyOn, onPick }: {
-  cursor: Date; today: string; from: string; to: string; busyOn: (d: string) => number; onPick: (d: string) => void
+function MonthGrid({ cursor, today, from, to, flex, busyOn, onPick }: {
+  cursor: Date; today: string; from: string; to: string; flex: Flex; busyOn: (d: string) => number; onPick: (d: string) => void
 }) {
+  // the flexible window around the chosen dates gets a faint tint
+  const winA = flex ? shift(from, -flex) : '', winB = flex ? shift(to || from, flex) : ''
   const first = new Date(cursor.getFullYear(), cursor.getMonth(), 1, 12)
   const start = startOfWeek(first)
   const weeks = Math.ceil((((first.getDay() + 6) % 7) + new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate()) / 7)
@@ -116,11 +133,12 @@ function MonthGrid({ cursor, today, from, to, busyOn, onPick }: {
           const inMonth = d.getMonth() === cursor.getMonth()
           const ends = id === from || id === to
           const between = !!to && id > from && id < to
+          const nearby = !!flex && !between && !(id === from || id === to) && id >= winA && id <= winB
           const n = busyOn(id)
           return (
             <button key={id} type="button" onClick={() => onPick(id)} aria-pressed={ends}
               aria-label={`${d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}${n ? `, ${n} ${n === 1 ? 'experience' : 'experiences'}` : ''}`}
-              className={`flex h-11 flex-col items-center justify-center gap-0.5 text-[14px] ${between ? 'bg-iri-violet/15' : ''} ${id === from && to ? 'rounded-l-[12px]' : ''} ${id === to ? 'rounded-r-[12px]' : ''}`}>
+              className={`flex h-11 flex-col items-center justify-center gap-0.5 text-[14px] ${between ? 'bg-iri-violet/15' : nearby ? 'bg-iri-teal/[0.07]' : ''} ${id === from && to ? 'rounded-l-[12px]' : ''} ${id === to ? 'rounded-r-[12px]' : ''}`}>
               <span className={`flex h-8 w-8 items-center justify-center rounded-full ${ends ? 'bg-iri font-semibold text-navy' : id === today ? 'ring-1 ring-gold/70 text-ink' : inMonth ? 'text-text' : 'text-faint'}`}>{d.getDate()}</span>
               <span className="flex h-[5px] gap-[3px]">
                 {Array.from({ length: Math.min(3, n) }, (_, i) => <span key={i} className="h-[5px] w-[5px] rounded-full bg-iri-strong" />)}
@@ -129,7 +147,7 @@ function MonthGrid({ cursor, today, from, to, busyOn, onPick }: {
           )
         })}
       </div>
-      <span className="pt-1 text-[12px] text-subtle">Tap a date, then a later one to see a range.</span>
+      <span className="pt-1 text-[12px] text-subtle">{flex ? `Tap a date or a range. The tinted days around it are your flexible ${flex === 14 ? 'two weeks' : flex === 7 ? 'week' : 'days'}.` : 'Tap a date, then a later one to see a range.'}</span>
     </div>
   )
 }
@@ -178,16 +196,35 @@ function WeekAgenda({ cursor, list, onDay, empty }: { cursor: Date; list: Listin
 }
 
 /** Month and Day views: what's on the chosen day or range. */
-function Picked({ from, to, list, empty, onClear }: { from: string; to: string; list: Listing[]; empty: ReactNode; onClear?: () => void }) {
-  const on = list.filter((e) => (to ? overlaps(e, from, to) : runs(e, from)))
+function Picked({ from, to, flex, list, empty, onClear }: { from: string; to: string; flex: Flex; list: Listing[]; empty: ReactNode; onClear?: () => void }) {
+  const end = to || from
+  const on = list.filter((e) => overlaps(e, from, end))
+  // flexible: also anything starting or running within the window around the chosen dates
+  const near = flex ? list.filter((e) => !on.includes(e) && overlaps(e, shift(from, -flex), shift(end, flex))) : []
   const label = to ? `${fmt(from, { month: 'short', day: 'numeric' })} – ${fmt(to, { month: 'short', day: 'numeric' })}` : fmt(from, { weekday: 'long', month: 'long', day: 'numeric' })
+  const howFar = (e: Listing) => {
+    const s0 = e.start_date!, e0 = e.end_date || s0
+    const days = s0 > end ? Math.round((at(s0).getTime() - at(end).getTime()) / 86400000) : Math.round((at(from).getTime() - at(e0).getTime()) / 86400000)
+    return `${days} ${days === 1 ? 'day' : 'days'} ${s0 > end ? 'after' : 'before'}`
+  }
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between">
         <span className="text-xs tracking-[0.14em] text-subtle uppercase">{label}</span>
         {onClear && <button type="button" onClick={onClear} className="min-h-9 text-[13px] text-gold-soft">Clear range</button>}
       </div>
-      {on.length ? on.map((e) => <ExperienceCard key={e.id} e={e} />) : empty}
+      {on.length ? on.map((e) => <ExperienceCard key={e.id} e={e} />) : !near.length ? empty : <span className="text-[13px] text-subtle">Nothing on these exact dates.</span>}
+      {near.length > 0 && (
+        <section className="mt-2 flex flex-col gap-2.5">
+          <span className="text-xs tracking-[0.14em] text-subtle uppercase">{`Also nearby · within ${FLEX.find(([k]) => k === flex)![1].replace('± ', '')}`}</span>
+          {near.map((e) => (
+            <div key={e.id} className="flex flex-col gap-1">
+              <span className="pl-1 text-[12px] text-gold-soft">{howFar(e)}</span>
+              <ExperienceCard e={e} />
+            </div>
+          ))}
+        </section>
+      )}
     </div>
   )
 }
