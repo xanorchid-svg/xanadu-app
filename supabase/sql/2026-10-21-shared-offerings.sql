@@ -375,3 +375,6 @@ do $$ begin
       on public.offerings for each row execute function public.match_refresh_trigger();
   end if;
 end $$;
+
+-- Oct 21 fix: run as the member (security invoker), or the bypass check is always true and the link checks never run.
+alter function public.guard_offering_links() security invoker;

@@ -15,6 +15,8 @@ const Privacy = lazy(() => import('./screens/Legal').then((m) => ({ default: m.P
 const Terms = lazy(() => import('./screens/Legal').then((m) => ({ default: m.Terms })))
 const Discover = lazy(() => import('./screens/seeker/Discover'))
 const Calendar = lazy(() => import('./screens/seeker/Calendar'))
+const ShareEvent = lazy(() => import('./screens/events/ShareEvent'))
+const EventPage = lazy(() => import('./screens/events/EventPage'))
 const Experience = lazy(() => import('./screens/seeker/Experience'))
 const Saved = lazy(() => import('./screens/seeker/Saved'))
 const You = lazy(() => import('./screens/seeker/You'))
@@ -102,6 +104,8 @@ export default function App() {
           <Route path="/calendar" element={<RequireRole role="seeker"><Calendar /></RequireRole>} />
           <Route path="/experience/:id" element={<RequireRole role="any"><Experience /></RequireRole>} />
           <Route path="/space/:id" element={<RequireRole role="any"><Space /></RequireRole>} />
+          <Route path="/event/:id" element={<RequireRole role="any"><EventPage /></RequireRole>} />
+          <Route path="/events/new" element={<RequireRole role="any"><ShareEvent /></RequireRole>} />
           <Route path="/saved" element={<RequireRole role="seeker"><Saved /></RequireRole>} />
           <Route path="/you" element={<RequireRole role="seeker"><You /></RequireRole>} />
           <Route path="/messages" element={<RequireRole role="any"><Messages /></RequireRole>} />

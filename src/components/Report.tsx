@@ -11,7 +11,7 @@ const REASONS = ['Inappropriate or unsafe', 'Harassment or unwanted contact', 'S
  * Only the Xanadu team sees reports. Blocking is optional and immediate.
  */
 export function ReportSheet({ memberId, name, context, contextId, onClose, onDone }: {
-  memberId: string; name: string; context: 'community' | 'message' | 'space' | 'offering' | 'profile'; contextId?: string | null
+  memberId: string; name: string; context: 'community' | 'message' | 'space' | 'offering' | 'profile' | 'community_event'; contextId?: string | null
   onClose: () => void; onDone: (blocked: boolean) => void
 }) {
   const { session } = useAuth()

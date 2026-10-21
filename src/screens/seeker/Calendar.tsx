@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { Chip, EmptyState, H1, Page, Screen, SeekerTabs, Segmented } from '../../components/ui'
 import { IconBack, IconCalendar, IconNext } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
+import CommunityEventCard from '../../components/CommunityEventCard'
+import { useCommunityEvents, type CommunityEvent } from '../../events'
 import { useListings, type Listing } from '../../store'
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -19,10 +21,14 @@ type View = 'Month' | 'Week' | 'Day'
 type Flex = 0 | 3 | 7 | 14
 const FLEX: [Flex, string][] = [[0, 'Exact'], [3, '± 3 days'], [7, '± 1 week'], [14, '± 2 weeks']]
 const shift = (s: string, n: number) => iso(add(at(s), n))
+/** Reviewed experiences and community events share the calendar. */
+type Item = Listing | CommunityEvent
+const isCommunity = (e: Item): e is CommunityEvent => 'submitted_by' in e && 'tags' in e
+const ItemCard = ({ e }: { e: Item }) => (isCommunity(e) ? <CommunityEventCard e={e} /> : <ExperienceCard e={e} />)
 /** Runs on this day? */
-const runs = (e: Listing, d: string) => !!e.start_date && e.start_date <= d && (e.end_date || e.start_date) >= d
+const runs = (e: Item, d: string) => !!e.start_date && e.start_date <= d && (e.end_date || e.start_date) >= d
 /** Overlaps these dates? */
-const overlaps = (e: Listing, a: string, b: string) => !!e.start_date && e.start_date <= b && (e.end_date || e.start_date) >= a
+const overlaps = (e: Item, a: string, b: string) => !!e.start_date && e.start_date <= b && (e.end_date || e.start_date) >= a
 
 /**
  * Every live experience by date. Month, Week or Day view, arrows to move through time.
@@ -39,9 +45,13 @@ export default function Calendar() {
   const [place, setPlace] = useState('Everywhere')
   const [flex, setFlex] = useState<Flex>(0)
   const { listings, loading } = useListings()
+  const { events } = useCommunityEvents()
 
   const countries = Array.from(new Set(listings.map((e) => e.space?.country.trim()).filter(Boolean) as string[])).sort()
-  const dated = listings.filter((e) => e.start_date && (place === 'Everywhere' || e.space?.country === place))
+  const dated: Item[] = [
+    ...listings.filter((e) => e.start_date && (place === 'Everywhere' || e.space?.country === place)),
+    ...events.filter((e) => e.start_date),
+  ].sort((a, b) => (a.start_date ?? '').localeCompare(b.start_date ?? ''))
   const busyOn = (d: string) => dated.filter((e) => runs(e, d)).length
 
   const c = at(cursor)
@@ -73,14 +83,17 @@ export default function Calendar() {
   const empty = (
     <EmptyState icon={<IconCalendar size={36} />} title={dated.length ? 'Nothing on these dates' : 'Nothing scheduled yet'}
       action={<Link to="/discover" className="flex min-h-11 items-center text-sm no-underline">Back to Discover</Link>}>
-      {dated.length ? 'Days with a dot have something on. Try another day or week.' : 'When spaces and Facilitators publish retreats, trainings and classes, they’ll show up here by day.'}
+      {dated.length ? 'Days with a dot have something on. Try another day or week.' : 'When spaces and Facilitators publish retreats, trainings and classes, they’ll show up here by day. Seen a poster for something nearby? Share it.'}
     </EmptyState>
   )
 
   return (
     <Screen footer={<SeekerTabs />}>
       <Page className="gap-4">
-        <H1>Calendar</H1>
+        <div className="flex items-end justify-between gap-3">
+          <H1>Calendar</H1>
+          <Link to="/events/new" className="mb-1 flex min-h-10 flex-none items-center rounded-full border border-line-2 px-3.5 text-[13px] text-text no-underline">+ Share an event</Link>
+        </div>
         <Segmented options={['Month', 'Week', 'Day'] as const} value={view} onChange={changeView} label="Calendar view" />
         {countries.length > 1 && (
           <div className="-mx-5 flex gap-2 overflow-x-auto px-5">
@@ -173,7 +186,7 @@ function WeekStrip({ cursor, today, selected, busyOn, onPick }: { cursor: Date; 
 }
 
 /** Week view: each day of the week with what's on. */
-function WeekAgenda({ cursor, list, onDay, empty }: { cursor: Date; list: Listing[]; onDay: (d: string) => void; empty: ReactNode }) {
+function WeekAgenda({ cursor, list, onDay, empty }: { cursor: Date; list: Item[]; onDay: (d: string) => void; empty: ReactNode }) {
   const start = startOfWeek(cursor)
   const days = Array.from({ length: 7 }, (_, i) => iso(add(start, i)))
   if (!list.some((e) => overlaps(e, days[0], days[6]))) return <>{empty}</>
@@ -187,7 +200,7 @@ function WeekAgenda({ cursor, list, onDay, empty }: { cursor: Date; list: Listin
               <span className="text-xs tracking-[0.14em] text-subtle uppercase">{fmt(d, { weekday: 'long', month: 'short', day: 'numeric' })}</span>
               <span className="text-[12px] text-gold-soft">Day view ›</span>
             </button>
-            {on.map((e) => <ExperienceCard key={e.id} e={e} />)}
+            {on.map((e) => <ItemCard key={e.id} e={e} />)}
           </section>
         )
       })}
@@ -196,13 +209,13 @@ function WeekAgenda({ cursor, list, onDay, empty }: { cursor: Date; list: Listin
 }
 
 /** Month and Day views: what's on the chosen day or range. */
-function Picked({ from, to, flex, list, empty, onClear }: { from: string; to: string; flex: Flex; list: Listing[]; empty: ReactNode; onClear?: () => void }) {
+function Picked({ from, to, flex, list, empty, onClear }: { from: string; to: string; flex: Flex; list: Item[]; empty: ReactNode; onClear?: () => void }) {
   const end = to || from
   const on = list.filter((e) => overlaps(e, from, end))
   // flexible: also anything starting or running within the window around the chosen dates
   const near = flex ? list.filter((e) => !on.includes(e) && overlaps(e, shift(from, -flex), shift(end, flex))) : []
   const label = to ? `${fmt(from, { month: 'short', day: 'numeric' })} – ${fmt(to, { month: 'short', day: 'numeric' })}` : fmt(from, { weekday: 'long', month: 'long', day: 'numeric' })
-  const howFar = (e: Listing) => {
+  const howFar = (e: Item) => {
     const s0 = e.start_date!, e0 = e.end_date || s0
     const days = s0 > end ? Math.round((at(s0).getTime() - at(end).getTime()) / 86400000) : Math.round((at(from).getTime() - at(e0).getTime()) / 86400000)
     return `${days} ${days === 1 ? 'day' : 'days'} ${s0 > end ? 'after' : 'before'}`
@@ -213,14 +226,14 @@ function Picked({ from, to, flex, list, empty, onClear }: { from: string; to: st
         <span className="text-xs tracking-[0.14em] text-subtle uppercase">{label}</span>
         {onClear && <button type="button" onClick={onClear} className="min-h-9 text-[13px] text-gold-soft">Clear range</button>}
       </div>
-      {on.length ? on.map((e) => <ExperienceCard key={e.id} e={e} />) : !near.length ? empty : <span className="text-[13px] text-subtle">Nothing on these exact dates.</span>}
+      {on.length ? on.map((e) => <ItemCard key={e.id} e={e} />) : !near.length ? empty : <span className="text-[13px] text-subtle">Nothing on these exact dates.</span>}
       {near.length > 0 && (
         <section className="mt-2 flex flex-col gap-2.5">
           <span className="text-xs tracking-[0.14em] text-subtle uppercase">{`Also nearby · within ${FLEX.find(([k]) => k === flex)![1].replace('± ', '')}`}</span>
           {near.map((e) => (
             <div key={e.id} className="flex flex-col gap-1">
               <span className="pl-1 text-[12px] text-gold-soft">{howFar(e)}</span>
-              <ExperienceCard e={e} />
+              <ItemCard e={e} />
             </div>
           ))}
         </section>

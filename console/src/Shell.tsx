@@ -10,6 +10,7 @@ export const NAV: Item[] = [
   { to: '/offerings', label: 'Offerings', icon: 'M4 7h16v13H4zM4 7l2-3h12l2 3M9 12h6' },
   { to: '/inbox', label: 'Inbox', icon: 'M4 5h16v11H8l-4 4zM8 9h8M8 12h5', phone: true },
   { to: '/members', label: 'Members', icon: 'M9 11a3 3 0 100-6 3 3 0 000 6zM3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 5.2a3 3 0 010 5.6M18 14.4c1.8.9 3 2.9 3 5.6', phone: true },
+  { to: '/events', label: 'Community events', icon: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4M8 14h3' },
   { to: '/waitlist', label: 'Waitlist', icon: 'M12 7v5l3 2M12 3a9 9 0 100 18 9 9 0 000-18z' },
   { to: '/spaces', label: 'Spaces', icon: 'M3 20h18M5 20V10l7-6 7 6v10M10 20v-5h4v5' },
   { to: '/emails', label: 'Emails', icon: 'M3 6h18v12H3zM3 7l9 6 9-6' },

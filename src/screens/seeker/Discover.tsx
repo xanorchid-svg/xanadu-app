@@ -12,6 +12,8 @@ import { useListings, useSpaces, type Listing, type PublicSpace } from '../../st
 import { activeCount, destinations, NO_FILTERS, passes, sortListings, spacePasses, useFilters } from '../../filters'
 import { Bell } from '../../components/Bell'
 import ApplicationBanner from '../../components/ApplicationBanner'
+import CommunityEventCard from '../../components/CommunityEventCard'
+import { useCommunityEvents } from '../../events'
 
 /** Does a practice chip match this experience or space? ("Trainings" also matches the Training format.) */
 const fits = (picked: string, practices: string[], format?: string) =>
@@ -49,6 +51,7 @@ export default function Discover() {
   const notified = profile?.launch_notify ?? false
   const { matches } = useMatches(6)
   const scores = useMatchScores()
+  const { events } = useCommunityEvents()
   const { listings, loading } = useListings()
   const { spaces } = useSpaces()
   const lifestyle = profile?.lifestyle ?? []
@@ -166,6 +169,18 @@ export default function Discover() {
               <span className="text-xs text-subtle">{volunteering ? 'Give your time, receive a place to stay, meals and practice' : 'Founding spaces welcomed by Xanadu'}</span>
             </div>
             <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">{places.map((s) => <SpaceRow key={s.id} s={s} />)}</div>
+          </section>
+        )}
+
+        {!filtering && (
+          <section className="flex flex-col gap-3">
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex flex-col gap-0.5"><H2>Happening nearby</H2><span className="text-xs text-subtle">Community events shared by members · not verified</span></div>
+              <Link to="/events/new" className="flex min-h-9 flex-none items-center text-[13px] no-underline">+ Share</Link>
+            </div>
+            {events.length > 0
+              ? <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">{events.slice(0, 12).map((e) => <CommunityEventCard key={e.id} e={e} wide={false} />)}</div>
+              : <RowLink to="/events/new" title="Seen a poster for a gathering?" sub="Share yoga, breathwork, sound healing, dance and circles happening near you." />}
           </section>
         )}
 

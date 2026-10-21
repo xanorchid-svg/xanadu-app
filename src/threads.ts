@@ -94,7 +94,7 @@ export function useUnreadDot() {
   return dot
 }
 
-export async function reportMember(reporter: string, reported: string, reason: string, context: 'community' | 'message' | 'space' | 'offering' | 'profile', contextId?: string | null) {
+export async function reportMember(reporter: string, reported: string, reason: string, context: 'community' | 'message' | 'space' | 'offering' | 'profile' | 'community_event', contextId?: string | null) {
   const { error } = await supabase.from('reports').insert({ reporter, reported, reason: reason.slice(0, 2000), context, context_id: contextId ?? null })
   return error ? friendlyError(error.message) : null
 }

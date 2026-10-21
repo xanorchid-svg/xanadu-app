@@ -29,6 +29,7 @@ export default function Today() {
   const [counts, setCounts] = useState<Counts | null>(null)
   const [actions, setActions] = useState<Action[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [events, setEvents] = useState(0)
   const signups = useTeamQuery<SignupDay[]>('team_signups', { p_days: 30 })
   const heard = useTeamQuery<Heard[]>('team_heard_from')
 
@@ -37,6 +38,7 @@ export default function Today() {
       if (error) setError("Couldn't load today's numbers. Refresh to try again.")
       else setCounts(data as Counts)
     })
+    supabase.rpc('team_pending_community_events').then(({ data }) => setEvents(Number(data) || 0))
     supabase.from('team_actions').select('id, action, target_kind, note, created_at').order('created_at', { ascending: false }).limit(10)
       .then(({ data }) => setActions((data as Action[]) ?? []))
   }, [])
@@ -48,6 +50,7 @@ export default function Today() {
     { n: counts.offerings_in_review, label: 'Offerings in review', to: '/offerings' },
     { n: counts.unanswered_messages, label: 'Messages to answer', to: '/inbox' },
     { n: counts.open_reports, label: 'Safety reports', to: '/safety' },
+    { n: events, label: 'Community events to review', to: '/events' },
   ]
   const waiting = attention?.reduce((s, a) => s + a.n, 0) ?? 0
   const total = counts ? counts.members.seeker + counts.members.container + counts.members.facilitator : 0
@@ -67,7 +70,7 @@ export default function Today() {
               <h2 id="attn" className="text-[12px] font-semibold uppercase tracking-[.16em] text-faint">Needs your attention</h2>
               <p className="text-[13px] text-subtle">{waiting === 0 ? 'All clear' : `${waiting} waiting`}</p>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
               {attention.map((a) => (
                 <Link key={a.label} to={a.to} className="no-underline">
                   <Card glow={a.n > 0} className="h-full p-4 hover:bg-surface">

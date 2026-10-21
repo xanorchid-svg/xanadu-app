@@ -19,6 +19,7 @@ const Safety = lazy(() => import('./screens/Safety'))
 const Emails = lazy(() => import('./screens/Emails'))
 const Instagram = lazy(() => import('./screens/Instagram'))
 const Waitlist = lazy(() => import('./screens/Waitlist'))
+const CommunityEvents = lazy(() => import('./screens/CommunityEvents'))
 
 function Door() {
   const { state } = useGate()
@@ -36,6 +37,7 @@ function Door() {
         <Route path="inbox" element={<Inbox />} />
         <Route path="members" element={<Members />} />
         <Route path="waitlist" element={<Waitlist />} />
+        <Route path="events" element={<CommunityEvents />} />
         <Route path="spaces" element={<Spaces />} />
         <Route path="safety" element={<Safety />} />
         <Route path="emails" element={<Emails />} />

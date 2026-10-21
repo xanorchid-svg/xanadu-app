@@ -22,7 +22,7 @@ export type OfferingImport = {
 type Result<F> = { fields: F; photos: string[]; notes: string }
 
 /** Turns a chosen flyer photo into a small JPEG for the AI to read (keeps uploads quick on phones). */
-function flyerFromFile(file: File, max = 1600): Promise<string> {
+export function flyerFromFile(file: File, max = 1600): Promise<string> {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file)
     const img = new Image()
@@ -39,7 +39,7 @@ function flyerFromFile(file: File, max = 1600): Promise<string> {
   })
 }
 
-async function call<T>(body: object): Promise<{ data?: T; error?: string }> {
+export async function call<T>(body: object): Promise<{ data?: T; error?: string }> {
   const { data, error } = await supabase.functions.invoke('import-listing', { body })
   if (!error) return { data: data as T }
   // the function explains what went wrong in plain words
