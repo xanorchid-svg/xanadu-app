@@ -1,3 +1,4 @@
+import { WEB_ORIGIN } from '../../lib/native'
 import { useEffect, useState } from 'react'
 import { ReportSheet } from '../../components/Report'
 import { Link, Navigate } from 'react-router-dom'
@@ -78,7 +79,7 @@ export default function Community() {
 
   const [inviteNote, setInviteNote] = useState('')
   const invite = async () => {
-    const url = window.location.origin
+    const url = WEB_ORIGIN
     try {
       if (navigator.share) { await navigator.share({ title: 'Xanadu', text: 'Join me on Xanadu, a network for awakening places.', url }); return }
       await navigator.clipboard.writeText(url); setInviteNote('Link copied ✓')

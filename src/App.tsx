@@ -1,8 +1,9 @@
 import { lazy, Suspense, useEffect, useLayoutEffect } from 'react'
-import { Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Loading, RequireRole, useAuth } from './auth'
 import AuthCallback from './screens/AuthCallback'
 import Intro from './screens/Intro'
+import { listenForAppLinks } from './lib/native'
 
 // Each screen is its own small file, loaded the first time it's opened (and kept offline by the app's service worker)
 const ResetPassword = lazy(() => import('./screens/ResetPassword'))
@@ -71,8 +72,11 @@ function ApplyRedirect() {
 
 export default function App() {
   const location = useLocation()
+  const navigate = useNavigate()
   useScrollToTop()
   usePrefetch()
+  // iPhone app: sign-in returns and other dreamxanadu:// links open the right screen
+  useEffect(() => listenForAppLinks((path) => navigate(path, { replace: true })), [navigate])
   return (
     <div className="flex h-dvh justify-center bg-navy-deep">
       {/* Fills every phone edge to edge; a phone-width column only on tablets and desktop */}

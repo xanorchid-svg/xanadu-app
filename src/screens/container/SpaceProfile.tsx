@@ -1,3 +1,4 @@
+import { WEB_ORIGIN } from '../../lib/native'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ContainerTabs, Reviews, Screen, Switch } from '../../components/ui'
@@ -72,7 +73,7 @@ export default function SpaceProfile() {
   const share = async () => {
     setShareNote('')
     if (!approved || !space.id) { setShareNote('Your share link opens once the Xanadu team has welcomed your space.'); return }
-    const url = `${window.location.origin}/space/${space.id}`
+    const url = `${WEB_ORIGIN}/space/${space.id}`
     try {
       if (navigator.share) { await navigator.share({ title: space.name, text: `${space.name} on Xanadu`, url }); return }
       await navigator.clipboard.writeText(url)

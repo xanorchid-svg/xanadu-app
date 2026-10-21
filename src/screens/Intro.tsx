@@ -5,6 +5,7 @@ import Logo from '../components/Logo'
 import type { Role } from '../data'
 import { HOME, takeReturn, toDbRole, useAuth } from '../auth'
 import { friendlyError, supabase, enabledProviders } from '../lib/supabase'
+import { isNative, nativeOAuth, WEB_ORIGIN } from '../lib/native'
 
 const ROLES: { role: Role; sub: string }[] = [
   { role: 'Seeker', sub: 'Explore' },
@@ -82,7 +83,7 @@ export default function Intro() {
 
   const login = phase !== 'intro'
   const join = JOIN[role]
-  const origin = window.location.origin
+  const origin = WEB_ORIGIN
 
   const targetW = (size.h * BG_HEIGHT * 900) / 518
   const growScale = targetW / (LOGO_W * LOGO_SCALE)
@@ -116,9 +117,12 @@ export default function Intro() {
 
   const oauth = async (provider: 'google' | 'apple') => {
     setError(''); setInfo('')
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider, options: { redirectTo: `${origin}/auth/callback?role=${toDbRole(role)}` },
-    })
+    // inside the iPhone app, sign-in opens in the system browser sheet and returns via dreamxanadu://
+    const { error } = isNative
+      ? await nativeOAuth(provider, toDbRole(role))
+      : await supabase.auth.signInWithOAuth({
+        provider, options: { redirectTo: `${origin}/auth/callback?role=${toDbRole(role)}` },
+      })
     if (error) setError(friendlyError(error.message))
   }
 
