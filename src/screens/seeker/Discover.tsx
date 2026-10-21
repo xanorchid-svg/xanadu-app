@@ -100,9 +100,9 @@ export default function Discover() {
         {!filtering && (lifestyle.length === 0 ? (
           <Link to="/you" className="ring-iri relative flex flex-col gap-2 overflow-hidden rounded-[22px] bg-plum/70 p-[18px] text-text no-underline">
             <span aria-hidden className="bg-iri-strong pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full opacity-25 blur-2xl" />
-            <span className="text-iri text-[11px] font-semibold tracking-[0.18em] uppercase">Design your stay</span>
-            <span className="font-display text-[24px] leading-tight text-ink">How long, how you spend your days, and where you feel most alive</span>
-            <span className="text-[13px] text-muted">A weekend or a season. Work remotely, volunteer, or just be. Beach, desert, mountains, jungle, city. We match you. ›</span>
+            <span className="text-iri text-[11px] font-semibold tracking-[0.18em] uppercase">Design your way</span>
+            <span className="font-display text-[24px] leading-tight text-ink">One class, a season, or a place to call home</span>
+            <span className="text-[13px] text-muted">Drop in, stay a while, or join a community. Work remotely, volunteer, or just be. We match you. ›</span>
           </Link>
         ) : (
           <div className="-mx-5 flex items-center gap-2 overflow-x-auto px-5">

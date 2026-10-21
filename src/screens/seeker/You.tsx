@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { RolesCard } from '../../components/Roles'
 import { Link } from 'react-router-dom'
 import { Chip, EmptyState, H2, Page, PrimaryButton, Screen, SeekerTabs, Segmented } from '../../components/ui'
 import { IconChart, IconSettings } from '../../components/icons'
@@ -67,7 +68,7 @@ export default function You() {
         </div>
 
         <section className="ring-iri flex flex-col gap-4 rounded-[22px] bg-plum/60 p-[18px]">
-          <div className="flex flex-col gap-0.5"><H2 className="text-[22px]">Your way of living</H2><span className="text-xs text-subtle">How long, how you want to spend your days, and where. We match you to places that hold it.</span></div>
+          <div className="flex flex-col gap-0.5"><H2 className="text-[22px]">Your way of living</H2><span className="text-xs text-subtle">How you want to take part, how you spend your days, and where. We match you to the places and gatherings that fit.</span></div>
           <LifestylePicker value={me.lifestyle} onChange={(v) => save({ ...me, lifestyle: v })} />
         </section>
 
@@ -127,10 +128,7 @@ export default function You() {
           <a href={`mailto:${CONTACT_EMAIL}`} className={`${row} border-b-0`}>Help <span className="text-[13px] text-subtle">{CONTACT_EMAIL}</span></a>
         </section>
 
-        <a href={`mailto:${CONTACT_EMAIL}?subject=I'd%20like%20to%20hold%20space%20on%20Xanadu`} className="flex flex-col gap-1 rounded-[20px] bg-iri p-[18px] text-navy no-underline hover:text-navy">
-          <span className="text-base font-semibold">Hold space on Xanadu</span>
-          <span className="text-[13px]">Have a retreat space or a practice to share? Write to us and we'll set up your host account →</span>
-        </a>
+        <RolesCard />
         <SignOutButton />
       </Page>
     </Screen>

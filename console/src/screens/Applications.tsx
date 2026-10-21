@@ -68,17 +68,17 @@ export default function Applications() {
       [a.name, a.email, a.space?.name, a.town, a.region, a.space?.country, a.space?.town].some((v) => v?.toLowerCase().includes(s))))
   }, [inRole, tab, q])
 
-  const open = (data ?? []).find((a) => a.id === openId) ?? null
-  const idx = shown.findIndex((a) => a.id === openId)
+  const open = (data ?? []).find((a) => a.key === openId) ?? (data ?? []).find((a) => a.id === openId) ?? null
+  const idx = shown.findIndex((a) => a.key === open?.key)
   const close = useCallback(() => setOpenId(null), [])
   const step = useCallback((d: number) => {
     if (!shown.length) return
     const next = shown[(Math.max(idx, 0) + d + shown.length) % shown.length]
-    setOpenId(next.id)
+    setOpenId(next.key)
   }, [shown, idx])
 
-  const decided = (id: string, status: Application['status'], label: string) => {
-    setData((list) => list?.map((a) => (a.id === id ? { ...a, status } : a)) ?? null)
+  const decided = (key: string, status: Application['status'], label: string) => {
+    setData((list) => list?.map((a) => (a.key === key ? { ...a, status } : a)) ?? null)
     toast.show(label)
     reload()
   }
@@ -112,8 +112,8 @@ export default function Applications() {
         <Card>
           <ul className="divide-y divide-line">
             {shown.map((a) => (
-              <li key={a.id}>
-                <button onClick={() => setOpenId(a.id)} className="flex w-full items-center gap-3.5 px-4 py-3.5 text-left hover:bg-surface/60 sm:px-5">
+              <li key={a.key}>
+                <button onClick={() => setOpenId(a.key)} className="flex w-full items-center gap-3.5 px-4 py-3.5 text-left hover:bg-surface/60 sm:px-5">
                   <Avatar src={photoOf(a)} size="size-12" square={a.role === 'container'} />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[15px] font-semibold text-text">{titleOf(a)}</p>
@@ -121,6 +121,7 @@ export default function Applications() {
                       {ROLE_LABEL[a.role]}{a.role === 'container' && a.name && a.space?.name ? ` · ${a.name}` : ''} · {whereOf(a) || 'No location yet'}
                     </p>
                     <div className="mt-1.5 flex flex-wrap gap-1">
+                      {a.fast_track && <span className="rounded-full bg-iri-violet/15 px-2 py-0.5 text-[11px] font-semibold text-iri-violet">{`Fast track · approved ${a.role === 'container' ? 'Facilitator' : 'Container'}`}</span>}
                       {checklist(a).map(([label, ok]) => (
                         <span key={label} className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${ok ? 'bg-iri-sage/12 text-iri-sage' : 'bg-surface text-faint ring-1 ring-line'}`}>
                           {ok ? '✓ ' : ''}{label}
@@ -140,7 +141,7 @@ export default function Applications() {
         </Card>
       )}
 
-      {open && <Review key={open.id} a={open} onClose={close} onStep={step} position={idx >= 0 ? `${idx + 1} of ${shown.length}` : ''} onDecided={decided} />}
+      {open && <Review key={open.key} a={open} onClose={close} onStep={step} position={idx >= 0 ? `${idx + 1} of ${shown.length}` : ''} onDecided={decided} />}
       {toast.node}
     </div>
   )
@@ -193,9 +194,9 @@ function Review({ a, onClose, onStep, position, onDecided }: {
 
   async function send(body: string) {
     if (!decision) return null
-    const { error } = await supabase.rpc('team_review_member', { p_member: a.id, p_decision: decision, p_message: body })
+    const { error } = await supabase.rpc('team_review_role', { p_member: a.id, p_role: a.role, p_decision: decision, p_message: body })
     if (error) return error.message
-    onDecided(a.id, DECISION[decision].status, DECISION[decision].done)
+    onDecided(a.key, DECISION[decision].status, DECISION[decision].done)
     setDecision(null)
     if (body) setThread((t) => [...(t ?? []), { id: crypto.randomUUID(), from_team: true, body, created_at: new Date().toISOString() }])
     return null
@@ -224,7 +225,7 @@ function Review({ a, onClose, onStep, position, onDecided }: {
     <Drawer label={titleOf(a)} onClose={onClose} footer={footer}
       image={<Avatar src={photoOf(a)} size="size-14" square={a.role === 'container'} />}
       title={titleOf(a)}
-      sub={<>{ROLE_LABEL[a.role]}{pillOf(a) && <StatusPill status={pillOf(a)!} />}{!a.onboarded && <span className="text-gold-pale">Hasn’t submitted yet</span>}</>}>
+      sub={<>{ROLE_LABEL[a.role]}{pillOf(a) && <StatusPill status={pillOf(a)!} />}{a.other_status === 'approved' && <span className="text-iri-violet">{`Already an approved ${a.role === 'container' ? 'Facilitator' : 'Container'}`}</span>}{!a.onboarded && <span className="text-gold-pale">Hasn’t submitted yet</span>}</>}>
 
       <Section title="Account">
         <Answers rows={[

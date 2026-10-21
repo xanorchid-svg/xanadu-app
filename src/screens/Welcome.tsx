@@ -4,6 +4,8 @@ import { AvatarPicker, LocationFields, PhotoGallery, PracticePicker, TextArea, T
 import { IconClose } from '../components/icons'
 import { Chip, Field, Glow, inputCls } from '../components/ui'
 import { LifestylePicker } from '../components/Lifestyle'
+import { cancelAddRole } from '../components/Roles'
+import { ImportCard, mergeSpace, type SpaceImport } from '../components/Import'
 import { HOME, Loading, takeReturn, useAuth } from '../auth'
 import { PRACTICES, SEEKER_ALIGN } from '../data'
 import { refreshMatches } from '../matching'
@@ -13,9 +15,9 @@ import { friendlyError } from '../lib/supabase'
 const HOST_PRACTICES = PRACTICES.filter((p) => p !== 'Trainings')
 
 /** Shared frame for every setup flow: progress, a scrolling step, Back / Continue. */
-function Wizard({ steps, step, setStep, onFinish, finishLabel, busy, error, children, onSignOut }: {
+function Wizard({ steps, step, setStep, onFinish, finishLabel, busy, error, children, onSignOut, onCancel }: {
   steps: string[]; step: number; setStep: (n: number) => void; onFinish: () => void; finishLabel: string
-  busy: boolean; error: string; children: ReactNode; onSignOut: () => void
+  busy: boolean; error: string; children: ReactNode; onSignOut: () => void; onCancel?: () => void
 }) {
   const last = step === steps.length - 1
   return (
@@ -23,7 +25,9 @@ function Wizard({ steps, step, setStep, onFinish, finishLabel, busy, error, chil
       <header className="flex flex-col gap-3 border-b border-[#1F2B3E] px-5 pt-safe pb-3.5">
         <div className="flex items-center justify-between">
           <span className="text-[13px] text-subtle">{`Step ${step + 1} of ${steps.length} · ${steps[step]}`}</span>
-          <button type="button" onClick={onSignOut} className="min-h-10 text-[13px] text-subtle">Sign out</button>
+          {onCancel
+            ? <button type="button" onClick={onCancel} className="min-h-10 text-[13px] text-subtle">Cancel</button>
+            : <button type="button" onClick={onSignOut} className="min-h-10 text-[13px] text-subtle">Sign out</button>}
         </div>
         <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
           {steps.map((s, i) => <span key={s} className={`h-1 rounded-full transition-colors duration-500 ${i <= step ? 'bg-iri-strong' : 'bg-line'}`} />)}
@@ -85,6 +89,20 @@ function HeardFrom({ h, optional = false }: { h: ReturnType<typeof useHeardFrom>
       )}
     </div>
   )
+}
+
+/** Adding a second role to an existing account: Cancel goes back to how things were. */
+function useAdding() {
+  const navigate = useNavigate()
+  const { profile, refreshProfile } = useAuth()
+  const adding = !!profile?.prev_role
+  const cancel = async () => {
+    const { error } = await cancelAddRole()
+    if (error) return
+    const p = await refreshProfile()
+    navigate(p ? HOME[p.role] : '/', { replace: true })
+  }
+  return { adding, cancel: adding ? cancel : undefined }
 }
 
 /* ---------------- Seeker ---------------- */
@@ -155,7 +173,8 @@ function ContainerWelcome() {
   const { session, profile, updateProfile, signOut } = useAuth()
   const [, saveSpace] = useSpaceProfile()
   const [step, setStep] = useState(0)
-  const [space, setSpace] = useState<SpaceProfile>({ ...EMPTY_SPACE, name: profile?.name ?? '' })
+  const { adding, cancel } = useAdding()
+  const [space, setSpace] = useState<SpaceProfile>({ ...EMPTY_SPACE, name: adding ? '' : profile?.name ?? '' })
   const [phone, setPhone] = useState('')
   const [proof, setProof] = useState('')
   const [agreed, setAgreed] = useState(false)
@@ -166,7 +185,7 @@ function ContainerWelcome() {
 
   const go = (n: number) => {
     if (n > step && step === 0 && (!space.name.trim() || !space.country.trim() || !space.town.trim())) { setError('Please add your space name, country and town.'); return }
-    if (n > step && step === 0 && !heard.pick) { setError('Please tell us where you heard about Xanadu.'); return }
+    if (n > step && step === 0 && !adding && !heard.pick) { setError('Please tell us where you heard about Xanadu.'); return }
     if (n > step && step === 1 && !space.about.trim()) { setError('Please describe your space in a few sentences.'); return }
     setError(''); setStep(n)
   }
@@ -176,20 +195,25 @@ function ContainerWelcome() {
     setBusy(true); setError('')
     const e1 = await saveSpace(space)
     const e2 = e1 ?? await savePrivateDetails(session!.user.id, { proof: proof.trim(), phone: phone.trim(), agreed_guidelines: true })
-    const e3 = e2 ?? await updateProfile({ name: space.name.trim(), town: space.town.trim(), practices: space.practices, about: space.about.trim(), heard_from: heard.value, onboarded: true })
+    // a member adding a space keeps their own name and about; the space has its own
+    const e3 = e2 ?? await updateProfile(adding ? { onboarded: true }
+      : { name: space.name.trim(), town: space.town.trim(), practices: space.practices, about: space.about.trim(), heard_from: heard.value, onboarded: true })
     if (e3) { setError(friendlyError(e3)); setBusy(false); return }
     navigate('/container', { replace: true })
   }
 
   return (
-    <Wizard steps={['Your space', 'The spirit', 'Photos & details', 'Trust']} step={step} setStep={go} onFinish={finish} finishLabel="Submit for review" busy={busy} error={error} onSignOut={signOut}>
+    <Wizard steps={['Your space', 'The spirit', 'Photos & details', 'Trust']} step={step} setStep={go} onFinish={finish} finishLabel="Submit for review" busy={busy} error={error} onSignOut={signOut} onCancel={cancel}>
       {step === 0 && (
         <>
-          <Title sub="Founding Containers join free. Let's set up your space.">Welcome, Container</Title>
+          {adding
+            ? <Title sub="Your space gets its own review. Everything else on your account stays as it is.">Add your space</Title>
+            : <Title sub="Founding Containers join free. Let's set up your space.">Welcome, Container</Title>}
+          <ImportCard<SpaceImport> kind="space" onFilled={(f) => setSpace((s) => mergeSpace(s, f))} onPhotos={(u) => setSpace((s) => ({ ...s, photos: [...s.photos, ...u] }))} />
           <TextField label="Space name" value={space.name} onChange={(v) => set('name', v)} />
           <LocationFields value={space} onChange={(v) => setSpace((s) => ({ ...s, ...v }))} />
           <TextField label="Phone (private, for your intro call)" value={phone} onChange={setPhone} type="tel" autoComplete="tel" />
-          <HeardFrom h={heard} />
+          {!adding && <HeardFrom h={heard} />}
         </>
       )}
       {step === 1 && (
@@ -233,7 +257,8 @@ function FacilitatorWelcome() {
   const [step, setStep] = useState(0)
   const [photo, setPhoto] = useState(profile?.photo_url ?? '')
   const [name, setName] = useState(profile?.name ?? '')
-  const [town, setTown] = useState('')
+  const { adding, cancel } = useAdding()
+  const [town, setTown] = useState(adding ? profile?.town || profile?.region || '' : '')
   const [practices, setPractices] = useState<string[]>([])
   const [languages, setLanguages] = useState('')
   const [about, setAbout] = useState('')
@@ -247,7 +272,7 @@ function FacilitatorWelcome() {
 
   const go = (n: number) => {
     if (n > step && step === 0 && (!name.trim() || !town.trim())) { setError("Please add your name and where you're based."); return }
-    if (n > step && step === 0 && !heard.pick) { setError('Please tell us where you heard about Xanadu.'); return }
+    if (n > step && step === 0 && !adding && !heard.pick) { setError('Please tell us where you heard about Xanadu.'); return }
     if (n > step && step === 1 && (!practices.length || !about.trim())) { setError('Please choose your practices and write a few words about your work.'); return }
     setError(''); setStep(n)
   }
@@ -273,14 +298,16 @@ function FacilitatorWelcome() {
   const tr = (i: number, k: keyof Training, v: string) => setTrainings((ts) => ts.map((t, j) => (j === i ? { ...t, [k]: v } : t)))
 
   return (
-    <Wizard steps={['You', 'Your practice', 'Training', 'Trust']} step={step} setStep={go} onFinish={finish} finishLabel="Submit for review" busy={busy} error={error} onSignOut={signOut}>
+    <Wizard steps={['You', 'Your practice', 'Training', 'Trust']} step={step} setStep={go} onFinish={finish} finishLabel="Submit for review" busy={busy} error={error} onSignOut={signOut} onCancel={cancel}>
       {step === 0 && (
         <>
-          <Title sub="Founding Facilitators join free. Let's introduce you.">Welcome, Facilitator</Title>
+          {adding
+            ? <Title sub="Your Facilitator profile gets its own review. Everything else on your account stays as it is.">Guide as a Facilitator</Title>
+            : <Title sub="Founding Facilitators join free. Let's introduce you.">Welcome, Facilitator</Title>}
           <AvatarPicker photo={photo} onChange={setPhoto} />
           <TextField label="Your name" value={name} onChange={setName} autoComplete="name" />
           <TextField label="Where you're based" value={town} onChange={setTown} placeholder="e.g. Ubud, Bali" />
-          <HeardFrom h={heard} />
+          {!adding && <HeardFrom h={heard} />}
         </>
       )}
       {step === 1 && (

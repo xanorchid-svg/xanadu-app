@@ -29,7 +29,7 @@ const Group = ({ title, sub, children }: { title: string; sub?: string; children
 )
 
 /**
- * How someone wants to live: how long, whether to work, which landscapes.
+ * How someone wants to take part (a class, regular sessions, a stay, community living), whether to work, which landscapes.
  * Seekers answer for themselves; hosts answer for their space ("host" wording). Both save the same words.
  */
 export function LifestylePicker({ value, onChange, host = false }: { value: string[]; onChange: (v: string[]) => void; host?: boolean }) {
@@ -38,7 +38,8 @@ export function LifestylePicker({ value, onChange, host = false }: { value: stri
   const work = host ? (['Work remotely'] as const) : WORK_STYLES
   return (
     <div className="flex flex-col gap-5">
-      <Group title={host ? 'Stays you welcome' : 'How long do you want to stay?'} sub="Pick all that fit">
+      <Group title={host ? 'What you welcome' : 'How would you like to take part?'}
+        sub={host ? 'From drop-in classes to people who live here. Pick all that fit' : 'From a single class to making it home. Pick all that fit'}>
         {STAYS.map((s) => <Chip key={s} on={value.includes(s)} onClick={() => toggle(s)}>{s}</Chip>)}
       </Group>
       <Group title={host ? 'Good for remote work?' : 'Work while you’re there?'} sub={host ? 'Reliable Wi-Fi and a place to work' : undefined}>

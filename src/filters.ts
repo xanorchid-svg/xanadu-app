@@ -49,7 +49,7 @@ const inPlace = (s: { country?: string; region?: string } | null | undefined, f:
 
 /** Does an experience pass every filter (optionally ignoring one, to count what each option would show)? */
 export function passes(e: Listing, f: Filters, ignore?: keyof Filters) {
-  if (ignore !== 'type' && f.type !== 'Any' && (f.type === 'Volunteer exchange' || e.format !== f.type)) return false
+  if (ignore !== 'type' && f.type !== 'Any' && (f.type === 'Volunteer exchange' ? !e.volunteer_exchange : e.format !== f.type)) return false
   if (ignore !== 'country' && ignore !== 'region' && !inPlace(e.space, f)) return false
   if (ignore !== 'land' && f.land && !(e.space?.lifestyle ?? []).includes(f.land)) return false
   if (ignore !== 'when' && f.when !== 'any') {

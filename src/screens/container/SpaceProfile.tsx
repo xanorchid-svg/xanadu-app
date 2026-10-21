@@ -1,5 +1,7 @@
 import { WEB_ORIGIN } from '../../lib/native'
 import { useState } from 'react'
+import { RolesCard } from '../../components/Roles'
+import { ImportCard, mergeSpace, type SpaceImport } from '../../components/Import'
 import { Link } from 'react-router-dom'
 import { ContainerTabs, Reviews, Screen, Switch } from '../../components/ui'
 import { AddPhotosButton, EditFooter, LocationFields, PhotoGallery, PracticePicker, SignOutButton, TextArea, TextField } from '../../components/edit'
@@ -22,7 +24,7 @@ export default function SpaceProfile() {
   const [shareNote, setShareNote] = useState('')
   const { profile } = useAuth()
   const { offerings } = useOfferings()
-  const approved = profile?.status === 'approved'
+  const approved = profile?.container_status === 'approved'
   const set = <K extends keyof SP>(k: K, v: SP[K]) => setDraft((d) => ({ ...d, [k]: v }))
   const startEdit = () => { setDraft(space); setError(''); setEditing(true) }
 
@@ -32,6 +34,7 @@ export default function SpaceProfile() {
       <Screen footer={<EditFooter onCancel={() => setEditing(false)} onSave={commit} error={error} busy={busy} />}>
         <div className="flex flex-col gap-5 px-5 pt-safe pb-8">
           <h1 className="m-0 font-display text-[32px] font-medium text-ink">Edit space</h1>
+          <ImportCard<SpaceImport> kind="space" onFilled={(f) => setDraft((d) => mergeSpace(d, f))} onPhotos={(u) => setDraft((d) => ({ ...d, photos: [...d.photos, ...u] }))} />
           <PhotoGallery photos={draft.photos} onChange={(p) => set('photos', p)} />
           <TextField label="Space name" value={draft.name} onChange={(v) => set('name', v)} />
           <LocationFields value={draft} onChange={(v) => setDraft((d) => ({ ...d, ...v }))} />
@@ -142,7 +145,7 @@ export default function SpaceProfile() {
               <div className="flex flex-wrap gap-2">{LANDSCAPES.filter((l) => space.lifestyle.includes(l)).map((l) => <LandChip key={l} name={l} on />)}</div>
               <span className="text-[13px] text-muted">{[STAYS.filter((x) => space.lifestyle.includes(x)).join(' · '), space.lifestyle.includes('Work remotely') ? 'Good for remote work' : ''].filter(Boolean).join(' · ')}</span>
             </>
-          ) : <button type="button" onClick={startEdit} className="self-start text-left text-[13px] text-subtle">[Your landscape, the stays you welcome and remote work. Seekers are matched on these.] <span className="text-iri font-semibold">Add ›</span></button>}
+          ) : <button type="button" onClick={startEdit} className="self-start text-left text-[13px] text-subtle">[Your landscape, what you welcome (classes, stays, community living) and remote work. Seekers are matched on these.] <span className="text-iri font-semibold">Add ›</span></button>}
         </section>
 
         {space.volunteerExchange && (
@@ -180,6 +183,7 @@ export default function SpaceProfile() {
           </Link>
         </section>
 
+        <RolesCard />
         <SignOutButton />
       </div>
     </Screen>

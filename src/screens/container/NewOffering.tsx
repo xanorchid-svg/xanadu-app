@@ -4,6 +4,8 @@ import { useOfferings, useSpaceProfile } from '../../store'
 import { Chip, Field, inputCls, Switch } from '../../components/ui'
 import { IconClose } from '../../components/icons'
 import { PRACTICES } from '../../data'
+import { VolunteerFields } from '../../components/Volunteer'
+import { ImportCard, type OfferingImport } from '../../components/Import'
 
 const STEP_NAMES = ['Basics', 'Dates & spots', 'Held for you', 'Review']
 const FORMATS = ['Retreat', 'Training', 'Drop-in'] as const
@@ -27,6 +29,8 @@ export default function NewOffering() {
   const [start, setStart] = useState('')
   const [end, setEnd] = useState('')
   const [price, setPrice] = useState('')
+  const [volunteer, setVolunteer] = useState(false)
+  const [volunteerDetails, setVolunteerDetails] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
@@ -50,6 +54,7 @@ export default function NewOffering() {
       title: title.trim(), format, practices, description: description.trim(),
       start_date: start || null, end_date: end || start || null, spots,
       price_usd: price ? Number(price) : null, included: inc,
+      volunteer_exchange: volunteer, volunteer_details: volunteer ? volunteerDetails.trim().slice(0, 600) : '',
     })
     setBusy(false)
     if (error) { setError(error); return }
@@ -60,6 +65,19 @@ export default function NewOffering() {
   const close = () => {
     const started = title.trim() || description.trim() || practices.length || start || price
     if (!started || window.confirm('Leave without submitting? What you\'ve written here won\'t be saved.')) { if (window.history.length > 1) navigate(-1); else navigate('/container') }
+  }
+  // what Xanadu read from a website or flyer; the host checks each step before submitting
+  const fillFrom = (f: OfferingImport) => {
+    if (f.format) setFormat(f.format)
+    if (f.title?.trim()) setTitle(f.title.trim())
+    if (f.practices?.length) setPractices((xs) => [...new Set([...xs, ...f.practices!.filter((p) => PRACTICES.includes(p as (typeof PRACTICES)[number]))])])
+    if (f.description?.trim()) setDescription(f.description.trim())
+    if (f.start_date && /^\d{4}-\d{2}-\d{2}$/.test(f.start_date)) setStart(f.start_date)
+    if (f.end_date && /^\d{4}-\d{2}-\d{2}$/.test(f.end_date)) setEnd(f.end_date)
+    if (f.spots && f.spots > 0) setSpots(Math.round(f.spots))
+    if (f.price_usd != null && f.price_usd >= 0) setPrice(String(f.price_usd))
+    if (f.included) setInc((x) => ({ ...x, ...Object.fromEntries(Object.entries(f.included!).filter(([, v]) => typeof v === 'boolean')) }))
+    if (f.volunteer_exchange) { setVolunteer(true); if (f.volunteer_details?.trim()) setVolunteerDetails(f.volunteer_details.trim()) }
   }
   const togglePractice = (p: string) => setPractices((xs) => (xs.includes(p) ? xs.filter((x) => x !== p) : [...xs, p]))
   const box = (on: boolean) => `min-h-12 rounded-xl border text-sm ${on ? 'border-transparent bg-iri font-semibold text-navy' : 'border-line-2 text-text'}`
@@ -83,6 +101,7 @@ export default function NewOffering() {
         {step === 1 && (
           <>
             <h1 className={h1}>What are you offering?</h1>
+            <ImportCard<OfferingImport> kind="offering" onFilled={fillFrom} />
             <div className="flex flex-col gap-2">
               <span className="text-[13px] text-muted">Format</span>
               <div className="grid grid-cols-3 gap-2">{FORMATS.map((f) => <button key={f} type="button" aria-pressed={format === f} onClick={() => setFormat(f)} className={box(format === f)}>{f}</button>)}</div>
@@ -133,6 +152,7 @@ export default function NewOffering() {
                 <Switch on={inc[k]} onChange={(v) => setInc((x) => ({ ...x, [k]: v }))} label={label} />
               </div>
             ))}
+            <VolunteerFields on={volunteer} details={volunteerDetails} onChange={(v, t) => { setVolunteer(v); setVolunteerDetails(t) }} />
           </>
         )}
 

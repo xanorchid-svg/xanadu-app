@@ -8,6 +8,7 @@ import { Loading } from '../../auth'
 import { friendlyError, supabase } from '../../lib/supabase'
 import { PRACTICES } from '../../data'
 import { useOfferings, type Offering } from '../../store'
+import { VolunteerFields } from '../../components/Volunteer'
 
 const FORMATS = ['Retreat', 'Training', 'Drop-in'] as const
 const INCLUDED = [['stay', 'Stay'], ['meals', 'Meals'], ['schedule', 'Daily schedule'], ['outings', 'Outings'], ['transport', 'Airport transport']] as const
@@ -18,6 +19,7 @@ function EditOffering({ o, onDone, update }: { o: Offering; onDone: () => void; 
   const [d, setD] = useState({
     title: o.title, format: o.format, practices: o.practices, description: o.description,
     start: o.start_date ?? '', end: o.end_date ?? '', spots: o.spots, price: o.price_usd != null ? String(o.price_usd) : '', included: { ...o.included },
+    volunteer: !!o.volunteer_exchange, volunteerDetails: o.volunteer_details ?? '',
   })
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -35,6 +37,7 @@ function EditOffering({ o, onDone, update }: { o: Offering; onDone: () => void; 
     const err = await update(o.id, {
       title: d.title.trim(), format: d.format, practices: d.practices, description: d.description.trim(),
       start_date: d.start, end_date: d.end || d.start, spots: d.spots, price_usd: d.price ? Number(d.price) : null, included: d.included,
+      volunteer_exchange: d.volunteer, volunteer_details: d.volunteer ? d.volunteerDetails.trim().slice(0, 600) : '',
     })
     setBusy(false)
     if (err) setError(err); else onDone()
@@ -84,6 +87,7 @@ function EditOffering({ o, onDone, update }: { o: Offering; onDone: () => void; 
             </div>
           ))}
         </div>
+        <VolunteerFields on={d.volunteer} details={d.volunteerDetails} onChange={(v, t) => setD((x) => ({ ...x, volunteer: v, volunteerDetails: t }))} />
         {confirmDelete ? (
           <div className="flex flex-col gap-2 rounded-2xl border border-gold/50 p-4">
             <span className="text-[14px] text-text">Delete this offering? This can't be undone.</span>

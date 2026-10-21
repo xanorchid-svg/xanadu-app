@@ -39,6 +39,9 @@ export type Offering = {
   schedule: Record<string, string[]>
   status: 'draft' | 'in_review' | 'live' | 'declined'
   created_at: string
+  /** guests give some hours in exchange for part of the stay */
+  volunteer_exchange: boolean
+  volunteer_details: string
 }
 
 export type Message = { id: string; from_team: boolean; body: string; created_at: string }
@@ -216,7 +219,7 @@ export function useOfferings() {
     const { error } = await supabase.from('offerings').update(patch).eq('id', id)
     if (error) return friendlyError(error.message)
     await reload()
-    if ('title' in patch || 'description' in patch || 'practices' in patch || 'format' in patch) refreshMatches()
+    if ('title' in patch || 'description' in patch || 'practices' in patch || 'format' in patch || 'volunteer_exchange' in patch) refreshMatches()
     return null
   }, [reload])
 

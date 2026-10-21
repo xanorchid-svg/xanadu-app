@@ -102,6 +102,8 @@ export default function Today() {
         </>
       )}
 
+      <AiSpend />
+
       <section aria-labelledby="activity">
         <h2 id="activity" className="mb-3 text-[12px] font-semibold uppercase tracking-[.16em] text-faint">Recent team activity</h2>
         {actions === null ? null : actions.length === 0 ? (
@@ -130,5 +132,26 @@ function Stat({ n, label, sub }: { n: number; label: string; sub?: string }) {
       <p className="mt-2 text-[13px] font-semibold text-subtle">{label}</p>
       {sub && <p className="mt-1 text-[11.5px] leading-snug text-faint">{sub}</p>}
     </div>
+  )
+}
+
+/** The website and flyer import (Claude) costs a little per use. Shown here so spend is never a surprise. */
+function AiSpend() {
+  const [d, setD] = useState<{ month_usd: number; total_usd: number; imports_month: number; monthly_cap_usd: number; alert_every_usd: number } | null>(null)
+  useEffect(() => { supabase.rpc('team_ai_spend').then(({ data }) => setD(data as typeof d)) }, [])
+  if (!d) return null
+  const pct = Math.min(100, (Number(d.month_usd) / Math.max(1, Number(d.monthly_cap_usd))) * 100)
+  return (
+    <section aria-labelledby="ai-spend" className="mb-8">
+      <h2 id="ai-spend" className="mb-3 text-[12px] font-semibold uppercase tracking-[.16em] text-faint">AI import spend</h2>
+      <Card className="flex flex-col gap-3 p-5">
+        <div className="flex items-baseline justify-between gap-3">
+          <p className="font-display text-[30px] leading-none text-ink">{`$${Number(d.month_usd).toFixed(2)}`}<span className="ml-2 font-sans text-[13px] text-subtle">{`this month · ${d.imports_month} imports`}</span></p>
+          <p className="text-[12.5px] text-faint">{`$${Number(d.total_usd).toFixed(2)} all time`}</p>
+        </div>
+        <div className="h-1.5 overflow-hidden rounded-full bg-line"><div className="h-full rounded-full bg-iri-strong" style={{ width: `${pct}%` }} /></div>
+        <p className="text-[12.5px] leading-snug text-faint">{`Pauses for the month at $${Number(d.monthly_cap_usd).toFixed(0)}. The team gets an email every $${Number(d.alert_every_usd).toFixed(0)} spent.`}</p>
+      </Card>
+    </section>
   )
 }

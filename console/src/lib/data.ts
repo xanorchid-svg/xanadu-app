@@ -15,6 +15,8 @@ export type SpaceForm = {
 }
 
 export type Application = {
+  /** one row per member per role they applied for: key = `${id}:${role}` */
+  key: string; fast_track: boolean; other_status: 'pending' | 'approved' | 'declined' | null
   id: string; role: 'container' | 'facilitator'; status: 'pending' | 'approved' | 'declined' | 'active'; onboarded: boolean
   name: string | null; email: string | null; photo_url: string | null; town: string | null; region: string | null
   practices: string[] | null; about: string | null; languages: string | null; trainings: Training[] | null

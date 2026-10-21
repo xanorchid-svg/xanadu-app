@@ -6,10 +6,12 @@
 export const SEEKER_ALIGN = ['Yoga', 'Breathwork', 'Meditation', 'Sound', 'Ecstatic dance', 'Kirtan', 'Trainings', "Women's retreats", "Men's retreats", 'Permaculture', 'Plant medicine', 'Residencies', 'Recovery programs']
 
 /**
- * Way of living. Seekers say how they want to live; spaces say what they offer.
+ * Way of living. Seekers say how they want to take part; spaces say what they welcome.
  * The same words are stored on both sides (profiles.lifestyle, spaces.lifestyle) so matching can pair them up.
+ * Xanadu is the hub for all of it: one class, regular sessions, a stay of any length, or making it home.
+ * Live offerings that are drop-ins also count as "A class or session" in matching.
  */
-export const STAYS = ['A weekend', 'A week or two', 'A month or more', 'A season', 'To live there'] as const
+export const STAYS = ['A class or session', 'Weekly or monthly sessions', 'A weekend', '1–3 weeks', 'A month or more', 'A season', 'Community living'] as const
 export const WORK_STYLES = ['Work remotely', 'Volunteer exchange', 'Just be, no work'] as const
 export const LANDSCAPES = ['Beach', 'Ocean', 'Jungle', 'Mountains', 'Desert', 'Forest', 'Countryside', 'Town', 'City'] as const
 

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { RolesCard } from '../../components/Roles'
 import { FacilitatorTabs, Reviews, Screen } from '../../components/ui'
 import { AvatarPicker, EditFooter, PracticePicker, SignOutButton, TextArea, TextField } from '../../components/edit'
 import { IconClose } from '../../components/icons'
@@ -153,6 +154,7 @@ export default function FacilitatorProfile() {
           <span className="text-[13px] leading-normal text-subtle">Spaces you co-host with will appear here.</span>
         </section>
 
+        {own && <RolesCard />}
         {own && <SignOutButton />}
       </div>
     </Screen>

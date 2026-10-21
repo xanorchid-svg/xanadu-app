@@ -166,6 +166,13 @@ export default function Experience() {
           </div>
         </div>
 
+        {o.volunteer_exchange && (
+          <section className="ring-iri flex flex-col gap-1.5 rounded-[18px] bg-plum/50 p-4">
+            <h2 className="m-0 font-display text-[22px] font-semibold text-ink">Volunteer exchange</h2>
+            <p className="m-0 text-[14px] leading-relaxed whitespace-pre-line text-muted">{o.volunteer_details?.trim() || 'Part of this experience can be exchanged for some hours of work. Ask the space for details.'}</p>
+          </section>
+        )}
+
         {outings.length > 0 && (
           <div className="flex flex-col gap-2">
             <h2 className="m-0 font-display text-[22px] font-semibold text-ink">Optional outings</h2>

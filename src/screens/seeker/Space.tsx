@@ -100,7 +100,7 @@ export default function Space() {
             <section className="ring-iri flex flex-col gap-3 rounded-[18px] bg-plum/50 p-4">
               <h2 className={h2}>Life here</h2>
               {lands.length > 0 && <div className="flex flex-wrap gap-2">{lands.map((l) => <LandChip key={l} name={l} on />)}</div>}
-              {stays.length > 0 && <span className="text-[13px] text-muted">{`Stays: ${stays.join(' · ')}`}</span>}
+              {stays.length > 0 && <span className="text-[13px] text-muted">{`Welcomes: ${stays.join(' · ')}`}</span>}
               {life.includes('Work remotely') && <span className="text-[13px] text-muted">Good for remote work</span>}
             </section>
           )

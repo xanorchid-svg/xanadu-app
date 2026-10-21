@@ -31,6 +31,11 @@ export type Profile = {
   lifestyle: string[]
   heard_from: string
   email_messages: boolean
+  /** each hosting role's own review status; null = never applied */
+  container_status: 'pending' | 'approved' | 'declined' | null
+  facilitator_status: 'pending' | 'approved' | 'declined' | null
+  /** set while the member is setting up an extra role (so they can cancel back) */
+  prev_role: DbRole | null
 }
 
 export const toDbRole = (r: Role): DbRole => r.toLowerCase() as DbRole
