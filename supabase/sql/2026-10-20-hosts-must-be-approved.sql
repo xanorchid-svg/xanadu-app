@@ -1,0 +1,7 @@
+-- Oct 20, 2026 (applied as migration hosts_must_be_approved). Containers and Facilitators can't use hosting tools until approved.
+-- offerings: insert and update only when profiles.container_status = 'approved' (was: anyone who had applied).
+-- spaces: update blocked once container_status = 'declined' (pending applicants can still edit, to answer "Ask for changes").
+-- trigger profiles_decline_offerings (decline_offerings_of_declined_host, security definer): declining a Container declines all their offerings.
+-- One-off: offerings of already-declined Containers were set to declined.
+-- App side: RequireRole (src/auth.tsx) sends unapproved hosts to /apply/status; pending ones may also open /messages/team,
+-- /notifications and their own /container/space or /facilitator/profile. ContainerTabs/FacilitatorTabs show applicant tabs.

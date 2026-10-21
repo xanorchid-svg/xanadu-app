@@ -1,4 +1,5 @@
 import { useUnreadDot } from '../threads'
+import { useAuth } from '../auth'
 import type { ReactNode } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { IconBack, IconCalendar, IconChat, IconCompass, IconHome, IconPeople, IconPin, IconPlus, IconUser } from './icons'
@@ -163,16 +164,36 @@ export const SeekerTabs = () => (
   ]} />
 )
 
-export const ContainerTabs = () => (
+/** Before approval a host sees only their application, the team thread and (while in review) their space or profile. */
+function ApplicantTabs({ edit }: { edit?: Tab }) {
+  return <TabBar label="Application" tabs={[
+    { to: '/apply/status', label: 'Application', icon: <IconHome /> },
+    { to: '/messages/team', label: 'Messages', icon: <IconChat />, dot: true },
+    ...(edit ? [edit] : []),
+  ]} />
+}
+const useApproved = () => {
+  const { profile } = useAuth()
+  return !profile || profile.role === 'seeker' || profile.status === 'approved' ? null : profile.status
+}
+
+export const ContainerTabs = () => {
+  const waiting = useApproved()
+  if (waiting) return <ApplicantTabs edit={waiting === 'pending' ? { to: '/container/space', label: 'Space', icon: <IconPin /> } : undefined} />
+  return (
   <TabBar label="Host" center={{ to: '/container/new', label: 'New offering', icon: <IconPlus size={24} /> }} tabs={[
     { to: '/container', label: 'Home', icon: <IconHome /> },
     { to: '/container/offering', label: 'Offerings', icon: <IconCalendar /> },
     { to: '/messages', label: 'Messages', icon: <IconChat />, end: false, dot: true },
     { to: '/container/space', label: 'Space', icon: <IconPin /> },
   ]} />
-)
+  )
+}
 
-export const FacilitatorTabs = () => (
+export const FacilitatorTabs = () => {
+  const waiting = useApproved()
+  if (waiting) return <ApplicantTabs edit={waiting === 'pending' ? { to: '/facilitator/profile', label: 'Profile', icon: <IconUser /> } : undefined} />
+  return (
   <TabBar label="Facilitator" tabs={[
     { to: '/facilitator', label: 'Home', icon: <IconHome /> },
     { to: '/facilitator/spaces', label: 'Spaces', icon: <IconPin /> },
@@ -180,7 +201,8 @@ export const FacilitatorTabs = () => (
     { to: '/messages', label: 'Messages', icon: <IconChat />, end: false, dot: true },
     { to: '/facilitator/profile', label: 'Profile', icon: <IconUser /> },
   ]} />
-)
+  )
+}
 
 /** Checklist used on Container and Facilitator home screens. Items tick themselves off as the profile fills in. */
 export function Checklist({ title, items, done }: { title: string; items: { id: string; title: string; sub: string; to: string }[]; done: string[] }) {

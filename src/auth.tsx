@@ -144,5 +144,13 @@ export function RequireRole({ role, children }: { role: DbRole | 'any'; children
   if (!profile) return <Loading label="Setting up your account…" />
   if (!profile.onboarded) return <Navigate to="/welcome" replace />
   if (role !== 'any' && profile.role !== role) return <Navigate to={HOME[profile.role]} replace />
+  // Containers and Facilitators wait at their application page until the team approves them.
+  // While in review they can still edit their application and write to the team; once declined, only the status page.
+  if (profile.role !== 'seeker' && profile.status !== 'approved') {
+    const path = location.pathname
+    const open = ['/apply/status', '/messages/team', '/notifications']
+    if (profile.status === 'pending') open.push(profile.role === 'container' ? '/container/space' : '/facilitator/profile')
+    if (!open.includes(path)) return <Navigate to="/apply/status" replace />
+  }
   return <>{children}</>
 }
