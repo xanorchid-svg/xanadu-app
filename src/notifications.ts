@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
 import { useAuth } from './auth'
+import { isNative } from './lib/native'
 
 /**
  * Notifications: approvals and decisions, an experience going live, new messages, Community requests
@@ -60,6 +61,8 @@ const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent)
 const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true
 
 export async function pushState(): Promise<PushState> {
+  // inside the iPhone app web push isn't available (native push comes later), so hide the prompt entirely
+  if (isNative) return 'unsupported'
   if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
     // iPhone only allows notifications once Xanadu is added to the Home Screen
     return isIOS() && !isStandalone() ? 'install-first' : 'unsupported'
