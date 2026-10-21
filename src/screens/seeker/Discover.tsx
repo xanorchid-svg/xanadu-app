@@ -11,6 +11,7 @@ import { useMatches } from '../../matching'
 import { useListings, useSpaces, type Listing, type PublicSpace } from '../../store'
 import { activeCount, destinations, NO_FILTERS, passes, sortListings, spacePasses, useFilters } from '../../filters'
 import { Bell } from '../../components/Bell'
+import ApplicationBanner from '../../components/ApplicationBanner'
 
 /** Does a practice chip match this experience or space? ("Trainings" also matches the Training format.) */
 const fits = (picked: string, practices: string[], format?: string) =>
@@ -77,6 +78,8 @@ export default function Discover() {
           </div>
           <Bell className="mt-1" />
         </div>
+
+        <ApplicationBanner />
 
         <div className="flex gap-2">
           <label className="flex min-h-12 min-w-0 flex-1 items-center gap-2.5 rounded-[14px] border border-line bg-surface-2 px-4 text-subtle">

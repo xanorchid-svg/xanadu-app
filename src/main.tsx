@@ -4,6 +4,22 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { AuthProvider } from './auth'
 import './index.css'
+import { registerSW } from 'virtual:pwa-register'
+import { isNative } from './lib/native'
+
+// Phones pick up new versions on their own: check whenever Xanadu is opened or comes back to the front,
+// and reload into the new version as soon as it's ready (the iPhone app updates through the App Store instead).
+if (!isNative && 'serviceWorker' in navigator) {
+  registerSW({
+    immediate: true,
+    onRegisteredSW(_url, reg) {
+      if (!reg) return
+      const check = () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}) }
+      document.addEventListener('visibilitychange', check)
+      setInterval(check, 30 * 60 * 1000)
+    },
+  })
+}
 
 // Don't restore the old scroll position on refresh; pages always open at the top
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual'

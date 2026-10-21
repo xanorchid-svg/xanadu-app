@@ -25,8 +25,26 @@ type Notification = { id: string; user_id: string; kind: string; title: string; 
 function composeNotification(n: Notification): Email {
   const url = `${APP}${n.link.startsWith('/') ? n.link : `/${n.link}`}`
   const isMessage = n.kind === 'message' || n.kind === 'team_message'
+  // approval: a real welcome, with the first steps for their side of Xanadu
+  if (n.kind === 'approved') {
+    const container = n.link.startsWith('/container')
+    return {
+      subject: n.title,
+      preheader: container ? 'Your space is part of the network. Here are your first steps.' : 'You’re a founding Facilitator. Here are your first steps.',
+      heading: 'Welcome to Xanadu ✦',
+      // the team's welcome message (from the console template) already names the first steps
+      paragraphs: [
+        n.body || (container
+          ? 'You’ve been personally reviewed and welcomed into Xanadu. Post your first offering, make your space page shine, and say hello to the Facilitators who write to you.'
+          : 'You’ve been personally reviewed and welcomed into Xanadu. Find your space, complete your profile, and find your people in Community.'),
+        `Your ${container ? 'Container' : 'Facilitator'} side of Xanadu is open now.`,
+      ],
+      button: { label: container ? 'Enter your space' : 'Find your space', url },
+      signoff: 'We’re so glad you’re here. Questions? Just reply to this email.',
+    }
+  }
   const label: Record<string, string> = {
-    approved: 'Open Xanadu', changes: 'See the note', declined: 'Read the message', offering_live: 'See it live',
+    changes: 'Update my application', declined: 'Read our note', offering_live: 'See it live',
     offering_changes: 'Edit your experience', team_message: 'Reply', message: 'Reply', community_request: 'See the request',
     community_accepted: 'Say hello', match: n.link.startsWith('/experience') ? 'See the experience' : 'See the place',
   }
@@ -67,10 +85,10 @@ function compose(kind: string, name: string, space: string): Email | null {
         heading: hi(name),
         paragraphs: [
           `Thank you for applying to join Xanadu as a founding Container. We’ve received ${space ? `${space}’s` : 'your'} application.`,
-          'Every space in Xanadu is welcomed personally, so a member of our team will look through what you shared. We’ll reply in your Xanadu inbox, usually within a few days, and may ask for a short intro call.',
-          'While you wait, you can keep adding photos and details to your space profile.',
+          'Every space on Xanadu is personally reviewed before it joins, so a member of our team will look through what you shared, usually within a few days, and may ask for a short intro call. We’ll email you as soon as you’re welcomed in.',
+          'While we review, explore Xanadu as a Seeker: the places, guides and people you’ll be part of. Your Container side opens once you’re verified.',
         ],
-        button: { label: 'Open your space', url: `${APP}/container` },
+        button: { label: 'Explore Xanadu', url: `${APP}/apply/status?role=container` },
         signoff: 'Questions? Just reply to this email.',
       }
     case 'application_facilitator':
@@ -80,10 +98,10 @@ function compose(kind: string, name: string, space: string): Email | null {
         heading: hi(name),
         paragraphs: [
           'Thank you for applying to join Xanadu as a founding Facilitator. We’ve received your application.',
-          'Every Facilitator is welcomed personally, so a member of our team will look through your practice, training and references. We’ll reply in your Xanadu inbox, usually within a few days.',
-          'While you wait, you can explore retreat spaces around the world from your Spaces tab.',
+          'Every guide on Xanadu is personally reviewed before joining, so a member of our team will look through your practice, training and references, usually within a few days. We’ll email you as soon as you’re welcomed in.',
+          'While we review, explore Xanadu as a Seeker: the places, guides and people you’ll be part of. Your Facilitator side opens once you’re verified.',
         ],
-        button: { label: 'Open Xanadu', url: `${APP}/facilitator` },
+        button: { label: 'Explore Xanadu', url: `${APP}/apply/status?role=facilitator` },
         signoff: 'Questions? Just reply to this email.',
       }
   }

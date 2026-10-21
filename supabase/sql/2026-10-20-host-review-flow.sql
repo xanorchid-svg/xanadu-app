@@ -1,0 +1,11 @@
+-- Oct 20, 2026 (night): verification flow for Containers and Facilitators (migration host_review_flow + follow-ups).
+-- profiles: container_changes / facilitator_changes (the team's note when it asks for changes; null otherwise),
+--           container_welcomed / facilitator_welcomed (false until the one-time welcome screen after approval is seen).
+-- team_review_role (same signature): records/clears the change note, resets *_welcomed on approve, and on approve
+--   switches the member onto that side (role = the approved role). Notification links: changes/declined → /apply/status.
+-- resubmit_application(role): clears the note and tells the team in the member's team thread.
+-- mark_welcomed(role): the welcome screen was seen.
+-- switch_role: a hosting side can only be switched to once that role is approved.
+-- add_role: returns 'pending' if already in review (the app opens /apply/status); reapplying clears the old note.
+-- team_templates approve_container / approve_facilitator / changes / decline rewritten (Xan's wording for declines).
+-- Edge function notify v5: role-specific approval email, application-received emails point to the Seeker side.

@@ -164,12 +164,11 @@ export const SeekerTabs = () => (
   ]} />
 )
 
-/** Before approval a host sees only their application, the team thread and (while in review) their space or profile. */
-function ApplicantTabs({ edit }: { edit?: Tab }) {
+/** Before approval a host sees only their application and their thread with the Xanadu team. */
+export function ApplicantTabs() {
   return <TabBar label="Application" tabs={[
     { to: '/apply/status', label: 'Application', icon: <IconHome /> },
     { to: '/messages/team', label: 'Messages', icon: <IconChat />, dot: true },
-    ...(edit ? [edit] : []),
   ]} />
 }
 const useApproved = () => {
@@ -179,7 +178,7 @@ const useApproved = () => {
 
 export const ContainerTabs = () => {
   const waiting = useApproved()
-  if (waiting) return <ApplicantTabs edit={waiting === 'pending' ? { to: '/container/space', label: 'Space', icon: <IconPin /> } : undefined} />
+  if (waiting) return <ApplicantTabs />
   return (
   <TabBar label="Host" center={{ to: '/container/new', label: 'New offering', icon: <IconPlus size={24} /> }} tabs={[
     { to: '/container', label: 'Home', icon: <IconHome /> },
@@ -192,7 +191,7 @@ export const ContainerTabs = () => {
 
 export const FacilitatorTabs = () => {
   const waiting = useApproved()
-  if (waiting) return <ApplicantTabs edit={waiting === 'pending' ? { to: '/facilitator/profile', label: 'Profile', icon: <IconUser /> } : undefined} />
+  if (waiting) return <ApplicantTabs />
   return (
   <TabBar label="Facilitator" tabs={[
     { to: '/facilitator', label: 'Home', icon: <IconHome /> },

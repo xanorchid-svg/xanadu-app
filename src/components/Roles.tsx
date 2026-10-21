@@ -17,7 +17,7 @@ const ADD: Record<'container' | 'facilitator', { title: string; sub: string }> =
 const statusOf = (p: { container_status: string | null; facilitator_status: string | null }, r: DbRole) =>
   r === 'container' ? p.container_status : r === 'facilitator' ? p.facilitator_status : 'active'
 
-const NOTE: Record<string, string> = { pending: 'In review', declined: 'Not approved', approved: '' }
+const NOTE: Record<string, string> = { pending: 'In review', declined: 'Not verified', approved: '' }
 
 export function RolesCard() {
   const { profile, refreshProfile } = useAuth()
@@ -41,6 +41,8 @@ export function RolesCard() {
 
   const switchTo = async (r: DbRole) => {
     if (r === profile.role) return
+    // a hosting side opens only once it's approved; until then the button shows where the application stands
+    if (r !== 'seeker' && statusOf(profile, r) !== 'approved') { navigate('/apply/status'); return }
     const res = await run(r, async () => await supabase.rpc('switch_role', { p_role: r }))
     if (res?.profile) navigate(HOME[res.profile.role], { replace: true })
   }
@@ -48,7 +50,7 @@ export function RolesCard() {
   const add = async (r: 'container' | 'facilitator') => {
     const res = await run(`add-${r}`, async () => await supabase.rpc('add_role', { p_role: r }))
     if (!res) return
-    navigate(res.data === 'setup' ? '/welcome' : HOME[r], { replace: true })
+    navigate(res.data === 'setup' ? '/welcome' : res.data === 'pending' ? '/apply/status' : HOME[r], { replace: true })
   }
 
   return (

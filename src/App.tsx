@@ -9,6 +9,8 @@ import PhoneOnly from './components/PhoneOnly'
 // Each screen is its own small file, loaded the first time it's opened (and kept offline by the app's service worker)
 const ResetPassword = lazy(() => import('./screens/ResetPassword'))
 const Welcome = lazy(() => import('./screens/Welcome'))
+const ApplicationUpdate = lazy(() => import('./screens/Welcome').then((m) => ({ default: m.ApplicationUpdate })))
+const WelcomeIn = lazy(() => import('./screens/host/WelcomeIn'))
 const Privacy = lazy(() => import('./screens/Legal').then((m) => ({ default: m.Privacy })))
 const Terms = lazy(() => import('./screens/Legal').then((m) => ({ default: m.Terms })))
 const Discover = lazy(() => import('./screens/seeker/Discover'))
@@ -115,6 +117,8 @@ export default function App() {
           {/* applying = creating a host account */}
           <Route path="/apply" element={<ApplyRedirect />} />
           <Route path="/apply/status" element={<RequireRole role="any"><Status /></RequireRole>} />
+          <Route path="/apply/update" element={<RequireRole role="any"><ApplicationUpdate /></RequireRole>} />
+          <Route path="/welcome-in" element={<RequireRole role="any"><WelcomeIn /></RequireRole>} />
 
           <Route path="/container" element={<RequireRole role="container"><ContainerHome /></RequireRole>} />
           <Route path="/container/new" element={<RequireRole role="container"><NewOffering /></RequireRole>} />

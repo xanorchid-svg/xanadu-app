@@ -1,16 +1,16 @@
-import { useState, type ReactNode } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useEffect, useState, type ReactNode } from 'react'
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { AvatarPicker, LocationFields, PhotoGallery, PracticePicker, TextArea, TextField } from '../components/edit'
 import { IconClose } from '../components/icons'
 import { Chip, Field, Glow, inputCls } from '../components/ui'
 import { LifestylePicker } from '../components/Lifestyle'
 import { cancelAddRole } from '../components/Roles'
 import { ImportCard, mergeSpace, type SpaceImport } from '../components/Import'
-import { HOME, Loading, takeReturn, useAuth } from '../auth'
+import { HOME, Loading, hostState, takeReturn, useAuth, type DbRole } from '../auth'
 import { PRACTICES, SEEKER_ALIGN } from '../data'
 import { refreshMatches } from '../matching'
 import { EMPTY_SPACE, savePrivateDetails, uploadPhotos, useSpaceProfile, type Reference, type SpaceProfile, type Training } from '../store'
-import { friendlyError } from '../lib/supabase'
+import { friendlyError, supabase } from '../lib/supabase'
 
 const HOST_PRACTICES = PRACTICES.filter((p) => p !== 'Trainings')
 
@@ -105,6 +105,41 @@ function useAdding() {
   return { adding, cancel: adding ? cancel : undefined }
 }
 
+/** What the applicant already sent us (private to them and the team), to fill the form when they update or reapply. */
+type Private = { proof: string; phone: string; references_list: Reference[]; insurance: string; agreed_guidelines: boolean }
+function usePrivate(onLoad: (p: Private) => void) {
+  const { session } = useAuth()
+  useEffect(() => {
+    if (!session) return
+    supabase.from('private_details').select('proof, phone, references_list, insurance, agreed_guidelines').eq('user_id', session.user.id).maybeSingle()
+      .then(({ data }) => { if (data) onLoad(data as Private) })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session])
+}
+
+/**
+ * After an application is sent the member waits on the Seeker side (or a side they're already approved for).
+ * The hosting side they applied for opens only once the Xanadu team approves it.
+ */
+function useAfterSubmit() {
+  const navigate = useNavigate()
+  const { profile, refreshProfile } = useAuth()
+  const back = profile?.prev_role
+  return async (role: 'container' | 'facilitator', update: boolean) => {
+    if (update) {
+      const { error } = await supabase.rpc('resubmit_application', { p_role: role })
+      if (error) return friendlyError(error.message)
+    } else {
+      const p = profile
+      const to: DbRole = back && back !== role && (back === 'seeker' || (p && hostState(p, back as 'container' | 'facilitator').status === 'approved')) ? back : 'seeker'
+      await supabase.rpc('switch_role', { p_role: to })
+    }
+    await refreshProfile()
+    navigate(`/apply/status?role=${role}${update ? '&updated=1' : '&sent=1'}`, { replace: true })
+    return null
+  }
+}
+
 /* ---------------- Seeker ---------------- */
 
 function SeekerWelcome() {
@@ -168,16 +203,21 @@ function SeekerWelcome() {
 
 /* ---------------- Container ---------------- */
 
-function ContainerWelcome() {
+function ContainerWelcome({ update = false }: { update?: boolean }) {
   const navigate = useNavigate()
   const { session, profile, updateProfile, signOut } = useAuth()
-  const [, saveSpace] = useSpaceProfile()
+  const [existing, saveSpace, spaceLoading] = useSpaceProfile()
   const [step, setStep] = useState(0)
   const { adding, cancel } = useAdding()
+  const after = useAfterSubmit()
   const [space, setSpace] = useState<SpaceProfile>({ ...EMPTY_SPACE, name: adding ? '' : profile?.name ?? '' })
   const [phone, setPhone] = useState('')
   const [proof, setProof] = useState('')
   const [agreed, setAgreed] = useState(false)
+  // updating or reapplying: start from what they already sent
+  useEffect(() => { if (!spaceLoading && existing.name) setSpace(existing) }, [spaceLoading]) // eslint-disable-line react-hooks/exhaustive-deps
+  usePrivate((p) => { setProof(p.proof ?? ''); setPhone(p.phone ?? ''); setAgreed(!!p.agreed_guidelines) })
+  const note = profile ? hostState(profile, 'container').note : null
   const heard = useHeardFrom(profile?.heard_from ?? '')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -185,7 +225,7 @@ function ContainerWelcome() {
 
   const go = (n: number) => {
     if (n > step && step === 0 && (!space.name.trim() || !space.country.trim() || !space.town.trim())) { setError('Please add your space name, country and town.'); return }
-    if (n > step && step === 0 && !adding && !heard.pick) { setError('Please tell us where you heard about Xanadu.'); return }
+    if (n > step && step === 0 && !adding && !update && !heard.pick) { setError('Please tell us where you heard about Xanadu.'); return }
     if (n > step && step === 1 && !space.about.trim()) { setError('Please describe your space in a few sentences.'); return }
     setError(''); setStep(n)
   }
@@ -196,24 +236,26 @@ function ContainerWelcome() {
     const e1 = await saveSpace(space)
     const e2 = e1 ?? await savePrivateDetails(session!.user.id, { proof: proof.trim(), phone: phone.trim(), agreed_guidelines: true })
     // a member adding a space keeps their own name and about; the space has its own
-    const e3 = e2 ?? await updateProfile(adding ? { onboarded: true }
-      : { name: space.name.trim(), town: space.town.trim(), practices: space.practices, about: space.about.trim(), heard_from: heard.value, onboarded: true })
-    if (e3) { setError(friendlyError(e3)); setBusy(false); return }
-    navigate('/container', { replace: true })
+    const e3 = e2 ?? (update ? null : await updateProfile(adding ? { onboarded: true }
+      : { name: space.name.trim(), town: space.town.trim(), practices: space.practices, about: space.about.trim(), heard_from: heard.value, onboarded: true }))
+    const e4 = e3 ?? await after('container', update)
+    if (e4) { setError(friendlyError(e4)); setBusy(false) }
   }
 
   return (
-    <Wizard steps={['Your space', 'The spirit', 'Photos & details', 'Trust']} step={step} setStep={go} onFinish={finish} finishLabel="Submit for review" busy={busy} error={error} onSignOut={signOut} onCancel={cancel}>
+    <Wizard steps={['Your space', 'The spirit', 'Photos & details', 'Trust']} step={step} setStep={go} onFinish={finish} finishLabel={update ? 'Send my update' : 'Submit for review'} busy={busy} error={error} onSignOut={signOut} onCancel={update ? () => navigate('/apply/status') : cancel}>
       {step === 0 && (
         <>
-          {adding
-            ? <Title sub="Your space gets its own review. Everything else on your account stays as it is.">Add your space</Title>
-            : <Title sub="Founding Containers join free. Let's set up your space.">Welcome, Container</Title>}
+          {update
+            ? <UpdateTitle note={note} />
+            : adding
+            ? <Title sub="Your space gets its own personal review. Your Container side opens once you’re verified; everything else on your account stays as it is.">Add your space</Title>
+            : <Title sub="Founding Containers join free. Every space is personally reviewed before it joins; while we review, you’ll explore Xanadu as a Seeker.">Welcome, Container</Title>}
           <ImportCard<SpaceImport> kind="space" onFilled={(f) => setSpace((s) => mergeSpace(s, f))} onPhotos={(u) => setSpace((s) => ({ ...s, photos: [...s.photos, ...u] }))} />
           <TextField label="Space name" value={space.name} onChange={(v) => set('name', v)} />
           <LocationFields value={space} onChange={(v) => setSpace((s) => ({ ...s, ...v }))} />
           <TextField label="Phone (private, for your intro call)" value={phone} onChange={setPhone} type="tel" autoComplete="tel" />
-          {!adding && <HeardFrom h={heard} />}
+          {!adding && !update && <HeardFrom h={heard} />}
         </>
       )}
       {step === 1 && (
@@ -251,28 +293,33 @@ function ContainerWelcome() {
 
 /* ---------------- Facilitator ---------------- */
 
-function FacilitatorWelcome() {
+function FacilitatorWelcome({ update = false }: { update?: boolean }) {
   const navigate = useNavigate()
   const { session, profile, updateProfile, signOut } = useAuth()
   const [step, setStep] = useState(0)
   const [photo, setPhoto] = useState(profile?.photo_url ?? '')
   const [name, setName] = useState(profile?.name ?? '')
   const { adding, cancel } = useAdding()
-  const [town, setTown] = useState(adding ? profile?.town || profile?.region || '' : '')
-  const [practices, setPractices] = useState<string[]>([])
-  const [languages, setLanguages] = useState('')
-  const [about, setAbout] = useState('')
-  const [trainings, setTrainings] = useState<Training[]>([{ title: '', school: '', year: '' }])
+  const after = useAfterSubmit()
+  // updating or reapplying: start from what they already sent (a brand-new application starts empty)
+  const applied = !!profile?.facilitator_status && (update || !!profile.about)
+  const [town, setTown] = useState(adding || applied ? profile?.town || profile?.region || '' : '')
+  const [practices, setPractices] = useState<string[]>(applied ? profile?.practices ?? [] : [])
+  const [languages, setLanguages] = useState(applied ? profile?.languages ?? '' : '')
+  const [about, setAbout] = useState(applied ? profile?.about ?? '' : '')
+  const [trainings, setTrainings] = useState<Training[]>(applied && profile?.trainings?.length ? profile.trainings : [{ title: '', school: '', year: '' }])
   const [refs, setRefs] = useState<Reference[]>([{ name: '', contact: '' }])
   const [insurance, setInsurance] = useState('')
   const heard = useHeardFrom(profile?.heard_from ?? '')
   const [agreed, setAgreed] = useState(false)
+  usePrivate((p) => { if (p.references_list?.length) setRefs(p.references_list); setInsurance(p.insurance ?? ''); setAgreed(!!p.agreed_guidelines) })
+  const note = profile ? hostState(profile, 'facilitator').note : null
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
   const go = (n: number) => {
     if (n > step && step === 0 && (!name.trim() || !town.trim())) { setError("Please add your name and where you're based."); return }
-    if (n > step && step === 0 && !adding && !heard.pick) { setError('Please tell us where you heard about Xanadu.'); return }
+    if (n > step && step === 0 && !adding && !update && !heard.pick) { setError('Please tell us where you heard about Xanadu.'); return }
     if (n > step && step === 1 && (!practices.length || !about.trim())) { setError('Please choose your practices and write a few words about your work.'); return }
     setError(''); setStep(n)
   }
@@ -288,9 +335,9 @@ function FacilitatorWelcome() {
         trainings: trainings.filter((t) => t.title.trim()),
       })
       const e2 = e1 ?? await savePrivateDetails(session!.user.id, { references_list: cleanRefs, insurance: insurance.trim(), agreed_guidelines: true })
-      const e3 = e2 ?? await updateProfile({ onboarded: true })
-      if (e3) { setError(friendlyError(e3)); setBusy(false); return }
-      navigate('/facilitator', { replace: true })
+      const e3 = e2 ?? (update ? null : await updateProfile({ onboarded: true }))
+      const e4 = e3 ?? await after('facilitator', update)
+      if (e4) { setError(friendlyError(e4)); setBusy(false) }
     } catch (e) { setError((e as Error).message); setBusy(false) }
   }
 
@@ -298,16 +345,18 @@ function FacilitatorWelcome() {
   const tr = (i: number, k: keyof Training, v: string) => setTrainings((ts) => ts.map((t, j) => (j === i ? { ...t, [k]: v } : t)))
 
   return (
-    <Wizard steps={['You', 'Your practice', 'Training', 'Trust']} step={step} setStep={go} onFinish={finish} finishLabel="Submit for review" busy={busy} error={error} onSignOut={signOut} onCancel={cancel}>
+    <Wizard steps={['You', 'Your practice', 'Training', 'Trust']} step={step} setStep={go} onFinish={finish} finishLabel={update ? 'Send my update' : 'Submit for review'} busy={busy} error={error} onSignOut={signOut} onCancel={update ? () => navigate('/apply/status') : cancel}>
       {step === 0 && (
         <>
-          {adding
-            ? <Title sub="Your Facilitator profile gets its own review. Everything else on your account stays as it is.">Guide as a Facilitator</Title>
-            : <Title sub="Founding Facilitators join free. Let's introduce you.">Welcome, Facilitator</Title>}
+          {update
+            ? <UpdateTitle note={note} />
+            : adding
+            ? <Title sub="Your Facilitator profile gets its own personal review. Your Facilitator side opens once you’re verified; everything else on your account stays as it is.">Guide as a Facilitator</Title>
+            : <Title sub="Founding Facilitators join free. Every guide is personally reviewed before joining; while we review, you’ll explore Xanadu as a Seeker.">Welcome, Facilitator</Title>}
           <AvatarPicker photo={photo} onChange={setPhoto} />
           <TextField label="Your name" value={name} onChange={setName} autoComplete="name" />
           <TextField label="Where you're based" value={town} onChange={setTown} placeholder="e.g. Ubud, Bali" />
-          {!adding && <HeardFrom h={heard} />}
+          {!adding && !update && <HeardFrom h={heard} />}
         </>
       )}
       {step === 1 && (
@@ -354,6 +403,33 @@ function FacilitatorWelcome() {
       )}
     </Wizard>
   )
+}
+
+/** Top of the form when the team has asked for changes: their note, then the form as they left it. */
+function UpdateTitle({ note }: { note: string | null }) {
+  return (
+    <>
+      <Title sub="Everything you sent is here. Change what the team asked for, then send it back.">Update your application</Title>
+      {note && (
+        <div className="ring-iri flex flex-col gap-1 rounded-2xl bg-plum/50 px-4 py-3.5">
+          <span className="text-[11px] font-semibold tracking-[0.18em] text-gold-soft uppercase">A note from the Xanadu team</span>
+          <p className="selectable m-0 text-[15px] leading-relaxed whitespace-pre-line text-text">{note}</p>
+        </div>
+      )}
+    </>
+  )
+}
+
+/** /apply/update: the application form, filled in, for answering the team's change request. */
+export function ApplicationUpdate() {
+  const { profile } = useAuth()
+  const [params] = useSearchParams()
+  if (!profile) return <Loading />
+  const asked = params.get('role')
+  const role = asked === 'container' || asked === 'facilitator' ? asked
+    : profile.container_status === 'pending' && (profile.container_changes || profile.facilitator_status !== 'pending') ? 'container' : 'facilitator'
+  if (hostState(profile, role).status !== 'pending') return <Navigate to="/apply/status" replace />
+  return role === 'container' ? <ContainerWelcome update /> : <FacilitatorWelcome update />
 }
 
 /** /welcome: the right setup flow for the member's role. */

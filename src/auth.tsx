@@ -36,6 +36,20 @@ export type Profile = {
   facilitator_status: 'pending' | 'approved' | 'declined' | null
   /** set while the member is setting up an extra role (so they can cancel back) */
   prev_role: DbRole | null
+  /** the team's note when it asked for changes to that role's application (null otherwise) */
+  container_changes: string | null
+  facilitator_changes: string | null
+  /** false until the member has seen the one-time welcome screen after that role was approved */
+  container_welcomed: boolean
+  facilitator_welcomed: boolean
+}
+
+/** Where a hosting role stands: in review (with or without a change note), declined, or approved. */
+export function hostState(p: Profile, r: 'container' | 'facilitator' = p.role === 'facilitator' ? 'facilitator' : 'container') {
+  const status = r === 'container' ? p.container_status : p.facilitator_status
+  const note = r === 'container' ? p.container_changes : p.facilitator_changes
+  const welcomed = r === 'container' ? p.container_welcomed : p.facilitator_welcomed
+  return { status, note, welcomed: welcomed !== false }
 }
 
 export const toDbRole = (r: Role): DbRole => r.toLowerCase() as DbRole
@@ -144,13 +158,17 @@ export function RequireRole({ role, children }: { role: DbRole | 'any'; children
   if (!profile) return <Loading label="Setting up your account…" />
   if (!profile.onboarded) return <Navigate to="/welcome" replace />
   if (role !== 'any' && profile.role !== role) return <Navigate to={HOME[profile.role]} replace />
-  // Containers and Facilitators wait at their application page until the team approves them.
-  // While in review they can still edit their application and write to the team; once declined, only the status page.
-  if (profile.role !== 'seeker' && profile.status !== 'approved') {
+  // Trust first: a Container or Facilitator can't use any hosting part of Xanadu until the team has personally
+  // reviewed and approved them. Until then the review page is all they see (plus their thread with the team,
+  // and their application form when the team asks for changes). After approval, a one-time welcome screen.
+  if (profile.role !== 'seeker') {
     const path = location.pathname
-    const open = ['/apply/status', '/messages/team', '/notifications']
-    if (profile.status === 'pending') open.push(profile.role === 'container' ? '/container/space' : '/facilitator/profile')
-    if (!open.includes(path)) return <Navigate to="/apply/status" replace />
+    const { status, welcomed } = hostState(profile)
+    if (status !== 'approved') {
+      if (!['/apply/status', '/apply/update', '/messages/team'].includes(path)) return <Navigate to="/apply/status" replace />
+    } else if (!welcomed && path !== '/welcome-in') {
+      return <Navigate to="/welcome-in" replace />
+    }
   }
   return <>{children}</>
 }
