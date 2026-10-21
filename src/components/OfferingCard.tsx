@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { Offering } from '../store'
+import { formatLabel } from '../data'
 
 const STATUS: Record<Offering['status'], [string, string]> = {
   in_review: ['In review', 'border-gold/60 text-gold-pale'],
@@ -22,7 +23,7 @@ export default function OfferingCard({ o }: { o: Offering }) {
     <Link to={`/container/offering?id=${o.id}`} className="flex flex-col gap-2.5 rounded-[18px] bg-plum p-4 text-text no-underline">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="text-xs text-gold-soft">{`${o.format} · ${dateRange(o)}`}</span>
+          <span className="text-xs text-gold-soft">{`${formatLabel(o.format)} · ${dateRange(o)}`}</span>
           <span className="text-base font-semibold text-ink">{o.title || 'Untitled offering'}</span>
           <span className="text-[13px] text-muted">{`0 of ${o.spots} spots filled`}</span>
         </div>

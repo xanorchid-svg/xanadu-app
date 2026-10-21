@@ -6,7 +6,7 @@ import OfferingCard, { StatusPill, dateRange } from '../../components/OfferingCa
 import { EditFooter } from '../../components/edit'
 import { Loading } from '../../auth'
 import { friendlyError, supabase } from '../../lib/supabase'
-import { PRACTICES } from '../../data'
+import { formatLabel, PRACTICES } from '../../data'
 import { useOfferings, type Offering } from '../../store'
 import { VolunteerFields } from '../../components/Volunteer'
 
@@ -56,7 +56,7 @@ function EditOffering({ o, onDone, update }: { o: Offering; onDone: () => void; 
       <div className="flex flex-col gap-[18px] px-5 pt-safe pb-8">
         <h1 className="m-0 font-display text-[32px] font-medium text-ink">Edit offering</h1>
         {o.status === 'live' && <p className="m-0 rounded-xl bg-plum px-3.5 py-3 text-[13px] leading-normal text-muted">This offering is live. Your changes show to guests as soon as you save.</p>}
-        <div className="grid grid-cols-3 gap-2">{FORMATS.map((f) => <button key={f} type="button" aria-pressed={d.format === f} onClick={() => set('format', f)} className={box(d.format === f)}>{f}</button>)}</div>
+        <div className="grid grid-cols-3 gap-2">{FORMATS.map((f) => <button key={f} type="button" aria-pressed={d.format === f} onClick={() => set('format', f)} className={box(d.format === f)}>{formatLabel(f)}</button>)}</div>
         <Field label="Title"><input value={d.title} onChange={(e) => set('title', e.target.value)} className={inputCls} /></Field>
         <div className="flex flex-col gap-2">
           <span className="text-[13px] text-muted">Practices</span>
@@ -204,7 +204,7 @@ export default function ManageOffering() {
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        <div className="flex items-center gap-2"><StatusPill status={o.status} /><span className="text-xs text-gold-soft">{`${o.format} · ${dateRange(o)}`}</span></div>
+        <div className="flex items-center gap-2"><StatusPill status={o.status} /><span className="text-xs text-gold-soft">{`${formatLabel(o.format)} · ${dateRange(o)}`}</span></div>
         <h1 className="m-0 font-display text-[30px] leading-[1.05] font-medium text-ink">{o.title || 'Untitled offering'}</h1>
       </div>
       <div className="flex flex-col gap-1.5">

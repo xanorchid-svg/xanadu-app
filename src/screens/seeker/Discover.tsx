@@ -5,9 +5,9 @@ import { LandChip } from '../../components/Lifestyle'
 import { IconSearch, IconStar } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
 import FilterSheet from '../../components/FilterSheet'
-import { CONTACT_EMAIL, LANDSCAPES, placeLabel, PRACTICES } from '../../data'
+import { CONTACT_EMAIL, formatLabel, LANDSCAPES, placeLabel, PRACTICES } from '../../data'
 import { useAuth } from '../../auth'
-import { useMatches } from '../../matching'
+import { useMatches, useMatchScores } from '../../matching'
 import { useListings, useSpaces, type Listing, type PublicSpace } from '../../store'
 import { activeCount, destinations, NO_FILTERS, passes, sortListings, spacePasses, useFilters } from '../../filters'
 import { Bell } from '../../components/Bell'
@@ -48,6 +48,7 @@ export default function Discover() {
   const { profile, updateProfile } = useAuth()
   const notified = profile?.launch_notify ?? false
   const { matches } = useMatches(6)
+  const scores = useMatchScores()
   const { listings, loading } = useListings()
   const { spaces } = useSpaces()
   const lifestyle = profile?.lifestyle ?? []
@@ -55,18 +56,19 @@ export default function Discover() {
   const prefs = profile?.prefs ?? []
 
   const q = query.trim().toLowerCase()
-  const textOf = (e: Listing) => `${e.title} ${e.format} ${e.practices.join(' ')} ${e.description} ${e.space?.name ?? ''} ${placeLabel(e.space ?? {})}`.toLowerCase()
+  const textOf = (e: Listing) => `${e.title} ${formatLabel(e.format)} ${e.practices.join(' ')} ${e.description} ${e.space?.name ?? ''} ${placeLabel(e.space ?? {})}`.toLowerCase()
   const spaceText = (s: PublicSpace) => `${s.name} ${placeLabel(s)} ${s.about} ${s.practices.join(' ')}`.toLowerCase()
 
-  const volunteering = f.type === 'Volunteer exchange'
-  const shown = volunteering ? [] : sortListings(listings.filter((e) => passes(e, f) && fits(picked, e.practices, e.format) && (!q || textOf(e).includes(q))), f, prefs)
+  const shown = sortListings(listings.filter((e) => passes(e, f) && fits(picked, e.practices, e.format) && (!q || textOf(e).includes(q))), f, prefs, scores)
   const places = spaces.filter((s) => spacePasses(s, f) && fits(picked, s.practices) && (!q || spaceText(s).includes(q)))
+  const dests = destinations(listings, spaces)
   const nFilters = activeCount(f)
   const filtering = picked !== 'All' || !!q || nFilters > 0
-  const where = f.region || f.country || 'Everywhere'
+  const where = f.region || f.country || (dests.length === 1 ? dests[0].country : 'Everywhere')
+  const volunteering = f.work === 'volunteer'
 
   const clearAll = () => { setPicked('All'); setQuery(''); setF({ ...NO_FILTERS, sort: f.sort }) }
-  const emptyTitle = q ? `Nothing matches "${query.trim()}" yet` : volunteering ? 'No volunteer exchanges here yet' : picked === 'All' && !nFilters ? 'The first experiences are on their way' : 'Nothing matches these filters yet'
+  const emptyTitle = q ? `Nothing matches "${query.trim()}" yet` : picked === 'All' && !nFilters ? 'The first experiences are on their way' : 'Nothing matches these filters yet'
 
   return (
     <Screen footer={<SeekerTabs />}>
@@ -140,36 +142,29 @@ export default function Discover() {
         )}
 
         {loading ? <span className="text-[13px] text-subtle">Finding experiences…</span>
-          : volunteering ? (places.length ? (
+          : shown.length > 0 ? (
             <section className="flex flex-col gap-3">
-              <div className="flex flex-col gap-0.5"><H2>Volunteer exchanges</H2><span className="text-xs text-subtle">Give your time, receive a place to stay, meals and practice</span></div>
-              {places.map((s) => <SpaceRow key={s.id} s={s} wide />)}
+              <H2>{filtering ? `${shown.length} ${shown.length === 1 ? 'experience' : 'experiences'}` : 'Aligned for you'}</H2>
+              {shown.map((e) => <ExperienceCard key={e.id} e={e} />)}
             </section>
-          ) : (
+          ) : filtering && (listings.length > 0 || places.length > 0) ? (
             <EmptyState title={emptyTitle} action={<button type="button" onClick={clearAll} className="flex min-h-11 items-center text-sm font-semibold text-gold-soft">Show everything</button>}>
-              Spaces that welcome volunteers will appear here. Try another destination.
+              {places.length ? 'No experiences match these choices yet. The spaces below do.' : 'Try another practice, date or price.'}
             </EmptyState>
-          ))
-            : shown.length > 0 ? (
-              <section className="flex flex-col gap-3">
-                <H2>{filtering ? `${shown.length} ${shown.length === 1 ? 'experience' : 'experiences'}` : 'Aligned for you'}</H2>
-                {shown.map((e) => <ExperienceCard key={e.id} e={e} />)}
-              </section>
-            ) : filtering && listings.length > 0 ? (
-              <EmptyState title={emptyTitle} action={<button type="button" onClick={clearAll} className="flex min-h-11 items-center text-sm font-semibold text-gold-soft">Show everything</button>}>
-                Try another practice, date or destination.
-              </EmptyState>
-            ) : (
-              <EmptyState icon={<span className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/50"><IconStar /></span>}
-                title={emptyTitle}
-                action={<PrimaryButton done={notified} onClick={() => updateProfile({ launch_notify: true })} className="mt-1">{notified ? "We'll let you know ✓" : 'Notify me when they open'}</PrimaryButton>}>
-                We're welcoming our founding retreat spaces and facilitators around the world. Their experiences will appear here as they join.
-              </EmptyState>
-            )}
+          ) : (
+            <EmptyState icon={<span className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/50"><IconStar /></span>}
+              title={emptyTitle}
+              action={<PrimaryButton done={notified} onClick={() => updateProfile({ launch_notify: true })} className="mt-1">{notified ? "We'll let you know ✓" : 'Notify me when they open'}</PrimaryButton>}>
+              We're welcoming our founding retreat spaces and facilitators around the world. Their experiences will appear here as they join.
+            </EmptyState>
+          )}
 
-        {!volunteering && places.length > 0 && (
+        {places.length > 0 && (
           <section className="flex flex-col gap-3">
-            <div className="flex flex-col gap-0.5"><H2>Retreat spaces</H2><span className="text-xs text-subtle">Founding spaces welcomed by Xanadu</span></div>
+            <div className="flex flex-col gap-0.5">
+              <H2>{volunteering ? 'Spaces that welcome volunteers' : 'Retreat spaces'}</H2>
+              <span className="text-xs text-subtle">{volunteering ? 'Give your time, receive a place to stay, meals and practice' : 'Founding spaces welcomed by Xanadu'}</span>
+            </div>
             <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">{places.map((s) => <SpaceRow key={s.id} s={s} />)}</div>
           </section>
         )}
@@ -182,7 +177,7 @@ export default function Discover() {
       </Page>
 
       {sheet && <FilterSheet value={f} onClose={() => setSheet(false)} onApply={(next) => { setF(next); setSheet(false) }}
-        listings={listings} spaces={spaces} places={destinations(listings, spaces)} />}
+        listings={listings} spaces={spaces} places={dests} />}
     </Screen>
   )
 }

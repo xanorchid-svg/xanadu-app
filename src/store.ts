@@ -42,6 +42,8 @@ export type Offering = {
   /** guests give some hours in exchange for part of the stay */
   volunteer_exchange: boolean
   volunteer_details: string
+  /** the experience's own photo; falls back to the space's main photo */
+  cover_url?: string
 }
 
 export type Message = { id: string; from_team: boolean; body: string; created_at: string }

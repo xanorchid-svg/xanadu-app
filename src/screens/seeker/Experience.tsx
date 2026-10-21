@@ -5,7 +5,7 @@ import { IconBack, IconHeart } from '../../components/icons'
 import { dateRange } from '../../components/OfferingCard'
 import { Loading, useAuth } from '../../auth'
 import { supabase } from '../../lib/supabase'
-import { placeLabel } from '../../data'
+import { formatLabel, placeLabel } from '../../data'
 import { useSaved, type Offering, type PublicSpace } from '../../store'
 import { ReportSheet } from '../../components/Report'
 
@@ -71,10 +71,10 @@ export default function Experience() {
   const isOwner = o.owner_id === session?.user.id
   const isSeeker = profile?.role === 'seeker'
   const saved = isSaved('offering', o.id)
-  const kicker = [o.practices.slice(0, 2).join(' · '), o.format, space?.region || space?.country].filter(Boolean).join(' · ')
+  const kicker = [o.practices.slice(0, 2).join(' · '), formatLabel(o.format), space?.region || space?.country].filter(Boolean).join(' · ')
   const price = o.price_usd != null ? `$${Number(o.price_usd).toLocaleString()}` : 'Ask the host'
   const meta = `${dateRange(o)} · ${o.spots} spots`
-  const cover = space?.photos[0]
+  const cover = o.cover_url || space?.photos[0]
 
   const request = async () => {
     if (!session || isOwner || sending) return

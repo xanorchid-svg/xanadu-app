@@ -2,21 +2,25 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Chip, Field, inputCls } from './ui'
 import { IconClose } from './icons'
-import { LENGTHS, NO_FILTERS, PRICES, SORTS, TYPES, WHEN, passes, spacePasses, type Filters } from '../filters'
+import { FLEX, LENGTHS, NO_FILTERS, SORTS, TYPES, WORK, passes, priceCeiling, spacePasses, toggled, type Filters } from '../filters'
 import type { Listing, PublicSpace } from '../store'
-import { LANDSCAPES } from '../data'
-import { LandChip } from './Lifestyle'
 
-const Section = ({ title, children }: { title: string; children: ReactNode }) => (
+const Section = ({ title, aside, children }: { title: string; aside?: ReactNode; children: ReactNode }) => (
   <section className="flex flex-col gap-2.5">
-    <h3 className="m-0 text-[13px] font-semibold tracking-[0.08em] text-subtle uppercase">{title}</h3>
+    <div className="flex items-baseline justify-between gap-3">
+      <h3 className="m-0 text-[13px] font-semibold tracking-[0.08em] text-subtle uppercase">{title}</h3>
+      {aside}
+    </div>
     <div className="flex flex-wrap gap-2">{children}</div>
   </section>
 )
 
+const money = (n: number) => `$${n.toLocaleString('en-US')}`
+
 /**
- * Bottom sheet with every Discover filter. Options that would show nothing are hidden
- * (the selected one always stays), and the button says how many results the choice gives.
+ * Bottom sheet with every Discover filter. The sections and options never move or disappear:
+ * chips toggle on and off, and an option that would show nothing right now is dimmed (still tappable).
+ * The button says how many experiences the choices give.
  */
 export default function FilterSheet({ value, onApply, onClose, listings, spaces, places }: {
   value: Filters; onApply: (f: Filters) => void; onClose: () => void
@@ -25,18 +29,16 @@ export default function FilterSheet({ value, onApply, onClose, listings, spaces,
   const [f, setF] = useState<Filters>(value)
   const set = (patch: Partial<Filters>) => setF((x) => ({ ...x, ...patch }))
 
-  // what a choice would show, given every other filter
-  const count = (patch: Partial<Filters>, ignore: keyof Filters) => {
+  // how much an option would show with every other choice kept
+  const n = (patch: Partial<Filters>) => {
     const g = { ...f, ...patch }
-    return g.type === 'Volunteer exchange'
-      ? spaces.filter((s) => spacePasses(s, g, ignore === 'type' ? undefined : ignore)).length
-      : listings.filter((e) => passes(e, g, undefined)).length
+    return listings.filter((e) => passes(e, g)).length + (patch.work ? spaces.filter((s) => spacePasses(s, g)).length : 0)
   }
-  const show = (selected: boolean, n: number) => selected || n > 0
-
-  const results = f.type === 'Volunteer exchange' ? spaces.filter((s) => spacePasses(s, f)).length : listings.filter((e) => passes(e, f)).length
-  const experiencesOnly = f.type !== 'Volunteer exchange'
+  const results = listings.filter((e) => passes(e, f)).length
+  const ceiling = priceCeiling(listings)
+  const price = f.maxPrice == null ? ceiling : Math.min(f.maxPrice, ceiling)
   const regions = places.find((p) => p.country === f.country)?.regions ?? []
+
   useEffect(() => {
     const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', esc)
@@ -55,61 +57,79 @@ export default function FilterSheet({ value, onApply, onClose, listings, spaces,
 
         <div className="flex flex-col gap-6 overflow-y-auto px-5 py-5">
           <Section title="Type">
-            {TYPES.map((t) => {
-              const n = count({ type: t }, 'type')
-              return show(f.type === t, t === 'Any' ? 1 : n) && <Chip key={t} solid on={f.type === t} onClick={() => set({ type: t })}>{t}</Chip>
+            {TYPES.map(([k, label]) => {
+              const on = f.types.includes(k)
+              return <Chip key={k} solid on={on} dim={!on && n({ types: [k] }) === 0} onClick={() => set({ types: toggled(f.types, k) })}>{label}</Chip>
             })}
           </Section>
 
-          <Section title="Where">
-            <Chip solid on={!f.country} onClick={() => set({ country: '', region: '' })}>Everywhere</Chip>
-            {places.map((p) => <Chip key={p.country} solid on={f.country === p.country} onClick={() => set({ country: p.country, region: '' })}>{p.country}</Chip>)}
-            {!places.length && <span className="text-[13px] text-subtle">Destinations appear here as spaces around the world join.</span>}
-          </Section>
-          {f.country && regions.length > 0 && (
+          {/* only worth asking once Xanadu has places in more than one country */}
+          {places.length > 1 && (
+            <Section title="Where">
+              {places.map((p) => {
+                const on = f.country === p.country
+                return <Chip key={p.country} solid on={on} onClick={() => set({ country: on ? '' : p.country, region: '' })}>{p.country}</Chip>
+              })}
+            </Section>
+          )}
+          {places.length > 1 && f.country && regions.length > 1 && (
             <Section title={`In ${f.country}`}>
-              <Chip on={!f.region} onClick={() => set({ region: '' })}>{`All of ${f.country}`}</Chip>
-              {regions.map((r) => <Chip key={r} on={f.region.toLowerCase() === r.toLowerCase()} onClick={() => set({ region: r })}>{r}</Chip>)}
+              {regions.map((r) => {
+                const on = f.region.toLowerCase() === r.toLowerCase()
+                return <Chip key={r} on={on} onClick={() => set({ region: on ? '' : r })}>{r}</Chip>
+              })}
             </Section>
           )}
 
-          {(f.land || LANDSCAPES.some((l) => count({ land: l }, 'land') > 0)) && (
-            <Section title="Landscape">
-              <Chip solid on={!f.land} onClick={() => set({ land: '' })}>Anywhere</Chip>
-              {LANDSCAPES.map((l) => show(f.land === l, count({ land: l }, 'land')) && <LandChip key={l} name={l} on={f.land === l} onClick={() => set({ land: f.land === l ? '' : l })} />)}
-            </Section>
+          <Section title="When">
+            <Chip solid on={f.when === 'flexible'} onClick={() => set({ when: 'flexible' })}>I’m flexible</Chip>
+            <Chip solid on={f.when === 'dates'} onClick={() => set({ when: 'dates' })}>Pick dates</Chip>
+          </Section>
+          {f.when === 'dates' && (
+            <div className="-mt-3 flex flex-col gap-3">
+              <div className="grid grid-cols-2 gap-2.5">
+                <Field label="From"><input type="date" value={f.from} onChange={(e) => set({ from: e.target.value, to: f.to && f.to < e.target.value ? e.target.value : f.to })} className={`${inputCls} px-3 text-sm [color-scheme:dark]`} /></Field>
+                <Field label="To"><input type="date" value={f.to} min={f.from || undefined} onChange={(e) => set({ to: e.target.value })} className={`${inputCls} px-3 text-sm [color-scheme:dark]`} /></Field>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {FLEX.map(([k, label]) => <Chip key={k} on={f.flex === k} onClick={() => set({ flex: k })}>{label}</Chip>)}
+              </div>
+            </div>
           )}
 
-          {experiencesOnly && (
-            <>
-              <Section title="When">
-                {WHEN.map(([k, label]) => show(f.when === k, k === 'any' || k === 'dates' ? 1 : count({ when: k }, 'when')) &&
-                  <Chip key={k} solid on={f.when === k} onClick={() => set({ when: k })}>{label}</Chip>)}
-              </Section>
-              {f.when === 'dates' && (
-                <div className="-mt-3 grid grid-cols-2 gap-2.5">
-                  <Field label="From"><input type="date" value={f.from} onChange={(e) => set({ from: e.target.value })} className={`${inputCls} px-3 text-sm [color-scheme:dark]`} /></Field>
-                  <Field label="To"><input type="date" value={f.to} min={f.from || undefined} onChange={(e) => set({ to: e.target.value })} className={`${inputCls} px-3 text-sm [color-scheme:dark]`} /></Field>
-                </div>
-              )}
-              <Section title="Price per person">
-                {PRICES.map(([k, label]) => show(f.price === k, k === 'any' ? 1 : count({ price: k }, 'price')) &&
-                  <Chip key={k} solid on={f.price === k} onClick={() => set({ price: k })}>{label}</Chip>)}
-              </Section>
-              <Section title="Length">
-                {LENGTHS.map(([k, label]) => show(f.length === k, k === 'any' ? 1 : count({ length: k }, 'length')) &&
-                  <Chip key={k} solid on={f.length === k} onClick={() => set({ length: k })}>{label}</Chip>)}
-              </Section>
-              <Section title="Sort by">
-                {SORTS.map(([k, label]) => <Chip key={k} on={f.sort === k} onClick={() => set({ sort: k })}>{label}</Chip>)}
-              </Section>
-            </>
-          )}
+          <Section title="Length">
+            {LENGTHS.map(([k, label]) => {
+              const on = f.lengths.includes(k)
+              return <Chip key={k} solid on={on} dim={!on && n({ lengths: [k] }) === 0} onClick={() => set({ lengths: toggled(f.lengths, k) })}>{label}</Chip>
+            })}
+          </Section>
+
+          <Section title="Will you work while you’re there?">
+            {WORK.map(([k, label]) => {
+              const on = f.work === k
+              return <Chip key={k} solid on={on} dim={!on && k !== 'none' && n({ work: k }) === 0} onClick={() => set({ work: on && k !== 'none' ? 'none' : k })}>{label}</Chip>
+            })}
+          </Section>
+
+          <section className="flex flex-col gap-2.5">
+            <div className="flex items-baseline justify-between gap-3">
+              <h3 className="m-0 text-[13px] font-semibold tracking-[0.08em] text-subtle uppercase">Price per person</h3>
+              <span className="text-[14px] font-semibold text-ink">{f.maxPrice == null ? 'Any price' : f.maxPrice === 0 ? 'Free or exchange' : `Up to ${money(f.maxPrice)}`}</span>
+            </div>
+            <input type="range" min={0} max={ceiling} step={50} value={price} aria-label="Highest price per person"
+              onChange={(e) => { const v = Number(e.target.value); set({ maxPrice: v >= ceiling ? null : v }) }}
+              className="xa-range w-full" style={{ ['--pct' as string]: `${(price / ceiling) * 100}%` }} />
+            <div className="flex justify-between text-[12px] text-faint"><span>Free</span><span>{`${money(ceiling)}+`}</span></div>
+          </section>
+
+          <Section title="Sort by">
+            {SORTS.map(([k, label]) => <Chip key={k} on={f.sort === k} onClick={() => set({ sort: k })}>{label}</Chip>)}
+          </Section>
         </div>
 
         <div className="border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-safe">
           <button type="button" onClick={() => onApply(f)} className="min-h-[54px] w-full rounded-2xl bg-iri text-[15px] font-semibold text-navy">
-            {results === 0 ? 'Show results (none yet)' : `Show ${results} ${f.type === 'Volunteer exchange' ? (results === 1 ? 'space' : 'spaces') : results === 1 ? 'experience' : 'experiences'}`}
+            {results === 0 ? 'Show results (none yet)' : `Show ${results} ${results === 1 ? 'experience' : 'experiences'}`}
           </button>
         </div>
       </div>

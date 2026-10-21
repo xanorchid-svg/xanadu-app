@@ -39,11 +39,11 @@ export function BackButton({ to, label = 'Back', onClick }: { to?: string; label
   return <Link to={to ?? '/'} aria-label={label} className={cls}><IconBack /></Link>
 }
 
-export function Chip({ on, onClick, children, solid = false }: { on: boolean; onClick: () => void; children: ReactNode; solid?: boolean }) {
+export function Chip({ on, onClick, children, solid = false, dim = false }: { on: boolean; onClick: () => void; children: ReactNode; solid?: boolean; dim?: boolean }) {
   const onCls = solid ? 'border-transparent bg-iri text-navy font-semibold' : 'ring-iri border-transparent bg-iri-violet/14 text-ink font-semibold'
   return (
     <button type="button" aria-pressed={on} onClick={onClick}
-      className={`min-h-9 flex-none rounded-full border px-3.5 text-[13px] transition-colors ${on ? onCls : 'border-line-2 text-muted'}`}>
+      className={`min-h-9 flex-none rounded-full border px-3.5 text-[13px] transition-colors ${on ? onCls : 'border-line-2 text-muted'}${dim ? ' opacity-40' : ''}`}>
       {children}
     </button>
   )

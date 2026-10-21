@@ -13,6 +13,9 @@ export const SEEKER_ALIGN = ['Yoga', 'Breathwork', 'Meditation', 'Sound', 'Ecsta
  */
 export const STAYS = ['A class or session', 'Weekly or monthly sessions', 'A weekend', '1–3 weeks', 'A month or more', 'A season', 'Community living'] as const
 export const WORK_STYLES = ['Work remotely', 'Volunteer exchange', 'Just be, no work'] as const
+/** How an offering's format reads to members ('Drop-in' is stored, 'Class or session' is shown). */
+export const formatLabel = (f: string) => (f === 'Drop-in' ? 'Class or session' : f)
+
 export const LANDSCAPES = ['Beach', 'Ocean', 'Jungle', 'Mountains', 'Desert', 'Forest', 'Countryside', 'Town', 'City'] as const
 
 /** Each landscape picks up one colour from the logo's iridescence. */

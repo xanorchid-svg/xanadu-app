@@ -174,3 +174,11 @@ button { font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Price scale in the Discover filters: iridescent fill up to the thumb */
+.xa-range { -webkit-appearance: none; appearance: none; height: 28px; background: transparent; }
+.xa-range::-webkit-slider-runnable-track { height: 6px; border-radius: 999px; background: linear-gradient(90deg, #9DBB7A, #6FB7BF, #8F9BE6, #B58BE0, #E09AC4, #E8BF8A) 0 0 / var(--pct, 100%) 100% no-repeat, #24324A; }
+.xa-range::-moz-range-track { height: 6px; border-radius: 999px; background: #24324A; }
+.xa-range::-moz-range-progress { height: 6px; border-radius: 999px; background: linear-gradient(90deg, #9DBB7A, #6FB7BF, #8F9BE6, #B58BE0, #E09AC4, #E8BF8A); }
+.xa-range::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; margin-top: -10px; border-radius: 50%; background: #F6F1E8; box-shadow: 0 2px 8px rgb(0 0 0 / .45); }
+.xa-range::-moz-range-thumb { width: 26px; height: 26px; border: 0; border-radius: 50%; background: #F6F1E8; box-shadow: 0 2px 8px rgb(0 0 0 / .45); }

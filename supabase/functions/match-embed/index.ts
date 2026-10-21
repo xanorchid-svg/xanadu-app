@@ -70,41 +70,73 @@ function keywordsOf(text: string): string[] {
 
 const embed = async (text: string) => JSON.stringify(await model.run(text.slice(0, 4000), { mean_pool: true, normalize: true }))
 
+// way-of-living tags an experience carries (kept the same as public.offering_tags in the database)
+const days = (a?: string | null, b?: string | null) => (a ? Math.round((new Date((b || a) + 'T12:00:00').getTime() - new Date(a + 'T12:00:00').getTime()) / 86400000) + 1 : 0)
+function offeringTags(o: { format: string; start_date: string | null; end_date: string | null; volunteer_exchange: boolean }) {
+  const n = days(o.start_date, o.end_date)
+  return [
+    o.format === 'Drop-in' ? 'A class or session' : '',
+    o.volunteer_exchange ? 'Volunteer exchange' : '',
+    n >= 2 && n <= 3 ? 'A weekend' : n >= 4 && n <= 21 ? '1–3 weeks' : n >= 22 && n <= 60 ? 'A month or more' : n > 60 ? 'A season' : '',
+  ].filter(Boolean)
+}
+
+// what an experience takes from its space: landscapes and remote work, not the space's stay lengths
+const STAYS = ['A class or session', 'Weekly or monthly sessions', 'A weekend', '1–3 weeks', 'A month or more', 'A season', 'Community living']
+const placeTags = (life: string[] | null | undefined) => (life ?? []).filter((x) => !STAYS.includes(x))
+
+type Row = { kind: string; ref_id: string; owner_id: string; keywords: string[]; embedding: string | null; updated_at: string }
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
   const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
 
   const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
-  const token = (req.headers.get('Authorization') ?? '').replace('Bearer ', '')
-  const { data: { user } } = await admin.auth.getUser(token)
-  if (!user) return json({ error: 'Please sign in again.' }, 401)
+  const body = await req.json().catch(() => ({})) as { queued?: string }
 
-  const { data: profile } = await admin.from('profiles').select('role, seeking, prefs, lifestyle').eq('id', user.id).single()
-  if (!profile) return json({ error: 'Profile not found.' }, 404)
-
-  const rows: { kind: string; ref_id: string; owner_id: string; keywords: string[]; embedding: string | null; updated_at: string }[] = []
+  const rows: Row[] = []
   const now = new Date().toISOString()
-  const add = async (kind: string, refId: string, text: string, tags: string[] = []) => {
+  const add = async (ownerId: string, kind: string, refId: string, text: string, tags: string[] = []) => {
     const clean = text.trim()
     const keywords = [...new Set([...keywordsOf(clean), ...tags])]
-    rows.push({ kind, ref_id: refId, owner_id: user.id, keywords, embedding: clean ? await embed(clean) : null, updated_at: now })
+    rows.push({ kind, ref_id: refId, owner_id: ownerId, keywords, embedding: clean ? await embed(clean) : null, updated_at: now })
   }
 
-  if (profile.role === 'seeker') {
-    const prefs: string[] = profile.prefs ?? []
-    const life: string[] = profile.lifestyle ?? []
-    await add('seeker', user.id, [profile.seeking, prefs.length ? `Interested in ${prefs.join(', ')}.` : '', life.length ? `Wants: ${life.join(', ')}.` : ''].join(' '), [...prefs, ...life])
-  } else if (profile.role === 'container') {
-    const { data: space } = await admin.from('spaces').select('*').eq('owner_id', user.id).maybeSingle()
+  // a host's space and every one of their offerings
+  const host = async (ownerId: string) => {
+    const { data: space } = await admin.from('spaces').select('*').eq('owner_id', ownerId).maybeSingle()
+    const where = space ? [space.town, space.region, space.country].filter(Boolean).join(', ') : ''
     if (space) {
-      await add('space', space.id, [space.name, [space.town, space.region, space.country].filter(Boolean).join(', '), space.about, (space.practices ?? []).join(', '), space.kitchen, space.getting_here,
+      await add(ownerId, 'space', space.id, [space.name, where, space.about, (space.practices ?? []).join(', '), space.kitchen, space.getting_here,
         space.volunteer_exchange ? `Volunteer work exchange available. ${space.volunteer_details}` : '', (space.lifestyle ?? []).join(', ')].join('. '),
         [...(space.practices ?? []), ...(space.lifestyle ?? []), ...(space.volunteer_exchange ? ['Volunteer exchange'] : [])])
     }
-    const { data: offerings } = await admin.from('offerings').select('id, title, format, practices, description').eq('owner_id', user.id)
+    const { data: offerings } = await admin.from('offerings').select('id, title, format, practices, description, start_date, end_date, volunteer_exchange, volunteer_details').eq('owner_id', ownerId)
     for (const o of offerings ?? []) {
-      await add('offering', o.id, [o.title, o.format, (o.practices ?? []).join(', '), o.description, space ? [space.town, space.region, space.country].filter(Boolean).join(', ') : '', space ? (space.lifestyle ?? []).join(', ') : ''].join('. '), [...(o.practices ?? []), ...(space?.lifestyle ?? [])])
+      const tags = offeringTags(o)
+      await add(ownerId, 'offering', o.id, [o.title, o.format === 'Drop-in' ? 'A class or session' : o.format, (o.practices ?? []).join(', '), o.description,
+        o.volunteer_exchange ? `Volunteer work exchange. ${o.volunteer_details}` : '', tags.join(', '), where, placeTags(space?.lifestyle).join(', ')].join('. '),
+        [...(o.practices ?? []), ...placeTags(space?.lifestyle), ...tags])
     }
+  }
+
+  if (body.queued) {
+    // called by the database after a space or offering changed: only act on owners it queued
+    const { data: q } = await admin.from('match_queue').delete().eq('owner_id', body.queued).select('owner_id')
+    if (!q?.length) return json({ updated: 0 })
+    await host(body.queued)
+  } else {
+    const token = (req.headers.get('Authorization') ?? '').replace('Bearer ', '')
+    const { data: { user } } = await admin.auth.getUser(token)
+    if (!user) return json({ error: 'Please sign in again.' }, 401)
+    const { data: profile } = await admin.from('profiles').select('role, seeking, prefs, lifestyle, container_status').eq('id', user.id).single()
+    if (!profile) return json({ error: 'Profile not found.' }, 404)
+
+    // everyone can be a Seeker; hosts' own things are re-read whichever hat they're wearing
+    const prefs: string[] = profile.prefs ?? []
+    const life: string[] = profile.lifestyle ?? []
+    await add(user.id, 'seeker', user.id, [profile.seeking, prefs.length ? `Interested in ${prefs.join(', ')}.` : '', life.length ? `Wants: ${life.join(', ')}.` : ''].join(' '), [...prefs, ...life])
+    if (profile.container_status) await host(user.id)
   }
 
   if (rows.length) {

@@ -42,3 +42,18 @@ export function useMatches(count = 6) {
   useEffect(() => { reload() }, [reload])
   return { matches, loading, reload }
 }
+
+/** Match score for every live experience (by id), used to sort Discover by "Best match". */
+export function useMatchScores() {
+  const { session } = useAuth()
+  const [scores, setScores] = useState<Record<string, number>>({})
+  useEffect(() => {
+    if (!session) return
+    supabase.rpc('my_match_scores').then(({ data }) => {
+      const out: Record<string, number> = {}
+      for (const r of (data as { kind: string; id: string; score: number }[] | null) ?? []) if (r.kind === 'offering') out[r.id] = r.score
+      setScores(out)
+    })
+  }, [session])
+  return scores
+}

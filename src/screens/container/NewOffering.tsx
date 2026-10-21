@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useOfferings, useSpaceProfile } from '../../store'
 import { Chip, Field, inputCls, Switch } from '../../components/ui'
 import { IconClose } from '../../components/icons'
-import { PRACTICES } from '../../data'
+import { formatLabel, PRACTICES } from '../../data'
 import { VolunteerFields } from '../../components/Volunteer'
 import { ImportCard, type OfferingImport } from '../../components/Import'
 
@@ -104,7 +104,7 @@ export default function NewOffering() {
             <ImportCard<OfferingImport> kind="offering" onFilled={fillFrom} />
             <div className="flex flex-col gap-2">
               <span className="text-[13px] text-muted">Format</span>
-              <div className="grid grid-cols-3 gap-2">{FORMATS.map((f) => <button key={f} type="button" aria-pressed={format === f} onClick={() => setFormat(f)} className={box(format === f)}>{f}</button>)}</div>
+              <div className="grid grid-cols-3 gap-2">{FORMATS.map((f) => <button key={f} type="button" aria-pressed={format === f} onClick={() => setFormat(f)} className={box(format === f)}>{formatLabel(f)}</button>)}</div>
             </div>
             <Field label="Title"><input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Ocean Breath Weekend" className={inputCls} /></Field>
             <div className="flex flex-col gap-2">
