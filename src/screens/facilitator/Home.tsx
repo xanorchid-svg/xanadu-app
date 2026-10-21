@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { useFacilitatorProfile } from '../../store'
+import { useFacilitatorProfile, useOfferings } from '../../store'
+import OfferingCard from '../../components/OfferingCard'
 import { useAuth } from '../../auth'
 import ApplicationBanner from '../../components/ApplicationBanner'
 import { Badge, Checklist, EmptyState, FacilitatorTabs, H2, Page, Screen, Switch } from '../../components/ui'
@@ -17,6 +18,7 @@ export default function FacilitatorHome() {
   const { profile, updateProfile } = useAuth()
   const open = profile?.open_to_spaces ?? true
   const [me] = useFacilitatorProfile()
+  const { offerings, linked } = useOfferings()
   // items tick themselves off as the profile fills in
   const done = [
     'account',
@@ -65,8 +67,17 @@ export default function FacilitatorHome() {
         </section>
 
         <section className="flex flex-col gap-2.5">
-          <H2>Your offerings</H2>
-          <span className="text-[13px] leading-normal text-subtle">Offerings you co-host with a space will appear here.</span>
+          <div className="flex items-baseline justify-between">
+            <H2>Your offerings</H2>
+            <Link to="/facilitator/new" className="text-[13px] no-underline">+ New offering</Link>
+          </div>
+          {offerings.map((o) => <OfferingCard key={o.id} o={o} to={`/facilitator/offering?id=${o.id}`} />)}
+          {linked.map((o) => <OfferingCard key={o.id} o={o} to={`/experience/${o.id}`} sub="A space added you as its Facilitator" />)}
+          {!offerings.length && !linked.length && (
+            <EmptyState title="Share your first offering" action={<Link to="/facilitator/new" className="flex min-h-11 items-center text-sm font-semibold no-underline">Create an offering</Link>}>
+              A class, a weekend or a season. Hold it at a space on Xanadu, or somewhere that isn’t on Xanadu yet and invite them in.
+            </EmptyState>
+          )}
         </section>
       </Page>
     </Screen>

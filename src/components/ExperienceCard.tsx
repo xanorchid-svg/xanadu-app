@@ -3,11 +3,13 @@ import type { Listing } from '../store'
 import { dateRange } from './OfferingCard'
 import { formatLabel, placeLabel } from '../data'
 
-/** One live experience in a list: cover photo from its space, practice, title, host and dates. */
+/** One live experience in a list: its photo, practice, title, where it's held, who leads it and dates. */
 export default function ExperienceCard({ e }: { e: Listing }) {
   const cover = e.cover_url || e.space?.photos[0]
   const kicker = [e.practices[0], formatLabel(e.format)].filter(Boolean).join(' · ')
-  const where = [e.space?.name, e.space ? placeLabel({ town: e.space.town, region: e.space.region }) || e.space.country : ''].filter(Boolean).join(' · ')
+  const where = e.space
+    ? [e.space.name, placeLabel({ town: e.space.town, region: e.space.region }) || e.space.country].filter(Boolean).join(' · ')
+    : [e.venue_name, e.venue_place].filter(Boolean).join(' · ')
   return (
     <Link to={`/experience/${e.id}`} className="flex items-center gap-3.5 rounded-[18px] bg-surface p-2.5 text-text no-underline">
       <div className="h-[76px] w-[76px] flex-none overflow-hidden rounded-[14px] bg-portal">
@@ -17,7 +19,7 @@ export default function ExperienceCard({ e }: { e: Listing }) {
         <span className="text-xs text-gold-soft">{kicker}</span>
         <span className="truncate text-[15px] font-semibold text-ink">{e.title || 'Untitled experience'}</span>
         <span className="truncate text-[13px] text-subtle">{[where, dateRange(e)].filter(Boolean).join(' · ')}</span>
-        {e.price_usd != null && <span className="text-[13px] text-muted">{`from $${Number(e.price_usd).toLocaleString()}`}</span>}
+        {(e.guide || e.price_usd != null) && <span className="truncate text-[13px] text-muted">{[e.guide ? `with ${e.guide.name}` : '', e.price_usd != null ? `from $${Number(e.price_usd).toLocaleString()}` : ''].filter(Boolean).join(' · ')}</span>}
       </div>
     </Link>
   )

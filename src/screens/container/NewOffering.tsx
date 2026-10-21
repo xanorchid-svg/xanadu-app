@@ -1,6 +1,10 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useOfferings, useSpaceProfile } from '../../store'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { inviteVenue, uploadPhotos, useOfferings, useSpaceProfile } from '../../store'
+import { useAuth } from '../../auth'
+import { CoverPicker } from '../../components/edit'
+import { GuidePicker, NO_VENUE, VenuePicker, type Venue } from '../../components/People'
+import { useSpaces } from '../../store'
 import { Chip, Field, inputCls, Switch } from '../../components/ui'
 import { IconClose } from '../../components/icons'
 import { formatLabel, PRACTICES } from '../../data'
@@ -17,8 +21,20 @@ const INCLUDED = [
   ['transport', 'Airport transport', 'From the nearest airport'],
 ] as const
 
-/** Four-step builder for a new retreat, training or drop-in. */
+/**
+ * Four-step builder for a new retreat, training or class. Containers build it for their space and can add
+ * the Facilitator who leads it; Facilitators build it, lead it, and choose where it's held.
+ */
 export default function NewOffering() {
+  const { session, profile } = useAuth()
+  const asGuide = profile?.role === 'facilitator'
+  const base = asGuide ? '/facilitator' : '/container'
+  const [guideId, setGuideId] = useState<string | null>(null)
+  const [params] = useSearchParams()
+  // started from a space page ("Hold an offering here")
+  const [venue, setVenue] = useState<Venue>(() => (params.get('space') ? { ...NO_VENUE, spaceId: params.get('space') } : NO_VENUE))
+  const [cover, setCover] = useState('')
+  const { spaces } = useSpaces()
   const [step, setStep] = useState(1)
   const [format, setFormat] = useState<(typeof FORMATS)[number]>('Retreat')
   const [title, setTitle] = useState('')
@@ -44,27 +60,36 @@ export default function NewOffering() {
     if (step === 2 && !start) { setError('Please choose a start date.'); return }
     if (step === 2 && end && end < start) { setError('The end date is before the start date.'); return }
     if (step === 2 && price && !(Number(price) >= 0)) { setError('Please enter the price as a number, e.g. 850.'); return }
+    if (step === 2 && asGuide && !venue.spaceId && !venue.name.trim()) { setError('Please choose where it’s held, or name the venue.'); return }
+    if (step === 2 && asGuide && venue.invite.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(venue.invite.trim())) { setError('That venue email doesn’t look right.'); return }
     if (step < 4) { setStep(step + 1); return }
     submit()
   }
 
   const submit = async () => {
     setBusy(true)
+    let coverUrl = ''
+    try { [coverUrl = ''] = cover ? await uploadPhotos(session!.user.id, [cover]) : [] } catch { setBusy(false); setError('We couldn’t upload the cover photo. Please try again.'); return }
     const { id, error } = await create({
       title: title.trim(), format, practices, description: description.trim(),
       start_date: start || null, end_date: end || start || null, spots,
       price_usd: price ? Number(price) : null, included: inc,
       volunteer_exchange: volunteer, volunteer_details: volunteer ? volunteerDetails.trim().slice(0, 600) : '',
+      cover_url: coverUrl,
+      ...(asGuide
+        ? { facilitator_id: session!.user.id, space_id: venue.spaceId, venue_name: venue.spaceId ? '' : venue.name.trim(), venue_place: venue.spaceId ? '' : venue.place.trim() }
+        : { facilitator_id: guideId }),
     })
+    if (error) { setBusy(false); setError(error); return }
+    if (asGuide && !venue.spaceId && venue.invite.trim() && id) await inviteVenue(id, venue.invite)
     setBusy(false)
-    if (error) { setError(error); return }
-    navigate(`/container/offering?id=${id}`, { replace: true })
+    navigate(`${base}/offering?id=${id}`, { replace: true })
   }
 
   // don't lose a half-written offering by accident
   const close = () => {
     const started = title.trim() || description.trim() || practices.length || start || price
-    if (!started || window.confirm('Leave without submitting? What you\'ve written here won\'t be saved.')) { if (window.history.length > 1) navigate(-1); else navigate('/container') }
+    if (!started || window.confirm('Leave without submitting? What you\'ve written here won\'t be saved.')) { if (window.history.length > 1) navigate(-1); else navigate(base) }
   }
   // what Xanadu read from a website or flyer; the host checks each step before submitting
   const fillFrom = (f: OfferingImport) => {
@@ -81,7 +106,9 @@ export default function NewOffering() {
   }
   const togglePractice = (p: string) => setPractices((xs) => (xs.includes(p) ? xs.filter((x) => x !== p) : [...xs, p]))
   const box = (on: boolean) => `min-h-12 rounded-xl border text-sm ${on ? 'border-transparent bg-iri font-semibold text-navy' : 'border-line-2 text-text'}`
-  const kicker = [format, ...(practices.length ? practices.slice(0, 2) : ['[Practices]'])].join(' · ')
+  const heldAt = asGuide ? spaces.find((x) => x.id === venue.spaceId) : space.name.trim() ? space : null
+  const placeName = asGuide ? (heldAt?.name || venue.name.trim() || 'Where it’s held') : space.name.trim() || 'Your space'
+  const kicker = [formatLabel(format), ...(practices.length ? practices.slice(0, 2) : ['[Practices]'])].join(' · ')
   const h1 = 'm-0 font-display text-[32px] leading-[1.05] font-medium text-ink'
 
   return (
@@ -131,14 +158,17 @@ export default function NewOffering() {
               </div>
             </div>
             <Field label="Price per person (USD)"><input inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value.replace(/[^0-9.]/g, ''))} placeholder="e.g. 850" className={inputCls} /></Field>
-            <div className="flex flex-col gap-2">
-              <span className="text-[13px] text-muted">Facilitator</span>
-              <div className="flex items-center gap-3 rounded-[14px] border border-dashed border-slate p-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-plum text-gold-soft">+</div>
-                <div className="flex flex-1 flex-col gap-0.5"><span className="text-sm font-semibold text-ink">Add a facilitator</span><span className="text-xs text-subtle">Invite one by email, or hold it yourself</span></div>
-                <a href="mailto:?subject=Co-host%20with%20me%20on%20Xanadu&body=I'd%20love%20to%20host%20an%20offering%20with%20you%20on%20Xanadu%3A%20https%3A%2F%2Fapp.dreamxanadu.com" className="flex min-h-10 items-center px-3 text-[13px] font-semibold no-underline">Invite</a>
+            {asGuide ? (
+              <div className="flex flex-col gap-2">
+                <span className="text-[13px] text-muted">Where it’s held</span>
+                <VenuePicker value={venue} onChange={setVenue} />
               </div>
-            </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <span className="text-[13px] text-muted">Facilitator (optional)</span>
+                <GuidePicker value={guideId} onChange={setGuideId} />
+              </div>
+            )}
           </>
         )}
 
@@ -160,11 +190,11 @@ export default function NewOffering() {
           <>
             <h1 className={h1}>Looks beautiful</h1>
             <div className="flex flex-col overflow-hidden rounded-[22px] bg-plum">
-              <div className="flex h-40 items-end bg-slate p-3.5"><span className="text-[11px] tracking-[0.14em] text-[#E9E3D3] uppercase">[Add a cover photo]</span></div>
+              <CoverPicker photo={cover} fallback={heldAt?.photos[0]} onChange={setCover} />
               <div className="flex flex-col gap-1.5 px-[18px] pt-4 pb-[18px]">
                 <span className="text-xs text-gold-soft">{kicker}</span>
                 <span className="font-display text-2xl text-ink">{title.trim() || '[Your title]'}</span>
-                <span className="text-[13px] text-muted">{`${space.name.trim() || 'Your space'} · ${start ? new Date(start + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Dates'} · ${spots} spots`}</span>
+                <span className="text-[13px] text-muted">{`${placeName} · ${start ? new Date(start + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Dates'} · ${spots} spots`}</span>
               </div>
             </div>
             <p className="m-0 rounded-xl bg-surface px-3.5 py-3 text-[13px] leading-normal text-muted">The Xanadu team reviews every new offering before it goes live, usually within a day.</p>

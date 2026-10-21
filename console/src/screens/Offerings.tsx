@@ -43,7 +43,7 @@ export default function Offerings() {
   const shown = useMemo(() => {
     const s = q.trim().toLowerCase()
     const list = (data ?? []).filter((o) => (tab === 'all' || tabOf(o) === tab) && (!s ||
-      [o.title, o.space_name, o.host_name, o.space_country, o.format].some((v) => v?.toLowerCase().includes(s))))
+      [o.title, o.space_name, o.host_name, o.space_country, o.format, o.facilitator_name, o.venue_name].some((v) => v?.toLowerCase().includes(s))))
     return tab === 'live' || tab === 'review' ? [...list].sort((a, b) => (a.start_date ?? '9').localeCompare(b.start_date ?? '9')) : list
   }, [data, tab, q])
 
@@ -76,7 +76,7 @@ export default function Offerings() {
                 <div className="p-4">
                   <p className="text-[11.5px] font-semibold uppercase tracking-[.14em] text-faint">{o.format}</p>
                   <p className="mt-1 font-display text-[22px] leading-tight text-ink">{o.title || 'Untitled'}</p>
-                  <p className="mt-1 text-[13px] text-subtle">{o.space_name || o.host_name} · {place(o.space_town, o.space_country) || 'No location'}</p>
+                  <p className="mt-1 text-[13px] text-subtle">{o.space_name || o.venue_name || o.host_name} · {place(o.space_town, o.space_country) || o.venue_place || 'No location'}{o.facilitator_name ? ` · led by ${o.facilitator_name}` : ''}</p>
                   <p className="mt-2 text-[13px] text-text">{dateRange(o.start_date, o.end_date)} · {money(o.price_usd)}{o.spots ? ` · ${o.spots} spots` : ''}</p>
                 </div>
               </Card>
@@ -163,11 +163,12 @@ function Review({ o, onClose, onDecided }: { o: Offering; onClose: () => void; o
           </div>
         </Section>
       )}
-      <Section title="Host">
+      <Section title="Who and where">
         <Answers rows={[
-          ['Space', o.space_name],
-          ['Location', place(o.space_town, o.space_region, o.space_country)],
-          ['Host', o.host_name],
+          ['Created by', `${o.host_name ?? ''}${o.created_as === 'facilitator' ? ' (Facilitator)' : ' (Container)'}`],
+          ['Held at', o.space_name || (o.venue_name ? `${o.venue_name} · not on Xanadu yet` : 'Not set')],
+          ['Location', place(o.space_town, o.space_region, o.space_country) || o.venue_place],
+          ['Led by', o.facilitator_name],
           ['Email', o.host_email && <span className="select-all">{o.host_email}</span>],
           ['Host status', o.host_status === 'approved' ? 'Approved' : o.host_status === 'declined' ? 'Declined' : 'Pending'],
           ['Submitted', day(o.created_at)],

@@ -178,6 +178,7 @@ export default function Applications() {
                       {ROLE_LABEL[a.role]}{a.role === 'container' && a.name && a.space?.name ? ` · ${a.name}` : ''} · {whereOf(a) || 'No location yet'}
                     </p>
                     <div className="mt-1.5 flex flex-wrap gap-1">
+                      {a.referred_by && <span className="rounded-full bg-iri-teal/15 px-2 py-0.5 text-[11px] font-semibold text-iri-teal">{`Referred by ${a.referred_by.name ?? 'a Facilitator'}`}</span>}
                       {a.fast_track && <span className="rounded-full bg-iri-violet/15 px-2 py-0.5 text-[11px] font-semibold text-iri-violet">{`Fast track · approved ${a.role === 'container' ? 'Facilitator' : 'Container'}`}</span>}
                       {checklist(a).map(([label, ok]) => (
                         <span key={label} className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${ok ? 'bg-iri-sage/12 text-iri-sage' : 'bg-surface text-faint ring-1 ring-line'}`}>
@@ -317,6 +318,7 @@ function Review({ a, onClose, onStep, position, onDecided }: {
         <Answers rows={[
           ['Email', <span className="select-all">{a.email}</span>],
           ['Heard about us', a.heard_from],
+          ...(a.referred_by ? [['Referred by', `${a.referred_by.name ?? 'A Facilitator'}${a.referred_by.facilitator_approved ? ' (approved Facilitator)' : ''}${a.referred_by.venue ? `, who holds an experience at ${a.referred_by.venue}` : ''} · ${day(a.referred_by.at)}`] as [string, string]] : []),
           [a.onboarded ? 'Submitted' : 'Started', day(a.onboarded ? a.submitted : a.created_at)],
           ['Last seen', day(a.last_sign_in_at)],
           ...(a.role === 'container' ? [['Offerings', String(a.offerings)] as [string, string]] : []),

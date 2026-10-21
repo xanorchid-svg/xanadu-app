@@ -3,6 +3,7 @@
 // The database calls it with one of:
 //   { id }    an email_queue row: a welcome email, or a notification email (kind "n:<notification id>")
 //   { push }  a notification id: push it to the member's phones and browsers
+//   { invite } a venue_invites row: a Facilitator invited the venue of their experience to Xanadu
 //   { init }  make sure the web-push keys exist (they're created once and kept in public.push_config)
 // It only ever sends things that are already queued or recorded, and each only once,
 // so calling it from anywhere else can't send anything new or twice.
@@ -45,7 +46,7 @@ function composeNotification(n: Notification): Email {
   }
   const label: Record<string, string> = {
     changes: 'Update my application', declined: 'Read our note', offering_live: 'See it live',
-    offering_changes: 'Edit your experience', team_message: 'Reply', message: 'Reply', community_request: 'See the request',
+    offering_changes: 'Edit your experience', offering_linked: 'See the experience', offering_left: 'Open the experience', team_message: 'Reply', message: 'Reply', community_request: 'See the request',
     community_accepted: 'Say hello', match: n.link.startsWith('/experience') ? 'See the experience' : 'See the place',
   }
   return {
@@ -133,7 +134,7 @@ function html(e: Email) {
     </td></tr>
     <tr><td align="center" style="padding:24px 8px 0;font-family:Manrope,'Helvetica Neue',Arial,sans-serif;font-size:12px;line-height:1.6;color:#7F8BA0;">
       Xanadu begins with you.<br>
-      ${e.footer ? `${esc(e.footer)}<br>` : ''}You’re receiving this because you joined Xanadu. · <a href="${APP}/privacy" style="color:#7F8BA0;">Privacy</a>
+      ${e.footer ? `${esc(e.footer)}<br>` : ''}${e.footer?.includes('suggested your space') ? '' : 'You’re receiving this because you joined Xanadu. · '}<a href="${APP}/privacy" style="color:#7F8BA0;">Privacy</a>
     </td></tr>
   </table>
 </td></tr></table></body></html>`
@@ -176,6 +177,43 @@ async function push(admin: SupabaseClient, id: string) {
   return reply({ ok: true, sent })
 }
 
+/** A Facilitator invited the place they're holding an experience at to join Xanadu as a Container. */
+async function invite(admin: SupabaseClient, id: string) {
+  const { data: inv } = await admin.from('venue_invites').update({ status: 'sent', sent_at: new Date().toISOString() })
+    .eq('id', id).eq('status', 'queued').select('id, email, venue_name, invited_by, offering_id').maybeSingle()
+  if (!inv) return reply({ ok: true, skipped: 'not queued' })
+  const fail = async (error: string) => { await admin.from('venue_invites').update({ status: 'failed', error, sent_at: null }).eq('id', id); return reply({ ok: false, error }, 500) }
+  const key = Deno.env.get('RESEND_API_KEY')
+  if (!key) return fail('RESEND_API_KEY is not set')
+  const { data: who } = await admin.from('profiles').select('name').eq('id', inv.invited_by).maybeSingle()
+  const { data: off } = inv.offering_id ? await admin.from('offerings').select('title').eq('id', inv.offering_id).maybeSingle() : { data: null }
+  const name = (who?.name ?? '').trim() || 'A Xanadu Facilitator'
+  const venue = inv.venue_name?.trim()
+  const e: Email = {
+    subject: `${name} invited ${venue || 'you'} to Xanadu`,
+    preheader: `${first(name) || name} is holding ${off?.title ? `“${off.title}”` : 'an experience'} with you and thought you belong on Xanadu.`,
+    heading: `${first(name) || name} thinks ${venue || 'your space'} belongs on Xanadu`,
+    paragraphs: [
+      `${name} is a Facilitator on Xanadu${off?.title ? ` and is holding “${off.title}” at ${venue || 'your space'}` : ''}. They’d love for you to join as a founding Container.`,
+      'Xanadu is a network of retreat spaces, guides and seekers. Spaces share their place and their offerings, from a single class to a season or community living, and Seekers who are aligned with them find them first.',
+      'Every space is personally reviewed before it joins. Because you were referred by one of our Facilitators, we’ll know where you came from when you apply. It takes about ten minutes.',
+    ],
+    button: { label: 'Apply as a Container', url: `${APP}/?mode=signup&role=Container` },
+    signoff: 'Questions? Just reply to this email and the Xanadu team will answer.',
+    footer: `You’re receiving this one email because ${name} suggested your space. We won’t email you again unless you join.`,
+  }
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', 'Idempotency-Key': `xanadu-invite-${inv.id}` },
+    body: JSON.stringify({ from: Deno.env.get('EMAIL_FROM') || 'Xanadu <hello@dreamxanadu.com>', to: [inv.email], reply_to: REPLY_TO,
+      subject: e.subject, html: html(e), text: text(e), tags: [{ name: 'kind', value: 'venue_invite' }] }),
+  })
+  const out = await res.json().catch(() => ({}))
+  if (!res.ok) return fail(`Resend ${res.status}: ${out?.message ?? 'error'}`)
+  await admin.from('venue_invites').update({ provider_id: out?.id ?? null, error: null }).eq('id', id)
+  return reply({ ok: true })
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return reply({ error: 'Method not allowed' }, 405)
   const input = await req.json().catch(() => ({}))
@@ -184,6 +222,7 @@ Deno.serve(async (req) => {
 
   if (input?.init) { await vapid(admin); return reply({ ok: true }) }
   if (uuid(input?.push)) return push(admin, input.push)
+  if (uuid(input?.invite)) return invite(admin, input.invite)
 
   const id = input?.id
   if (!uuid(id)) return reply({ error: 'Missing id' }, 400)

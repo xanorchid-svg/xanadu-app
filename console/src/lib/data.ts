@@ -17,6 +17,8 @@ export type SpaceForm = {
 export type Application = {
   /** one row per member per role they applied for: key = `${id}:${role}` */
   key: string; fast_track: boolean; other_status: 'pending' | 'approved' | 'declined' | null
+  /** a Facilitator invited this venue by email before it applied */
+  referred_by?: { name: string | null; id: string; facilitator_approved: boolean; venue: string; at: string } | null
   id: string; role: 'container' | 'facilitator'; status: 'pending' | 'approved' | 'declined' | 'active'; onboarded: boolean
   name: string | null; email: string | null; photo_url: string | null; town: string | null; region: string | null
   practices: string[] | null; about: string | null; languages: string | null; trainings: Training[] | null
@@ -32,6 +34,7 @@ export type Offering = {
   status: 'draft' | 'in_review' | 'live' | 'declined'; created_at: string; updated_at: string
   host_name: string | null; host_status: string; host_email: string | null; host_photo: string | null
   space_name: string | null; space_country: string | null; space_region: string | null; space_town: string | null; cover: string | null
+  created_as?: 'container' | 'facilitator'; facilitator_name?: string | null; venue_name?: string; venue_place?: string
 }
 
 export type Thread = {

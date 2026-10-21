@@ -1,17 +1,25 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { BackButton, Chip, ContainerTabs, EmptyState, Field, inputCls, PrimaryLink, Screen, Switch } from '../../components/ui'
+import { BackButton, Chip, ContainerTabs, EmptyState, FacilitatorTabs, Field, inputCls, PrimaryLink, Screen, Switch } from '../../components/ui'
 import { IconPeople } from '../../components/icons'
 import OfferingCard, { StatusPill, dateRange } from '../../components/OfferingCard'
-import { EditFooter } from '../../components/edit'
-import { Loading } from '../../auth'
+import { CoverPicker, EditFooter } from '../../components/edit'
+import { GuidePicker, VenuePicker, type Venue } from '../../components/People'
+import { Loading, useAuth } from '../../auth'
 import { friendlyError, supabase } from '../../lib/supabase'
 import { formatLabel, PRACTICES } from '../../data'
-import { useOfferings, type Offering } from '../../store'
+import { inviteVenue, uploadPhotos, useOfferings, type Offering } from '../../store'
 import { VolunteerFields } from '../../components/Volunteer'
 
 const FORMATS = ['Retreat', 'Training', 'Drop-in'] as const
 const INCLUDED = [['stay', 'Stay'], ['meals', 'Meals'], ['schedule', 'Daily schedule'], ['outings', 'Outings'], ['transport', 'Airport transport']] as const
+
+/** Containers manage offerings under /container, Facilitators under /facilitator. */
+function useSide() {
+  const { profile, session } = useAuth()
+  const asGuide = profile?.role === 'facilitator'
+  return { asGuide, base: asGuide ? '/facilitator' : '/container', Tabs: asGuide ? FacilitatorTabs : ContainerTabs, me: session?.user.id ?? '' }
+}
 
 /** Edit an offering's basics after it's been submitted, or delete it. */
 function EditOffering({ o, onDone, update }: { o: Offering; onDone: () => void; update: (id: string, patch: Partial<Offering>) => Promise<string | null> }) {
@@ -21,6 +29,10 @@ function EditOffering({ o, onDone, update }: { o: Offering; onDone: () => void; 
     start: o.start_date ?? '', end: o.end_date ?? '', spots: o.spots, price: o.price_usd != null ? String(o.price_usd) : '', included: { ...o.included },
     volunteer: !!o.volunteer_exchange, volunteerDetails: o.volunteer_details ?? '',
   })
+  const { asGuide, base, me } = useSide()
+  const [cover, setCover] = useState(o.cover_url ?? '')
+  const [guideId, setGuideId] = useState<string | null>(o.facilitator_id ?? null)
+  const [venue, setVenue] = useState<Venue>({ spaceId: o.space_id ?? null, name: o.venue_name ?? '', place: o.venue_place ?? '', invite: '' })
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -33,12 +45,20 @@ function EditOffering({ o, onDone, update }: { o: Offering; onDone: () => void; 
     if (!d.start) { setError('Please choose a start date.'); return }
     if (d.end && d.end < d.start) { setError('The end date is before the start date.'); return }
     if (d.price && !(Number(d.price) >= 0)) { setError('Please enter the price as a number, e.g. 850.'); return }
+    if (asGuide && !venue.spaceId && !venue.name.trim()) { setError('Please choose where it’s held, or name the venue.'); return }
     setBusy(true)
+    let coverUrl = cover
+    try { [coverUrl = ''] = cover ? await uploadPhotos(me, [cover]) : [''] } catch { setBusy(false); setError('We couldn’t upload the cover photo. Please try again.'); return }
+    const links: Partial<Offering> = asGuide
+      ? { space_id: venue.spaceId, venue_name: venue.spaceId ? '' : venue.name.trim(), venue_place: venue.spaceId ? '' : venue.place.trim() }
+      : { facilitator_id: guideId }
     const err = await update(o.id, {
+      ...links, cover_url: coverUrl,
       title: d.title.trim(), format: d.format, practices: d.practices, description: d.description.trim(),
       start_date: d.start, end_date: d.end || d.start, spots: d.spots, price_usd: d.price ? Number(d.price) : null, included: d.included,
       volunteer_exchange: d.volunteer, volunteer_details: d.volunteer ? d.volunteerDetails.trim().slice(0, 600) : '',
     })
+    if (!err && asGuide && !venue.spaceId && venue.invite.trim()) await inviteVenue(o.id, venue.invite)
     setBusy(false)
     if (err) setError(err); else onDone()
   }
@@ -47,7 +67,7 @@ function EditOffering({ o, onDone, update }: { o: Offering; onDone: () => void; 
     const { error } = await supabase.from('offerings').delete().eq('id', o.id)
     setBusy(false)
     if (error) { setError(friendlyError(error.message)); return }
-    navigate('/container', { replace: true })
+    navigate(base, { replace: true })
   }
   const box = (on: boolean) => `min-h-12 rounded-xl border text-sm ${on ? 'border-transparent bg-iri font-semibold text-navy' : 'border-line-2 text-text'}`
 
@@ -58,6 +78,11 @@ function EditOffering({ o, onDone, update }: { o: Offering; onDone: () => void; 
         {o.status === 'live' && <p className="m-0 rounded-xl bg-plum px-3.5 py-3 text-[13px] leading-normal text-muted">This offering is live. Your changes show to guests as soon as you save.</p>}
         <div className="grid grid-cols-3 gap-2">{FORMATS.map((f) => <button key={f} type="button" aria-pressed={d.format === f} onClick={() => set('format', f)} className={box(d.format === f)}>{formatLabel(f)}</button>)}</div>
         <Field label="Title"><input value={d.title} onChange={(e) => set('title', e.target.value)} className={inputCls} /></Field>
+        <CoverPicker photo={cover} onChange={setCover} />
+        <div className="flex flex-col gap-2">
+          <span className="text-[13px] text-muted">{asGuide ? 'Where it’s held' : 'Facilitator (optional)'}</span>
+          {asGuide ? <VenuePicker value={venue} onChange={setVenue} /> : <GuidePicker value={guideId} onChange={setGuideId} />}
+        </div>
         <div className="flex flex-col gap-2">
           <span className="text-[13px] text-muted">Practices</span>
           <div className="flex flex-wrap gap-2">{PRACTICES.filter((p) => p !== 'Trainings').map((p) => (
@@ -117,7 +142,8 @@ function dayCount(o: Offering) {
 /** Manage one offering: guests, a day-by-day schedule, meals and outings. Everything saves to the offering. */
 export default function ManageOffering() {
   const [params] = useSearchParams()
-  const { offerings, loading, update } = useOfferings()
+  const { offerings, linked, loading, update } = useOfferings()
+  const { base, Tabs } = useSide()
   const [editing, setEditing] = useState(false)
   const [tab, setTab] = useState<(typeof TABS)[number]>('Guests')
   const [day, setDay] = useState(1)
@@ -135,13 +161,28 @@ export default function ManageOffering() {
   // Offerings tab: every offering at a glance
   if (!id && offerings.length) {
     return (
-      <Screen footer={<ContainerTabs />}>
+      <Screen footer={<Tabs />}>
         <div className="flex flex-col gap-4 px-5 pt-safe pb-6">
           <div className="flex items-baseline justify-between">
             <h1 className="m-0 font-display text-[34px] font-medium text-ink">Offerings</h1>
-            <Link to="/container/new" className="text-[13px] no-underline">+ New offering</Link>
+            <Link to={`${base}/new`} className="text-[13px] no-underline">+ New offering</Link>
           </div>
-          {offerings.map((x) => <OfferingCard key={x.id} o={x} />)}
+          {offerings.map((x) => <OfferingCard key={x.id} o={x} to={`${base}/offering?id=${x.id}`} />)}
+          <LinkedOfferings list={linked} />
+        </div>
+      </Screen>
+    )
+  }
+
+  if (!o && !id && linked.length) {
+    return (
+      <Screen footer={<Tabs />}>
+        <div className="flex flex-col gap-4 px-5 pt-safe pb-6">
+          <div className="flex items-baseline justify-between">
+            <h1 className="m-0 font-display text-[34px] font-medium text-ink">Offerings</h1>
+            <Link to={`${base}/new`} className="text-[13px] no-underline">+ New offering</Link>
+          </div>
+          <LinkedOfferings list={linked} />
         </div>
       </Screen>
     )
@@ -149,12 +190,12 @@ export default function ManageOffering() {
 
   if (!o) {
     return (
-      <Screen footer={<ContainerTabs />}>
+      <Screen footer={<Tabs />}>
         <div className="flex flex-col gap-5 px-5 pt-safe pb-6">
           <h1 className="m-0 font-display text-[34px] font-medium text-ink">Offerings</h1>
           {id && <p className="m-0 text-[14px] text-muted">That offering couldn't be found. It may have been deleted.</p>}
-          <EmptyState title="No offerings yet" action={<PrimaryLink to="/container/new" className="mt-1 min-h-[46px] text-sm">Create your first offering</PrimaryLink>}>
-            Create a retreat, training or drop-in. Guests, schedules, meals and outings will all live here.
+          <EmptyState title="No offerings yet" action={<PrimaryLink to={`${base}/new`} className="mt-1 min-h-[46px] text-sm">Create your first offering</PrimaryLink>}>
+            Create a retreat, training or class. Guests, schedules, meals and outings will all live here.
           </EmptyState>
         </div>
       </Screen>
@@ -197,7 +238,7 @@ export default function ManageOffering() {
   const header = (
     <div className="flex flex-col gap-3.5 bg-plum px-5 pt-safe">
       <div className="flex items-center justify-between">
-        <BackButton to="/container/offering" />
+        <BackButton to={`${base}/offering`} />
         <div className="flex items-center gap-1">
           <Link to={`/experience/${o.id}`} className="flex min-h-11 items-center px-2 text-[13px] no-underline">Preview</Link>
           <button type="button" onClick={() => { setError(''); setEditing(true) }} className="min-h-10 rounded-full border border-gold px-3.5 text-[13px] font-semibold text-gold-pale">Edit details</button>
@@ -224,14 +265,14 @@ export default function ManageOffering() {
   const remove = 'ml-auto flex h-9 min-w-9 items-center justify-center rounded-full text-sm text-subtle'
 
   return (
-    <Screen header={header} footer={<ContainerTabs />}>
+    <Screen header={header} footer={<Tabs />}>
       <div className="flex flex-col gap-3 px-5 pt-[18px] pb-7">
         {o.status === 'declined' && (
           <div className="flex flex-col gap-2.5 rounded-2xl border border-gold/60 bg-plum p-4">
             <span className="text-[15px] font-semibold text-ink">The team asked for a few changes</span>
             <span className="text-[13px] leading-normal text-subtle">Their note is in your Inbox. Tap Edit details to make the changes, then resubmit.</span>
             <div className="flex gap-2">
-              <Link to="/container/inbox" className="flex min-h-11 flex-1 items-center justify-center rounded-xl border border-line-2 text-[13px] text-text no-underline">Open Inbox</Link>
+              <Link to="/messages/team" className="flex min-h-11 flex-1 items-center justify-center rounded-xl border border-line-2 text-[13px] text-text no-underline">Open Inbox</Link>
               <button type="button" disabled={busy} onClick={resubmit} className="min-h-11 flex-1 rounded-xl bg-iri text-[13px] font-semibold text-navy disabled:opacity-70">Resubmit for review</button>
             </div>
           </div>
@@ -314,7 +355,7 @@ export default function ManageOffering() {
           <section className="mt-4 flex flex-col gap-2">
             <span className="text-xs tracking-[0.14em] text-subtle uppercase">Your other offerings</span>
             {offerings.filter((x) => x.id !== o.id).map((x) => (
-              <Link key={x.id} to={`/container/offering?id=${x.id}`} className="flex items-center justify-between rounded-[14px] bg-surface p-3.5 text-text no-underline">
+              <Link key={x.id} to={`${base}/offering?id=${x.id}`} className="flex items-center justify-between rounded-[14px] bg-surface p-3.5 text-text no-underline">
                 <span className="text-sm">{x.title || 'Untitled offering'}</span><StatusPill status={x.status} />
               </Link>
             ))}
@@ -322,5 +363,16 @@ export default function ManageOffering() {
         )}
       </div>
     </Screen>
+  )
+}
+
+/** Experiences other members created that are held at your space or that you lead. */
+function LinkedOfferings({ list }: { list: Offering[] }) {
+  if (!list.length) return null
+  return (
+    <section className="mt-2 flex flex-col gap-2">
+      <span className="text-xs tracking-[0.14em] text-subtle uppercase">With other members</span>
+      {list.map((x) => <OfferingCard key={x.id} o={x} to={`/experience/${x.id}`} sub="Added by another member · open to remove yourself" />)}
+    </section>
   )
 }

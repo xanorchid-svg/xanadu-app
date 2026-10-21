@@ -44,6 +44,50 @@ export type Offering = {
   volunteer_details: string
   /** the experience's own photo; falls back to the space's main photo */
   cover_url?: string
+  /** where it's held: a Xanadu space, or an outside venue (venue_name / venue_place) */
+  space_id?: string | null
+  venue_name?: string
+  venue_place?: string
+  /** the Facilitator leading it, when there is one */
+  facilitator_id?: string | null
+  owner_id?: string
+}
+
+/** What members see of a Facilitator who leads an experience. */
+export type Guide = {
+  id: string; name: string; photo_url: string; town: string; region: string
+  practices: string[]; about: string; languages: string; trainings: Training[]
+}
+const GUIDE_COLS = 'id, name, photo_url, town, region, practices, about, languages, trainings'
+
+/** Approved Facilitators (for a Container adding one to an offering). */
+export function useGuides() {
+  const { session } = useAuth()
+  const [guides, setGuides] = useState<Guide[]>([])
+  useEffect(() => {
+    let live = true
+    supabase.from('profiles').select(GUIDE_COLS).eq('facilitator_status', 'approved').neq('id', session?.user.id ?? '').order('name')
+      .then(({ data }) => { if (live) setGuides(((data as Guide[]) ?? []).filter((g) => g.name?.trim())) })
+    return () => { live = false }
+  }, [session])
+  return guides
+}
+
+export async function fetchGuide(id: string): Promise<Guide | null> {
+  const { data } = await supabase.from('profiles').select(GUIDE_COLS).eq('id', id).maybeSingle()
+  return (data as Guide | null) ?? null
+}
+
+/** Take your space (or yourself, as the Facilitator) off someone else's experience. */
+export async function leaveOffering(id: string): Promise<string | null> {
+  const { error } = await supabase.rpc('leave_offering', { p_offering: id })
+  return error ? friendlyError(error.message) : null
+}
+
+/** Email an outside venue an invitation to join Xanadu (a referral from the Facilitator). */
+export async function inviteVenue(offeringId: string, email: string): Promise<string | null> {
+  const { error } = await supabase.rpc('invite_venue', { p_offering: offeringId, p_email: email.trim() })
+  return error ? friendlyError(error.message) : null
 }
 
 export type Message = { id: string; from_team: boolean; body: string; created_at: string }
@@ -197,12 +241,19 @@ export async function savePrivateDetails(userId: string, patch: { proof?: string
 export function useOfferings() {
   const { session } = useAuth()
   const [offerings, setOfferings] = useState<Offering[]>([])
+  // experiences someone else created that are held at my space or that I lead
+  const [linked, setLinked] = useState<Offering[]>([])
   const [loading, setLoading] = useState(true)
 
   const reload = useCallback(async () => {
     if (!session) return
-    const { data } = await supabase.from('offerings').select('*').eq('owner_id', session.user.id).order('created_at', { ascending: false })
+    const me = session.user.id
+    const { data } = await supabase.from('offerings').select('*').eq('owner_id', me).order('created_at', { ascending: false })
     setOfferings((data as Offering[]) ?? [])
+    const { data: mySpace } = await supabase.from('spaces').select('id').eq('owner_id', me).maybeSingle()
+    const or = [`facilitator_id.eq.${me}`, mySpace ? `space_id.eq.${mySpace.id}` : ''].filter(Boolean).join(',')
+    const { data: other } = await supabase.from('offerings').select('*').neq('owner_id', me).or(or).order('start_date', { ascending: true })
+    setLinked((other as Offering[]) ?? [])
     setLoading(false)
   }, [session])
 
@@ -225,7 +276,7 @@ export function useOfferings() {
     return null
   }, [reload])
 
-  return { offerings, loading, create, update, reload }
+  return { offerings, linked, loading, create, update, reload }
 }
 
 /* ---------- inbox (thread with the Xanadu team) ---------- */
@@ -271,22 +322,27 @@ export type PublicSpace = {
 }
 
 /** A live offering plus the space that hosts it (when that space is approved). */
-export type Listing = Offering & { owner_id: string; space: PublicSpace | null }
+export type Listing = Offering & { owner_id: string; space: PublicSpace | null; guide?: Guide | null }
 
 const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
 
 /** Live offerings that haven't ended yet, soonest first, each with its host space. */
-export async function fetchListings(filter?: { ids?: string[]; ownerId?: string; includePast?: boolean }): Promise<Listing[]> {
+export async function fetchListings(filter?: { ids?: string[]; ownerId?: string; spaceId?: string; includePast?: boolean }): Promise<Listing[]> {
   let q = supabase.from('offerings').select('*').eq('status', 'live')
   if (filter?.ids) q = q.in('id', filter.ids.length ? filter.ids : ['00000000-0000-0000-0000-000000000000'])
   if (filter?.ownerId) q = q.eq('owner_id', filter.ownerId)
+  if (filter?.spaceId) q = q.eq('space_id', filter.spaceId)
   const { data } = await q.order('start_date', { ascending: true, nullsFirst: false })
   const today = todayIso()
   const rows = ((data as (Offering & { owner_id: string })[]) ?? [])
     .filter((o) => filter?.includePast || !(o.end_date || o.start_date) || (o.end_date || o.start_date)! >= today)
-  const owners = Array.from(new Set(rows.map((o) => o.owner_id)))
-  const spaces = owners.length ? ((await supabase.from('spaces').select('*').in('owner_id', owners)).data as PublicSpace[] | null) ?? [] : []
-  return rows.map((o) => ({ ...o, space: spaces.find((s) => s.owner_id === o.owner_id) ?? null }))
+  const spaceIds = Array.from(new Set(rows.map((o) => o.space_id).filter(Boolean))) as string[]
+  const guideIds = Array.from(new Set(rows.map((o) => o.facilitator_id).filter(Boolean))) as string[]
+  const [spaces, guides] = await Promise.all([
+    spaceIds.length ? supabase.from('spaces').select('*').in('id', spaceIds).then(({ data }) => (data as PublicSpace[] | null) ?? []) : Promise.resolve([] as PublicSpace[]),
+    guideIds.length ? supabase.from('profiles').select(GUIDE_COLS).in('id', guideIds).then(({ data }) => (data as Guide[] | null) ?? []) : Promise.resolve([] as Guide[]),
+  ])
+  return rows.map((o) => ({ ...o, space: spaces.find((s) => s.id === o.space_id) ?? null, guide: guides.find((g) => g.id === o.facilitator_id) ?? null }))
 }
 
 export function useListings() {

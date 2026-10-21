@@ -6,7 +6,8 @@ import { dateRange } from '../../components/OfferingCard'
 import { Loading, useAuth } from '../../auth'
 import { supabase } from '../../lib/supabase'
 import { formatLabel, placeLabel } from '../../data'
-import { useSaved, type Offering, type PublicSpace } from '../../store'
+import { fetchGuide, leaveOffering, useSaved, type Guide, type Offering, type PublicSpace } from '../../store'
+import { LedBy, OutsideVenue } from '../../components/People'
 import { ReportSheet } from '../../components/Report'
 
 type Row = Offering & { owner_id: string }
@@ -27,6 +28,9 @@ export default function Experience() {
   const [error, setError] = useState('')
   const [reporting, setReporting] = useState(false)
   const [reported, setReported] = useState(false)
+  const [guide, setGuide] = useState<Guide | null>(null)
+  const [leaving, setLeaving] = useState(false)
+  const [left, setLeft] = useState(false)
 
   useEffect(() => {
     let live = true
@@ -36,8 +40,11 @@ export default function Experience() {
       const o = data as Row | null
       setOffering(o)
       if (!o) return
-      const { data: sp } = await supabase.from('spaces').select('*').eq('owner_id', o.owner_id).maybeSingle()
-      if (live) setSpace(sp as PublicSpace | null)
+      const [{ data: sp }, g] = await Promise.all([
+        o.space_id ? supabase.from('spaces').select('*').eq('id', o.space_id).maybeSingle() : Promise.resolve({ data: null }),
+        o.facilitator_id ? fetchGuide(o.facilitator_id) : Promise.resolve(null),
+      ])
+      if (live) { setSpace(sp as PublicSpace | null); setGuide(g) }
       // already asked for a spot? keep the button in its "sent" state
       if (session && o.owner_id !== session.user.id && o.title) {
         const { data: prior } = await supabase.from('messages').select('id').eq('user_id', session.user.id).eq('from_team', false).ilike('body', `%"${o.title.replace(/[%_]/g, '')}"%`).limit(1)
@@ -68,10 +75,15 @@ export default function Experience() {
   }
 
   const o = offering
-  const isOwner = o.owner_id === session?.user.id
+  const me = session?.user.id
+  const isOwner = o.owner_id === me
+  // added to someone else's experience: as the space it's held at, or as the Facilitator leading it
+  const mySpace = !isOwner && !!space && space.owner_id === me
+  const iLead = !isOwner && !!me && o.facilitator_id === me
+  const part = isOwner || mySpace || iLead
   const isSeeker = profile?.role === 'seeker'
   const saved = isSaved('offering', o.id)
-  const kicker = [o.practices.slice(0, 2).join(' · '), formatLabel(o.format), space?.region || space?.country].filter(Boolean).join(' · ')
+  const kicker = [o.practices.slice(0, 2).join(' · '), formatLabel(o.format), space ? space.region || space.country : o.venue_place].filter(Boolean).join(' · ')
   const price = o.price_usd != null ? `$${Number(o.price_usd).toLocaleString()}` : 'Ask the host'
   const meta = `${dateRange(o)} · ${o.spots} spots`
   const cover = o.cover_url || space?.photos[0]
@@ -84,8 +96,17 @@ export default function Experience() {
     if (error) setError("We couldn't send your request. Please try again."); else setRequested(true)
   }
 
-  const action = isOwner
-    ? <span className="rounded-2xl border border-line-2 px-4 py-3 text-[13px] text-subtle">{o.status === 'live' ? 'Your guest preview' : 'Preview · not live yet'}</span>
+  const leave = async () => {
+    setError(''); setLeaving(true)
+    const err = await leaveOffering(o.id)
+    setLeaving(false)
+    if (err) { setError(err); return }
+    setLeft(true)
+    if (mySpace) setSpace(null); else setGuide(null)
+  }
+
+  const action = part
+    ? <span className="rounded-2xl border border-line-2 px-4 py-3 text-[13px] text-subtle">{o.status === 'live' ? (isOwner ? 'Your guest preview' : mySpace ? 'Held at your space' : 'You’re leading this') : 'Preview · not live yet'}</span>
     : !isSeeker
       ? <span className="rounded-2xl border border-line-2 px-4 py-3 text-[13px] text-subtle">Seekers request spots</span>
       : requested
@@ -145,10 +166,24 @@ export default function Experience() {
             <span className="text-gold-soft" aria-hidden>›</span>
           </Link>
         )}
-        {space && !isOwner && (isSeeker || (profile?.role === 'facilitator' && profile.status === 'approved')) && (
-          <Link to={`/messages/new?to=${o.owner_id}&space=${space.id}&offering=${o.id}`}
+        {!space && o.venue_name && <OutsideVenue name={o.venue_name} place={o.venue_place ?? ''} />}
+        {!space && !o.venue_name && !o.space_id && o.facilitator_id && <OutsideVenue name="" place="" />}
+        {space && !part && (isSeeker || (profile?.role === 'facilitator' && profile.status === 'approved')) && (
+          <Link to={`/messages/new?to=${space.owner_id}&space=${space.id}&offering=${o.id}`}
             className="-mt-2 flex min-h-12 items-center justify-center rounded-2xl border border-line-2 text-[15px] text-text no-underline">{`Message ${space.name}`}</Link>
         )}
+
+        {guide && <LedBy guide={guide} offeringId={o.id} canMessage={!part && guide.id !== me && (isSeeker || profile?.role === 'container')} />}
+
+        {(mySpace || iLead) && (
+          <section className="flex flex-col gap-2 rounded-[18px] border border-line-2 p-4">
+            <span className="text-[14px] font-semibold text-ink">{mySpace ? 'This experience is held at your space' : 'You’re listed as the Facilitator leading this'}</span>
+            <span className="text-[13px] leading-normal text-subtle">{mySpace ? 'Another member added it. If it isn’t right, remove your space and they’ll be told.' : 'Another member added you. If it isn’t right, remove yourself and they’ll be told.'}</span>
+            <button type="button" disabled={leaving} onClick={() => { if (window.confirm(mySpace ? 'Remove your space from this experience?' : 'Remove yourself from this experience?')) leave() }}
+              className="min-h-11 rounded-xl border border-gold/60 text-[13px] font-semibold text-gold-pale disabled:opacity-60">{leaving ? 'Removing…' : mySpace ? 'Remove my space' : 'Remove me'}</button>
+          </section>
+        )}
+        {left && <p className="m-0 rounded-xl bg-surface px-3.5 py-3 text-[13px] text-muted">Done. You’re no longer part of this experience, and its creator has been told.</p>}
 
         {o.description && (
           <div className="flex flex-col gap-2">
@@ -184,7 +219,7 @@ export default function Experience() {
             ))}
           </div>
         )}
-        {!isOwner && (reported
+        {!part && (reported
           ? <p className="m-0 text-center text-[13px] text-subtle">Thank you. Our team will look into it.</p>
           : <button type="button" onClick={() => setReporting(true)} className="min-h-11 self-center text-[13px] text-subtle underline-offset-2 hover:underline">Report this experience</button>)}
       </div>

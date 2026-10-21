@@ -128,6 +128,8 @@ export default function App() {
 
           <Route path="/facilitator" element={<RequireRole role="facilitator"><FacilitatorHome /></RequireRole>} />
           <Route path="/facilitator/spaces" element={<RequireRole role="facilitator"><FindSpaces /></RequireRole>} />
+          <Route path="/facilitator/new" element={<RequireRole role="facilitator"><NewOffering /></RequireRole>} />
+          <Route path="/facilitator/offering" element={<RequireRole role="facilitator"><ManageOffering /></RequireRole>} />
           <Route path="/facilitator/inbox" element={<Navigate to="/messages" replace />} />
           <Route path="/facilitator/profile" element={<RequireRole role="facilitator"><FacilitatorProfile /></RequireRole>} />
 

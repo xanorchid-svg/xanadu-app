@@ -179,3 +179,23 @@ export function LocationFields({ value, onChange }: { value: { country: string; 
     </div>
   )
 }
+
+/** One wide cover photo for an experience; tap to add or change it. */
+export function CoverPicker({ photo, fallback, onChange }: { photo: string; fallback?: string; onChange: (p: string) => void }) {
+  const { open, input, error } = usePhotoInput((urls) => onChange(urls[0]))
+  const shown = photo || fallback
+  return (
+    <div className="flex flex-col gap-1.5">
+      <button type="button" onClick={open} aria-label={photo ? 'Change cover photo' : 'Add a cover photo'}
+        className="relative flex h-40 items-end overflow-hidden rounded-[18px] bg-portal p-3 text-left">
+        {shown && <img decoding="async" src={shown} alt="" className="absolute inset-0 h-full w-full object-cover" />}
+        <span className="relative rounded-full bg-navy/75 px-3 py-1.5 text-[12px] font-semibold text-text">
+          {photo ? 'Change cover photo' : fallback ? 'Using your space’s photo · Add your own' : 'Add a cover photo'}
+        </span>
+      </button>
+      {photo && <button type="button" onClick={() => onChange('')} className="self-start text-[12px] text-subtle">Remove cover photo</button>}
+      {input}
+      {error && <span className="text-xs text-gold-pale">{error}</span>}
+    </div>
+  )
+}

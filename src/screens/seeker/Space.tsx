@@ -35,7 +35,7 @@ export default function Space() {
       if (!live) return
       const row = (data as Row) ?? null
       setSpace(row)
-      if (row) { const l = await fetchListings({ ownerId: row.owner_id }); if (live) setListings(l) }
+      if (row) { const l = await fetchListings({ spaceId: row.id }); if (live) setListings(l) }
     })
     return () => { live = false }
   }, [id])
@@ -88,6 +88,9 @@ export default function Space() {
           {own && <span className="text-[13px] text-subtle">This is how members see your space.</span>}
           {canMessage && (
             <Link to={message()} className="mt-2 flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-iri text-[15px] font-semibold text-navy no-underline hover:text-navy">{`Message ${space.name}`}</Link>
+          )}
+          {canMessage && profile?.role === 'facilitator' && (
+            <Link to={`/facilitator/new?space=${space.id}`} className="flex min-h-12 items-center justify-center rounded-2xl border border-line-2 text-[15px] text-text no-underline">Hold an offering here</Link>
           )}
           {error && <span role="alert" className="text-[13px] text-gold-pale">{error}</span>}
         </div>

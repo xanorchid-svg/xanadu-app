@@ -18,14 +18,14 @@ export function StatusPill({ status }: { status: Offering['status'] }) {
   return <span className={`flex-none rounded-full border px-2.5 py-1 text-xs ${cls}`}>{label}</span>
 }
 
-export default function OfferingCard({ o }: { o: Offering }) {
+export default function OfferingCard({ o, to, sub }: { o: Offering; to?: string; sub?: string }) {
   return (
-    <Link to={`/container/offering?id=${o.id}`} className="flex flex-col gap-2.5 rounded-[18px] bg-plum p-4 text-text no-underline">
+    <Link to={to ?? `/container/offering?id=${o.id}`} className="flex flex-col gap-2.5 rounded-[18px] bg-plum p-4 text-text no-underline">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-0.5">
           <span className="text-xs text-gold-soft">{`${formatLabel(o.format)} · ${dateRange(o)}`}</span>
           <span className="text-base font-semibold text-ink">{o.title || 'Untitled offering'}</span>
-          <span className="text-[13px] text-muted">{`0 of ${o.spots} spots filled`}</span>
+          <span className="text-[13px] text-muted">{sub ?? `0 of ${o.spots} spots filled`}</span>
         </div>
         <StatusPill status={o.status} />
       </div>

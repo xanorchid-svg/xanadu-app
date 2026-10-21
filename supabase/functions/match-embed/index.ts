@@ -102,21 +102,27 @@ Deno.serve(async (req) => {
     rows.push({ kind, ref_id: refId, owner_id: ownerId, keywords, embedding: clean ? await embed(clean) : null, updated_at: now })
   }
 
-  // a host's space and every one of their offerings
+  // a host's space, and every offering they created or that's held at their space (each with its own space and Facilitator)
   const host = async (ownerId: string) => {
     const { data: space } = await admin.from('spaces').select('*').eq('owner_id', ownerId).maybeSingle()
-    const where = space ? [space.town, space.region, space.country].filter(Boolean).join(', ') : ''
+    const placeOf = (sp: { town?: string; region?: string; country?: string } | null) => (sp ? [sp.town, sp.region, sp.country].filter(Boolean).join(', ') : '')
     if (space) {
-      await add(ownerId, 'space', space.id, [space.name, where, space.about, (space.practices ?? []).join(', '), space.kitchen, space.getting_here,
+      await add(ownerId, 'space', space.id, [space.name, placeOf(space), space.about, (space.practices ?? []).join(', '), space.kitchen, space.getting_here,
         space.volunteer_exchange ? `Volunteer work exchange available. ${space.volunteer_details}` : '', (space.lifestyle ?? []).join(', ')].join('. '),
         [...(space.practices ?? []), ...(space.lifestyle ?? []), ...(space.volunteer_exchange ? ['Volunteer exchange'] : [])])
     }
-    const { data: offerings } = await admin.from('offerings').select('id, title, format, practices, description, start_date, end_date, volunteer_exchange, volunteer_details').eq('owner_id', ownerId)
-    for (const o of offerings ?? []) {
+    const cols = 'id, owner_id, title, format, practices, description, start_date, end_date, volunteer_exchange, volunteer_details, space_id, facilitator_id, venue_name, venue_place'
+    const { data: own } = await admin.from('offerings').select(cols).eq('owner_id', ownerId)
+    const { data: atSpace } = space ? await admin.from('offerings').select(cols).eq('space_id', space.id).neq('owner_id', ownerId) : { data: [] }
+    for (const o of [...(own ?? []), ...(atSpace ?? [])]) {
+      const sp = o.space_id ? (o.space_id === space?.id ? space : (await admin.from('spaces').select('*').eq('id', o.space_id).maybeSingle()).data) : null
+      const guide = o.facilitator_id ? (await admin.from('profiles').select('name, practices, about').eq('id', o.facilitator_id).maybeSingle()).data : null
       const tags = offeringTags(o)
-      await add(ownerId, 'offering', o.id, [o.title, o.format === 'Drop-in' ? 'A class or session' : o.format, (o.practices ?? []).join(', '), o.description,
-        o.volunteer_exchange ? `Volunteer work exchange. ${o.volunteer_details}` : '', tags.join(', '), where, placeTags(space?.lifestyle).join(', ')].join('. '),
-        [...(o.practices ?? []), ...placeTags(space?.lifestyle), ...tags])
+      await add(o.owner_id, 'offering', o.id, [o.title, o.format === 'Drop-in' ? 'A class or session' : o.format, (o.practices ?? []).join(', '), o.description,
+        o.volunteer_exchange ? `Volunteer work exchange. ${o.volunteer_details}` : '', tags.join(', '),
+        sp ? placeOf(sp) : [o.venue_name, o.venue_place].filter(Boolean).join(', '), placeTags(sp?.lifestyle).join(', '),
+        guide ? `Led by ${guide.name}. ${(guide.practices ?? []).join(', ')}. ${guide.about ?? ''}` : ''].join('. '),
+        [...(o.practices ?? []), ...placeTags(sp?.lifestyle), ...tags])
     }
   }
 
@@ -129,14 +135,14 @@ Deno.serve(async (req) => {
     const token = (req.headers.get('Authorization') ?? '').replace('Bearer ', '')
     const { data: { user } } = await admin.auth.getUser(token)
     if (!user) return json({ error: 'Please sign in again.' }, 401)
-    const { data: profile } = await admin.from('profiles').select('role, seeking, prefs, lifestyle, container_status').eq('id', user.id).single()
+    const { data: profile } = await admin.from('profiles').select('role, seeking, prefs, lifestyle, container_status, facilitator_status').eq('id', user.id).single()
     if (!profile) return json({ error: 'Profile not found.' }, 404)
 
     // everyone can be a Seeker; hosts' own things are re-read whichever hat they're wearing
     const prefs: string[] = profile.prefs ?? []
     const life: string[] = profile.lifestyle ?? []
     await add(user.id, 'seeker', user.id, [profile.seeking, prefs.length ? `Interested in ${prefs.join(', ')}.` : '', life.length ? `Wants: ${life.join(', ')}.` : ''].join(' '), [...prefs, ...life])
-    if (profile.container_status) await host(user.id)
+    if (profile.container_status || profile.facilitator_status) await host(user.id)
   }
 
   if (rows.length) {
