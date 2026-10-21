@@ -1,3 +1,4 @@
+// Oct 20 v2 (Xan): opening 'Want to find out more?' removed; starts on 'Xanadu starts with you.'
 // Xanadu Reel 27 "Follow along" teaser (Oct 20, Xan): mysterious, slow fades through dark, text-only. Images: img/teaser/ (Canva DAHYegA5SMA pages 88-92, AI).
 const { chromium } = require('/home/claude/ig/node_modules/playwright');
 const fs = require('fs');
@@ -7,16 +8,15 @@ const F = (p) => 'file://' + p;
 const font = (fam, file, w, style = 'normal') =>
   `@font-face{font-family:'${fam}';src:url('${F(IG + '/node_modules/@fontsource/' + file)}') format('woff2');font-weight:${w};font-style:${style}}`;
 
-const DURATION = 19.5;
+const DURATION = 16.1;
 // scenes: [start, end, img, chip, lines[[delay, html, cls]], textTop]
 const SCENES = [
-  [0.00, 3.40, 'img/teaser/mist.jpg', null, [[0.35, 'Want to find out more?', 'm'], [1.55, '<em>Follow along.</em>', 'l']], 640],
-  [3.40, 7.20, 'img/teaser/path.jpg', null, [[0.25, 'Looking for', 'm'], [0.6, '<em>alternative ways</em>', 'l'], [0.85, '<em>of living,</em>', 'l'], [1.9, 'but don’t know', 'm'], [2.15, 'where to start?', 'm']], 520],
-  [7.20, 10.20, 'img/teaser/shore.jpg', null, [[0.3, 'Xanadu', 'xl'], [1.2, '<em>starts with you.</em>', 'l']], 560],
-  [10.20, 14.30, 'img/teaser/moon.jpg', null, [[0.3, 'xan·a·du', 'hw'], [0.95, '/ˈza-nə-ˌdü/ · noun', 'pr'], [1.6, 'an idyllic, exotic,', 'df'], [1.85, 'or luxurious place.', 'df']], 220],
-  [14.30, 16.80, 'img/teaser/shala.jpg', null, [[0.3, 'Want to find out more?', 'm'], [1.1, '<em>Follow along.</em>', 'l']], 560],
+  [0.00, 3.00, 'img/teaser/shore.jpg', null, [[0.25, 'Xanadu', 'xl'], [1.0, '<em>starts with you.</em>', 'l']], 560],
+  [3.00, 6.80, 'img/teaser/path.jpg', null, [[0.25, 'Looking for', 'm'], [0.6, '<em>alternative ways</em>', 'l'], [0.85, '<em>of living,</em>', 'l'], [1.9, 'but don’t know', 'm'], [2.15, 'where to start?', 'm']], 520],
+  [6.80, 10.90, 'img/teaser/moon.jpg', null, [[0.3, 'xan·a·du', 'hw'], [0.95, '/ˈza-nə-ˌdü/ · noun', 'pr'], [1.6, 'an idyllic, exotic,', 'df'], [1.85, 'or luxurious place.', 'df']], 220],
+  [10.90, 13.40, 'img/teaser/shala.jpg', null, [[0.3, 'Want to find out more?', 'm'], [1.1, '<em>Follow along.</em>', 'l']], 560],
 ];
-const END = 16.80;
+const END = 13.40;
 
 const CSS = `
 ${font('Cormorant', 'cormorant-garamond/files/cormorant-garamond-latin-500-normal.woff2', 500)}
