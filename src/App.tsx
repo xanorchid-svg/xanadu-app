@@ -4,6 +4,7 @@ import { Loading, RequireRole, useAuth } from './auth'
 import AuthCallback from './screens/AuthCallback'
 import Intro from './screens/Intro'
 import { listenForAppLinks } from './lib/native'
+import PhoneOnly from './components/PhoneOnly'
 
 // Each screen is its own small file, loaded the first time it's opened (and kept offline by the app's service worker)
 const ResetPassword = lazy(() => import('./screens/ResetPassword'))
@@ -83,6 +84,7 @@ export default function App() {
       <div className="relative h-full w-full overflow-hidden bg-navy sm:max-w-[430px] sm:shadow-[0_0_80px_rgba(0,0,0,0.45)]">
         {/* a slow aurora in the logo's colours drifts behind every screen */}
         <div className="xa-aurora" aria-hidden />
+        <PhoneOnly>
         <div className="relative z-[1] h-full">
         {/* keyed by path so each page mounts fresh, with its own scroll position and state */}
         <Suspense fallback={<Loading />}>
@@ -129,6 +131,7 @@ export default function App() {
         </Routes>
         </Suspense>
         </div>
+        </PhoneOnly>
       </div>
     </div>
   )
