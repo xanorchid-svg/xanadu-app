@@ -34,7 +34,8 @@ npx tsc -b && npm run build
 | `team_list_members()`, `team_member_extra(member)` | Members |
 | `team_list_spaces()` | Spaces |
 | `team_list_reports()`, `team_resolve_report(report, dismiss/warn/remove, message)`, `team_restore_community(member)` | Safety |
-| `team_list_team()`, `team_add_member(email, role)` (admins only), `team_set_template(key, body)` | Settings |
+| `team_list_team()`, `team_add_member(email, role)`, `team_set_member_role(user, role)`, `team_remove_member(user)` (admins only; not yourself; always one admin left), `team_set_template(key, body)` | Settings |
+| `social_post_state` (team-only table: post_id → posted / deleted) | Instagram: posts cleared from the list, restorable |
 
 All team functions are `security definer`, check `is_team()` first, are executable by `authenticated` only (not `anon`), and write to the audit log when they change anything. Supabase's advisor flags them as "security definer callable by signed-in users": that's intended, the check is inside each function.
 
