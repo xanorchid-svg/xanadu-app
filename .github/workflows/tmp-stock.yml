@@ -17,4 +17,4 @@ jobs:
           if git diff --name-only HEAD~1 | grep -q get.json; then python tmp-stock/get.py; else python tmp-stock/sheets.py; fi
       - run: |
           git config user.name bot && git config user.email bot@users.noreply.github.com
-          git add tmp-stock/out tmp-stock/full 2>/dev/null; git commit -m "results [skip ci]" && git pull --rebase -q && git push
+          git add -A tmp-stock; git commit -m "results [skip ci]" && git pull --rebase -q && git push
