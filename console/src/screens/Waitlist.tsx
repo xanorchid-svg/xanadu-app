@@ -9,7 +9,7 @@ type Row = {
   invited_at: string | null; created_at: string; has_account: boolean
 }
 
-const FROM: Record<string, string> = { 'join-section': 'Website · waitlist section', 'join-modal': 'Website · Join Xanadu' }
+const FROM: Record<string, string> = { 'join-section': 'Website · waitlist section', 'join-modal': 'Website · Join Xanadu', app: 'Signed up in the app' }
 
 /** Seekers who joined the waitlist on dreamxanadu.com. They enter the app once the founding circle is complete. */
 export default function Waitlist() {

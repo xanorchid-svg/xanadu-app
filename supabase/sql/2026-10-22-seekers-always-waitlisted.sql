@@ -1,0 +1,8 @@
+-- Oct 22, 2026 (applied as migration app_seekers_join_waitlist).
+-- Until launch every Seeker is on the waitlist, wherever they signed up:
+--   add_seeker_to_waitlist(user, source)  internal; skips anyone with a Container or Facilitator application.
+--   trigger on_auth_user_created_waitlist  a new account whose metadata role is 'seeker' (source 'app'; the website's
+--                                          join_waitlist call then overwrites source with its form name).
+--   on_member_onboarded                    also adds Seekers who finish setup in the app (Google/Apple sign-ups carry no role).
+-- Containers/Facilitators (app or website) appear in Console -> Applications, never on the waitlist.
+-- import-listing v4: kind 'facilitator' added; 'space' and 'facilitator' usable by anyone signed in (5/day before applying).
