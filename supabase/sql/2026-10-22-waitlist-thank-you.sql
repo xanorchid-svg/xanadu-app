@@ -1,0 +1,7 @@
+-- Oct 22, 2026 (applied as migration waitlist_sends_seeker_thank_you).
+-- The website's "Join the waitlist" now creates a real Seeker account (email + password or Google) in this project,
+-- then calls join_waitlist with their stay. join_waitlist now also queues the 'welcome_seeker' email
+-- ("Thank you for joining the Xanadu waitlist") for that account straight away, since website Seekers
+-- don't go through app onboarding (on_member_onboarded only fires there). queue_email sends each kind once.
+-- Only plain Seekers get it: anyone with a Container or Facilitator application gets their application email instead.
+-- Email wording lives in supabase/functions/notify/index.ts (compose): welcome_seeker, application_container, application_facilitator.

@@ -11,7 +11,7 @@ type EmailRow = {
 type Missing = { id: string; name: string | null; role: Role; email: string; created_at: string }
 
 const TYPE: Record<string, string> = {
-  welcome_seeker: 'Welcome', application_container: 'Application received', application_facilitator: 'Application received',
+  welcome_seeker: 'Waitlist thank-you', application_container: 'Application thank-you', application_facilitator: 'Application thank-you',
   approved: 'Approved', changes: 'Needs changes', declined: 'Declined', offering_live: 'Experience live', offering_changes: 'Experience changes',
   team_message: 'Team message', message: 'New message', community_request: 'Community request', community_accepted: 'Community', match: 'New match',
 }

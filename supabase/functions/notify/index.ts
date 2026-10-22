@@ -68,41 +68,41 @@ function compose(kind: string, name: string, space: string): Email | null {
   switch (kind) {
     case 'welcome_seeker':
       return {
-        subject: 'Welcome to Xanadu',
-        preheader: "You're one of our founding Seekers.",
+        subject: 'Thank you for joining the Xanadu waitlist',
+        preheader: 'We’ll let you know as soon as we’re ready for you.',
         heading: hi(name),
         paragraphs: [
-          "You're one of Xanadu's founding Seekers, and we're so glad you're here.",
-          'Xanadu begins with you. Tell us how long you want to stay, whether you’ll work while you’re there, and where you feel most alive, and we’ll match you with retreats, guides and places aligned with it.',
-          'New spaces and experiences are joining all the time. When something is a match for you, you’ll see it first in Discover.',
+          'Thank you for joining the Xanadu waitlist. Your place is held, and your account is ready.',
+          'Right now we are gathering our founding circle of spaces and guides. We’ll notify you once we’re ready for you.',
+          'Thank you for joining the Xanadu dream.',
         ],
-        button: { label: 'Open Xanadu', url: `${APP}/discover` },
+        button: { label: 'Visit Xanadu', url: 'https://dreamxanadu.com' },
         signoff: 'Questions or ideas? Just reply to this email. We read every one.',
       }
     case 'application_container':
       return {
-        subject: 'Welcome to Xanadu: we’ve received your application',
-        preheader: `Thank you for sharing ${space || 'your space'} with us.`,
+        subject: 'Thank you for applying to Xanadu',
+        preheader: `We’ll notify you once we review ${space ? `${space}’s` : 'your'} application.`,
         heading: hi(name),
         paragraphs: [
           `Thank you for applying to join Xanadu as a founding Container. We’ve received ${space ? `${space}’s` : 'your'} application.`,
-          'Every space on Xanadu is personally reviewed before it joins, so a member of our team will look through what you shared, usually within a few days, and may ask for a short intro call. We’ll email you as soon as you’re welcomed in.',
-          'While we review, explore Xanadu as a Seeker: the places, guides and people you’ll be part of. Your Container side opens once you’re verified.',
+          'Every space on Xanadu is personally reviewed before it joins. We’ll notify you once we review your application, and we may ask for a short intro call.',
+          'Thank you for joining the Xanadu dream.',
         ],
-        button: { label: 'Explore Xanadu', url: `${APP}/apply/status?role=container` },
+        button: { label: 'See your application', url: `${APP}/apply/status?role=container` },
         signoff: 'Questions? Just reply to this email.',
       }
     case 'application_facilitator':
       return {
-        subject: 'Welcome to Xanadu: we’ve received your application',
-        preheader: 'Thank you for sharing your work with us.',
+        subject: 'Thank you for applying to Xanadu',
+        preheader: 'We’ll notify you once we review your application.',
         heading: hi(name),
         paragraphs: [
           'Thank you for applying to join Xanadu as a founding Facilitator. We’ve received your application.',
-          'Every guide on Xanadu is personally reviewed before joining, so a member of our team will look through your practice, training and references, usually within a few days. We’ll email you as soon as you’re welcomed in.',
-          'While we review, explore Xanadu as a Seeker: the places, guides and people you’ll be part of. Your Facilitator side opens once you’re verified.',
+          'Every guide on Xanadu is personally reviewed before joining. We’ll notify you once we review your application.',
+          'Thank you for joining the Xanadu dream.',
         ],
-        button: { label: 'Explore Xanadu', url: `${APP}/apply/status?role=facilitator` },
+        button: { label: 'See your application', url: `${APP}/apply/status?role=facilitator` },
         signoff: 'Questions? Just reply to this email.',
       }
   }
