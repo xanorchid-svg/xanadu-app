@@ -68,12 +68,11 @@ function compose(kind: string, name: string, space: string): Email | null {
   switch (kind) {
     case 'welcome_seeker':
       return {
-        subject: 'Thank you for joining the Xanadu waitlist',
-        preheader: 'We’ll let you know as soon as we’re ready for you.',
+        subject: 'Thank you for joining Xanadu',
+        preheader: 'You’re on the waitlist. We’ll notify you once you can access the platform fully.',
         heading: hi(name),
         paragraphs: [
-          'Thank you for joining the Xanadu waitlist. Your place is held, and your account is ready.',
-          'Right now we are gathering our founding circle of spaces and guides. We’ll notify you once we’re ready for you.',
+          'Thank you for joining Xanadu. You are on the waitlist, and we will notify you once you can access our platform fully.',
           'Thank you for joining the Xanadu dream.',
         ],
         button: { label: 'Visit Xanadu', url: 'https://dreamxanadu.com' },
@@ -82,11 +81,10 @@ function compose(kind: string, name: string, space: string): Email | null {
     case 'application_container':
       return {
         subject: 'Thank you for applying to Xanadu',
-        preheader: `We’ll notify you once we review ${space ? `${space}’s` : 'your'} application.`,
+        preheader: 'We’ll review your application, then notify you once you can access the platform fully.',
         heading: hi(name),
         paragraphs: [
-          `Thank you for applying to join Xanadu as a founding Container. We’ve received ${space ? `${space}’s` : 'your'} application.`,
-          'Every space on Xanadu is personally reviewed before it joins. We’ll notify you once we review your application, and we may ask for a short intro call.',
+          `Thank you for joining Xanadu.${space ? ` We’ve received ${space}’s application.` : ''} We will review your application, then notify you once you can access our platform fully.`,
           'Thank you for joining the Xanadu dream.',
         ],
         button: { label: 'Visit Xanadu', url: 'https://dreamxanadu.com' }, // the app stays closed until launch
@@ -95,11 +93,10 @@ function compose(kind: string, name: string, space: string): Email | null {
     case 'application_facilitator':
       return {
         subject: 'Thank you for applying to Xanadu',
-        preheader: 'We’ll notify you once we review your application.',
+        preheader: 'We’ll review your application, then notify you once you can access the platform fully.',
         heading: hi(name),
         paragraphs: [
-          'Thank you for applying to join Xanadu as a founding Facilitator. We’ve received your application.',
-          'Every guide on Xanadu is personally reviewed before joining. We’ll notify you once we review your application.',
+          `Thank you for joining Xanadu. We will review your application, then notify you once you can access our platform fully.`,
           'Thank you for joining the Xanadu dream.',
         ],
         button: { label: 'Visit Xanadu', url: 'https://dreamxanadu.com' }, // the app stays closed until launch

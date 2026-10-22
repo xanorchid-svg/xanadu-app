@@ -17,28 +17,56 @@ const TYPE: Record<string, string> = {
 }
 const TONE = { sent: 'text-iri-sage', queued: 'text-gold-pale', failed: 'text-rose', skipped: 'text-faint' } as const
 
-type Tab = 'all' | 'sent' | 'failed'
-const TABS = [{ key: 'all', label: 'All' }, { key: 'sent', label: 'Sent' }, { key: 'failed', label: 'Failed' }] as const
+/** Who the email was for, so Xan can see each group's emails on its own */
+type Group = 'all' | 'seekers' | 'containers' | 'facilitators' | 'approved' | 'decisions' | 'other'
+const GROUPS = [
+  { key: 'all', label: 'All' },
+  { key: 'seekers', label: 'Seekers · waitlist' },
+  { key: 'containers', label: 'Containers · applied' },
+  { key: 'facilitators', label: 'Facilitators · applied' },
+  { key: 'approved', label: 'Approved' },
+  { key: 'decisions', label: 'Changes & declined' },
+  { key: 'other', label: 'Messages & other' },
+] as const
+const groupOf = (e: EmailRow): Exclude<Group, 'all'> => {
+  switch (e.type ?? e.kind) {
+    case 'welcome_seeker': return 'seekers'
+    case 'application_container': return 'containers'
+    case 'application_facilitator': return 'facilitators'
+    case 'approved': return 'approved'
+    case 'changes': case 'declined': return 'decisions'
+    default: return 'other'
+  }
+}
+/** The welcome emails' subjects, as the email itself says them */
+const SUBJECT: Record<string, string> = {
+  welcome_seeker: 'Thank you for joining Xanadu',
+  application_container: 'Thank you for applying to Xanadu',
+  application_facilitator: 'Thank you for applying to Xanadu',
+}
+type StatusFilter = 'all' | 'sent' | 'failed'
 
 /** Every email Xanadu has sent to members, and anyone who never got a welcome email. */
 export default function Emails() {
   const log = useTeamQuery<EmailRow[]>('team_email_log', { p_limit: 500 })
   const missing = useTeamQuery<Missing[]>('team_missing_welcome')
-  const [tab, setTab] = useState<Tab>('all')
+  const [group, setGroup] = useState<Group>('all')
+  const [status, setStatus] = useState<StatusFilter>('all')
   const [q, setQ] = useState('')
   const [busy, setBusy] = useState<string | null>(null)
   const toast = useToast()
 
-  const counts = useMemo(() => ({
-    all: log.data?.length ?? 0,
-    sent: log.data?.filter((e) => e.status === 'sent').length ?? 0,
-    failed: log.data?.filter((e) => e.status === 'failed').length ?? 0,
-  }), [log.data])
+  const counts = useMemo(() => {
+    const c: Record<Group, number> = { all: 0, seekers: 0, containers: 0, facilitators: 0, approved: 0, decisions: 0, other: 0 }
+    ;(log.data ?? []).forEach((e) => { c.all++; c[groupOf(e)]++ })
+    return c
+  }, [log.data])
+  const failedCount = useMemo(() => log.data?.filter((e) => e.status === 'failed').length ?? 0, [log.data])
   const shown = useMemo(() => {
     const s = q.trim().toLowerCase()
-    return (log.data ?? []).filter((e) => (tab === 'all' || e.status === tab) &&
+    return (log.data ?? []).filter((e) => (group === 'all' || groupOf(e) === group) && (status === 'all' || e.status === status) &&
       (!s || [e.name, e.email, e.subject].some((v) => v?.toLowerCase().includes(s))))
-  }, [log.data, tab, q])
+  }, [log.data, group, status, q])
 
   const refresh = () => setTimeout(() => { log.reload(); missing.reload() }, 2500)
   async function sendWelcome(ids: string[]) {
@@ -81,18 +109,26 @@ export default function Emails() {
         </Card>
       )}
 
+      <div className="mb-3"><Tabs tabs={GROUPS} value={group} onChange={setGroup} counts={counts} /></div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <Tabs tabs={TABS} value={tab} onChange={setTab} counts={counts} />
+        <div className="flex gap-1.5">
+          {(['all', 'sent', 'failed'] as const).map((k) => (
+            <button key={k} onClick={() => setStatus(k)}
+              className={`h-8 rounded-full px-3.5 text-[12.5px] font-semibold capitalize ${status === k ? 'bg-surface text-ink ring-1 ring-gold/50' : 'text-faint hover:text-text'}`}>
+              {k === 'all' ? 'Any status' : k}
+            </button>
+          ))}
+        </div>
         <div className="flex gap-2">
           <Button variant="quiet" className="h-9" onClick={() => { log.reload(); missing.reload() }}>Refresh</Button>
-          {counts.failed > 0 && <Button className="h-9" onClick={retry} disabled={!!busy}>{busy === 'retry' ? 'Retrying…' : `Retry ${counts.failed} failed`}</Button>}
+          {failedCount > 0 && <Button className="h-9" onClick={retry} disabled={!!busy}>{busy === 'retry' ? 'Retrying…' : `Retry ${failedCount} failed`}</Button>}
         </div>
       </div>
 
       {log.error && <p className="text-[14px] text-rose">{log.error}</p>}
       {!log.data && !log.error && <div className="grid place-items-center py-16"><Spinner /></div>}
       {log.data && shown.length === 0 && (
-        <EmptyState title={q ? 'Nothing matches' : 'No emails yet'} body="Welcome emails, application decisions, team replies, message alerts and new-match emails will all be listed here." />
+        <EmptyState title={q || group !== 'all' || status !== 'all' ? 'Nothing here' : 'No emails yet'} body="Welcome emails, application decisions, team replies, message alerts and new-match emails will all be listed here." />
       )}
       {log.data && shown.length > 0 && (
         <Card>
@@ -100,7 +136,7 @@ export default function Emails() {
             {shown.map((e) => (
               <li key={e.id} className="grid grid-cols-1 gap-x-4 gap-y-0.5 px-4 py-3 text-[13.5px] sm:grid-cols-[1fr_auto] sm:px-5">
                 <div className="min-w-0">
-                  <p className="truncate font-semibold text-text">{e.subject || '—'}</p>
+                  <p className="truncate font-semibold text-text">{SUBJECT[e.type ?? e.kind] ?? e.subject ?? '—'}</p>
                   <p className="truncate text-[12.5px] text-faint">To {e.name || e.email} · {e.email}{e.role ? ` · ${ROLE_LABEL[e.role]}` : ''}</p>
                 </div>
                 <div className="flex items-center gap-3 sm:justify-end">

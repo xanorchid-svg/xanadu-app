@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { supabase } from '../lib/supabase'
 import { POSTS, slideUrl, videoUrl, type SocialPost } from '../social/posts'
 import { useToast } from '../parts'
@@ -105,10 +106,43 @@ export default function Instagram() {
     setReqs((data as Req[]) || [])
   }, [])
   useEffect(() => { loadReqs() }, [loadReqs])
+  // Posts cleared from this list: marked as already posted, or deleted
+  const [cleared, setCleared] = useState<Record<string, 'posted' | 'deleted'>>({})
+  const loadCleared = useCallback(async () => {
+    const { data } = await supabase.from('social_post_state').select('post_id, state')
+    setCleared(Object.fromEntries(((data as { post_id: string; state: 'posted' | 'deleted' }[]) || []).map((r) => [r.post_id, r.state])))
+  }, [])
+  useEffect(() => { loadCleared() }, [loadCleared])
+  const live = useMemo(() => POSTS.filter((p) => !cleared[p.id]), [cleared])
+  const clearedPosts = useMemo(() => POSTS.filter((p) => cleared[p.id]).sort((a, b) => b.date.localeCompare(a.date)), [cleared])
+  const [showCleared, setShowCleared] = useState(false)
+
+  const [picked, setPicked] = useState<Set<string>>(new Set())
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const pick = (id: string) => setPicked((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
+  async function clearPicked(state: 'posted' | 'deleted') {
+    const ids = [...picked]
+    setBusy(true)
+    const { error } = await supabase.from('social_post_state').upsert(ids.map((post_id) => ({ post_id, state, updated_at: new Date().toISOString() })))
+    setBusy(false)
+    if (error) { toast.show('Couldn’t update those posts'); return }
+    setCleared((c) => ({ ...c, ...Object.fromEntries(ids.map((id) => [id, state])) }))
+    setPicked(new Set()); setConfirmDelete(false); setOpen(null)
+    toast.show(`${ids.length} post${ids.length > 1 ? 's' : ''} ${state === 'posted' ? 'marked as posted' : 'deleted'}`)
+  }
+  async function restore(id: string) {
+    const { error } = await supabase.from('social_post_state').delete().eq('post_id', id)
+    if (error) { toast.show('Couldn’t restore it'); return }
+    setCleared((c) => { const n = { ...c }; delete n[id]; return n })
+    toast.show('Back in the list')
+  }
+
   const openCount = (id: string) => reqs.filter((r) => r.post_id === id && (r.status === 'open' || r.status === 'in_progress')).length
 
   const matches = (p: SocialPost, skip?: string) => GROUPS.every((g) => g.key === skip || !filters[g.key]?.length || filters[g.key].includes(g.get(p)))
-  const shown = useMemo(() => [...POSTS].sort((a, b) => a.date.localeCompare(b.date)).filter((p) => matches(p)), [filters]) // eslint-disable-line react-hooks/exhaustive-deps
+  const shown = useMemo(() => [...live].sort((a, b) => a.date.localeCompare(b.date)).filter((p) => matches(p)), [filters, live]) // eslint-disable-line react-hooks/exhaustive-deps
+  const allPicked = shown.length > 0 && shown.every((p) => picked.has(p.id))
   const active = Object.values(filters).some((v) => v.length)
 
   function toggle(key: string, value: string) {
@@ -145,7 +179,7 @@ export default function Instagram() {
               <span className="w-full shrink-0 text-[11.5px] sm:w-24 font-semibold uppercase tracking-[0.14em] text-faint">{g.label}</span>
               {g.options.map((o) => {
                 const on = filters[g.key]?.includes(o.value)
-                const n = POSTS.filter((p) => g.get(p) === o.value && matches(p, g.key)).length
+                const n = live.filter((p) => g.get(p) === o.value && matches(p, g.key)).length
                 return (
                   <button key={o.value} onClick={() => toggle(g.key, o.value)} disabled={!n && !on}
                     className={`inline-flex h-8 items-center gap-2 rounded-full px-3 text-[12.5px] font-semibold transition disabled:opacity-35 ${on ? 'bg-gold/20 text-gold-pale ring-1 ring-gold/60' : 'bg-navy/60 text-subtle ring-1 ring-line hover:text-text'}`}>
@@ -159,7 +193,7 @@ export default function Instagram() {
         </div>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
           <p className="text-[12.5px] text-faint">
-            Showing {shown.length} of {POSTS.length} posts
+            Showing {shown.length} of {live.length} posts
             {active && <> · <button className="text-subtle underline-offset-2 hover:text-text hover:underline" onClick={() => setFilters({})}>Clear filters</button></>}
           </p>
           <div className="inline-flex rounded-full bg-navy/60 p-1 ring-1 ring-line">
@@ -185,13 +219,21 @@ export default function Instagram() {
         </div>
       ) : (
         <div className="space-y-5">
-          {!shown.length && <p className="text-[14px] text-subtle">No posts match these filters.</p>}
+          {!shown.length && <p className="text-[14px] text-subtle">{live.length ? 'No posts match these filters.' : 'Every post is cleared. Nice work.'}</p>}
+          {shown.length > 0 && (
+            <div className="flex items-center gap-3 px-1">
+              <Check on={allPicked} onClick={() => setPicked(allPicked ? new Set() : new Set(shown.map((p) => p.id)))} label="Select all" />
+              <span className="text-[12.5px] font-semibold text-subtle">{picked.size ? `${picked.size} selected` : 'Select posts to mark as posted or delete'}</span>
+            </div>
+          )}
           {shown.map((p) => {
             const s = STATUS[p.status]
             const isOpen = open === p.id
             return (
               <Card key={p.id} className="overflow-hidden">
-                <button id={'post-' + p.id} onClick={() => setOpen(isOpen ? null : p.id)} className="flex w-full scroll-mt-6 flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 text-left">
+                <div className="flex items-center">
+                <div className="shrink-0 pl-5"><Check on={picked.has(p.id)} onClick={() => pick(p.id)} label={`Select ${p.title}`} /></div>
+                <button id={'post-' + p.id} onClick={() => setOpen(isOpen ? null : p.id)} className="flex min-w-0 flex-1 scroll-mt-6 flex-wrap items-center gap-x-4 gap-y-2 py-4 pl-4 pr-5 text-left">
                   <img src={slideUrl(p, 1)} alt="" className="size-14 rounded-lg object-cover ring-1 ring-line" />
                   <div className="min-w-0 flex-1">
                     <p className="font-display text-[22px] leading-tight text-ink">{p.title}</p>
@@ -203,6 +245,7 @@ export default function Instagram() {
                   {openCount(p.id) > 0 && <span className="inline-flex h-6 items-center rounded-full bg-iri-teal/15 px-2.5 text-[11.5px] font-semibold text-text ring-1 ring-iri-teal/50">{openCount(p.id)} change{openCount(p.id) > 1 ? 's' : ''} requested</span>}
                   <span className={`inline-flex h-6 items-center rounded-full px-2.5 text-[11.5px] font-semibold ${s.cls}`}>{s.label}</span>
                 </button>
+                </div>
 
                 {isOpen && (
                   <div className="border-t border-line px-5 py-5">
@@ -238,7 +281,63 @@ export default function Instagram() {
           })}
         </div>
       )}
+      {clearedPosts.length > 0 && (
+        <section className="mt-8">
+          <button onClick={() => setShowCleared((v) => !v)} className="text-[13px] font-semibold text-subtle hover:text-text">
+            {showCleared ? 'Hide' : 'Show'} cleared posts ({clearedPosts.length})
+          </button>
+          {showCleared && (
+            <Card className="mt-3">
+              <ul className="divide-y divide-line">
+                {clearedPosts.map((p) => (
+                  <li key={p.id} className="flex items-center gap-3 px-5 py-3">
+                    <img src={slideUrl(p, 1)} alt="" className="size-10 rounded-md object-cover opacity-70 ring-1 ring-line" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[14px] font-semibold text-text">{p.title}</p>
+                      <p className="text-[12px] text-faint">{fmt(p.date)} · {cleared[p.id] === 'posted' ? 'Already posted' : 'Deleted'}</p>
+                    </div>
+                    <Button variant="ghost" onClick={() => restore(p.id)}>Restore</Button>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
+        </section>
+      )}
+
+      {picked.size > 0 && createPortal(
+        <div className="xa-page fixed inset-x-0 bottom-20 z-40 flex justify-center px-4 md:bottom-6 md:pl-60">
+          <div className="ring-iri w-full max-w-xl rounded-2xl bg-surface p-3.5 shadow-2xl">
+            {confirmDelete ? (
+              <>
+                <p className="text-[14px] font-semibold text-text">Delete {picked.size} post{picked.size > 1 ? 's' : ''}?</p>
+                <p className="mt-0.5 text-[12.5px] text-faint">They leave this list (you can restore them at the bottom of the page). If a draft is waiting in Metricool, delete it there too.</p>
+                <div className="mt-3 flex gap-2">
+                  <Button variant="quiet" onClick={() => setConfirmDelete(false)} disabled={busy}>Back</Button>
+                  <Button className="flex-1" onClick={() => clearPicked('deleted')} disabled={busy}>{busy ? 'Deleting…' : `Delete ${picked.size}`}</Button>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="flex-1 pl-1.5 text-[14px] font-semibold text-text">{picked.size} selected</span>
+                <Button variant="ghost" onClick={() => setPicked(new Set())}>Clear</Button>
+                <Button variant="quiet" onClick={() => setConfirmDelete(true)} disabled={busy}>Delete</Button>
+                <Button onClick={() => clearPicked('posted')} disabled={busy}>{busy ? 'Saving…' : 'Already posted'}</Button>
+              </div>
+            )}
+          </div>
+        </div>, document.body,
+      )}
       {toast.node}
     </div>
+  )
+}
+
+function Check({ on, onClick, label }: { on: boolean; onClick: () => void; label: string }) {
+  return (
+    <button type="button" role="checkbox" aria-checked={on} aria-label={label} onClick={onClick}
+      className={`grid size-5 shrink-0 place-items-center rounded-md text-[12px] font-bold ${on ? 'bg-iri-strong text-navy' : 'ring-1 ring-line-2 hover:ring-gold/60'}`}>
+      {on ? '✓' : ''}
+    </button>
   )
 }
