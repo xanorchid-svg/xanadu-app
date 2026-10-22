@@ -89,7 +89,7 @@ function compose(kind: string, name: string, space: string): Email | null {
           'Every space on Xanadu is personally reviewed before it joins. We’ll notify you once we review your application, and we may ask for a short intro call.',
           'Thank you for joining the Xanadu dream.',
         ],
-        button: { label: 'See your application', url: `${APP}/apply/status?role=container` },
+        button: { label: 'Visit Xanadu', url: 'https://dreamxanadu.com' }, // the app stays closed until launch
         signoff: 'Questions? Just reply to this email.',
       }
     case 'application_facilitator':
@@ -102,7 +102,7 @@ function compose(kind: string, name: string, space: string): Email | null {
           'Every guide on Xanadu is personally reviewed before joining. We’ll notify you once we review your application.',
           'Thank you for joining the Xanadu dream.',
         ],
-        button: { label: 'See your application', url: `${APP}/apply/status?role=facilitator` },
+        button: { label: 'Visit Xanadu', url: 'https://dreamxanadu.com' }, // the app stays closed until launch
         signoff: 'Questions? Just reply to this email.',
       }
   }

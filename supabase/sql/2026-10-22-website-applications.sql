@@ -1,0 +1,12 @@
+-- Oct 22, 2026 (applied as migration website_applications).
+-- Containers and Facilitators now apply on dreamxanadu.com (/apply/container, /apply/facilitator), not in the app.
+--   apply_application(user, role, jsonb)  internal: fills profile, space (Containers), private_details, sets the role's
+--                                          status to pending, onboards them (sends application_<role> email), and
+--                                          leaves them on the Seeker side until the team approves. Not callable by members.
+--   submit_application(role, jsonb)       for a signed-in member (Google sign-in or an existing account on the website).
+--   trigger on_auth_user_created_application  a new email sign-up carrying raw_user_meta_data.application is filed at once,
+--                                          before email confirmation (fires after on_auth_user_created by name order).
+-- Payload keys: name, town, region, country, heard_from, practices[], phone, links, proof, agreed,
+--   Container: space_name, space_about, lifestyle[], volunteer_exchange, volunteer_details, sleeps, mats, rooms, kitchen, getting_here
+--   Facilitator: about, languages, insurance, trainings[{title,school,year}], references[{name,contact}]
+-- notify v8: application and waitlist emails point to https://dreamxanadu.com while the app is closed.
