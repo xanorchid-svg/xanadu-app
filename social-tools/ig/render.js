@@ -60,6 +60,7 @@ p.body{font-family:Manrope;font-weight:300;font-size:36px;line-height:1.5;color:
 .foot{position:absolute;left:110px;right:110px;bottom:72px;z-index:2;display:flex;justify-content:space-between;align-items:center;
  font-family:Manrope;font-weight:500;font-size:20px;letter-spacing:.3em;text-transform:uppercase;color:rgba(243,236,223,.7)}
 .foot .n{letter-spacing:.15em}
+.foot{text-shadow:0 1px 10px rgba(16,27,44,.85),0 0 2px rgba(16,27,44,.6)}
 .num{font-family:Cormorant;font-style:italic;font-size:44px;color:var(--gold-pale);margin-bottom:22px}
 .time{font-family:Manrope;font-weight:500;font-size:30px;letter-spacing:.24em;color:var(--gold-pale);margin-bottom:26px}
 /* the full emblem: static mark + inner and outer orbits (all 900x518, stacked) */
@@ -139,7 +140,7 @@ const POSTS = require('./posts.js')({ MARK, F });
 (async () => {
   const only = process.argv[2];
   const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' }).catch(() => chromium.launch());
-  const page = await browser.newPage({ viewport: { width: 1080, height: 1350 } });
+  const page = await browser.newPage({ viewport: { width: 1080, height: 1350 }, deviceScaleFactor: 2 }); // 2x supersample; publish.py downsamples to 1080x1350
   for (const [id, slides] of Object.entries(POSTS)) {
     if (only && !id.startsWith(only)) continue;
     const dir = path.join(__dirname, 'out', id);

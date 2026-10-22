@@ -26,7 +26,7 @@ const GROUPS: Group[] = [
   { key: 'cover', label: 'Grid tile', get: (p) => p.cover, options: [{ value: 'white', label: 'White' }, { value: 'photo', label: 'Photo' }, { value: 'navy', label: 'Navy' }] },
   { key: 'format', label: 'Format', get: (p) => p.format, options: [{ value: 'Reel', label: 'Reels' }, { value: 'Carousel', label: 'Carousels' }, { value: 'Single image', label: 'Single posts' }] },
   { key: 'audience', label: 'For', get: (p) => p.audience, options: [{ value: 'Seekers', label: 'Seekers' }, { value: 'Spaces & guides', label: 'Spaces & guides' }, { value: 'Everyone', label: 'Everyone' }] },
-  { key: 'imagery', label: 'Imagery', get: (p) => p.imagery, options: [{ value: 'AI', label: 'AI photos' }, { value: 'Stock footage', label: 'Real footage' }, { value: 'Graphic only', label: 'Type only' }] },
+  { key: 'imagery', label: 'Imagery', get: (p) => p.imagery, options: [{ value: 'Stock photos', label: 'Stock photos' }, { value: 'AI', label: 'AI photos' }, { value: 'Stock footage', label: 'Real footage' }, { value: 'Graphic only', label: 'Type only' }] },
   {
     key: 'month', label: 'Month', get: month,
     options: uniq([...POSTS].sort((a, b) => a.date.localeCompare(b.date)).map(month)).map((m) => ({ value: m, label: m })),
@@ -193,7 +193,7 @@ export default function Instagram() {
       <p className="mb-6 max-w-2xl text-[14px] leading-relaxed text-subtle">
         Every post is waiting in Metricool as a draft for you to schedule: one reel a week, never two reels in a row, and the grid rotates white → photo → navy → photo.
         Reels are phone-reminder posts, so Metricool pings you and you add a trending sound in Instagram. Nothing goes live until you do.
-        Photos are either AI-generated for mood (checked for hands, faces, text and physics) or free licensed stock footage (Mixkit).
+        Feed photos are high-resolution licensed stock (Unsplash) and reels use free licensed footage (Mixkit); a few older reels still run over AI stills. The earlier AI versions of the photo posts are saved if you want to go back.
       </p>
 
       <Card className="mb-6 px-5 pb-5 pt-1">
@@ -267,7 +267,7 @@ export default function Instagram() {
                     <p className="font-display text-[22px] leading-tight text-ink">{p.title}</p>
                     <p className="flex flex-wrap items-center gap-x-1.5 text-[12.5px] text-faint">
                       <span className={`inline-block size-2.5 rounded-full ${COVER_DOT[p.cover]}`} title={`${p.cover} grid tile`} />
-                      {fmt(p.date)} · {p.format}{p.slides > 1 ? ` · ${p.slides} slides` : ''} · for {p.audience} · {p.imagery === 'Stock footage' ? 'real footage' : p.imagery === 'AI' ? 'AI photos' : 'type only'}
+                      {fmt(p.date)} · {p.format}{p.slides > 1 ? ` · ${p.slides} slides` : ''} · for {p.audience} · {p.imagery === 'Stock footage' ? 'real footage' : p.imagery === 'Stock photos' ? 'stock photos' : p.imagery === 'AI' ? 'AI photos' : 'type only'}
                     </p>
                   </div>
                   {openCount(p.id) > 0 && <span className="inline-flex h-6 items-center rounded-full bg-iri-teal/15 px-2.5 text-[11.5px] font-semibold text-text ring-1 ring-iri-teal/50">{openCount(p.id)} change{openCount(p.id) > 1 ? 's' : ''} requested</span>}

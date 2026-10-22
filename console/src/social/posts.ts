@@ -13,11 +13,11 @@ export type SocialPost = {
   format: 'Single image' | 'Carousel' | 'Reel'
   /** what the grid tile looks like: keeps the white → photo → navy → photo rotation */
   cover: 'white' | 'navy' | 'photo'
-  imagery: 'AI' | 'Stock footage' | 'Graphic only'
+  imagery: 'AI' | 'Stock photos' | 'Stock footage' | 'Graphic only'
   audience: 'Seekers' | 'Spaces & guides' | 'Everyone'
   slides: number
   caption: string
-  /** AI imagery is mood only, never a real place or member (see claude/CONTENT-RULES.md) */
+  /** AI and stock imagery is mood only, never a real place or member (see claude/CONTENT-RULES.md). Stock photos are licensed Unsplash images; the earlier AI slides are kept in /social-ai/<id>/. */
   aiImagery: boolean
   status: 'draft' | 'scheduled' | 'posted' | 'manual'
 }
@@ -29,7 +29,7 @@ export const POSTS: SocialPost[] = [
     date: '2026-10-21T10:00',
     format: 'Single image',
     cover: 'photo',
-    imagery: 'AI',
+    imagery: 'Stock photos',
     audience: 'Everyone',
     slides: 1,
     aiImagery: true,
@@ -50,7 +50,7 @@ The doors open soon. Join the waitlist (link in bio).
     date: '2026-10-26T10:00',
     format: 'Carousel',
     cover: 'photo',
-    imagery: 'AI',
+    imagery: 'Stock photos',
     audience: 'Seekers',
     slides: 6,
     aiImagery: true,
@@ -69,7 +69,7 @@ We're beginning in Nosara, Costa Rica. Join the waitlist (link in bio).
     date: '2026-11-13T10:00',
     format: 'Carousel',
     cover: 'photo',
-    imagery: 'AI',
+    imagery: 'Stock photos',
     audience: 'Spaces & guides',
     slides: 5,
     aiImagery: true,
@@ -172,7 +172,7 @@ Send this to the friend who needs a month, not a week. Join the waitlist (link i
     date: '2026-12-02T10:00',
     format: 'Carousel',
     cover: 'photo',
-    imagery: 'AI',
+    imagery: 'Stock photos',
     audience: 'Seekers',
     slides: 6,
     aiImagery: true,
@@ -191,7 +191,7 @@ That's what Xanadu is for. Join the waitlist (link in bio).
     date: '2026-11-23T10:00',
     format: 'Carousel',
     cover: 'photo',
-    imagery: 'AI',
+    imagery: 'Stock photos',
     audience: 'Seekers',
     slides: 5,
     aiImagery: true,
@@ -210,7 +210,7 @@ Join the waitlist (link in bio).
     date: '2026-11-18T10:00',
     format: 'Carousel',
     cover: 'photo',
-    imagery: 'AI',
+    imagery: 'Stock photos',
     audience: 'Spaces & guides',
     slides: 6,
     aiImagery: true,
@@ -270,7 +270,7 @@ Tag the friend who always extends. Join the waitlist (link in bio).
     date: '2026-12-07T10:00',
     format: 'Carousel',
     cover: 'photo',
-    imagery: 'AI',
+    imagery: 'Stock photos',
     audience: 'Seekers',
     slides: 5,
     aiImagery: true,
@@ -314,7 +314,7 @@ Send this to the friend who needs one. Join the waitlist (link in bio).
     date: '2026-11-25T10:00',
     format: 'Carousel',
     cover: 'navy',
-    imagery: 'AI',
+    imagery: 'Stock photos',
     audience: 'Seekers',
     slides: 7,
     aiImagery: true,
@@ -396,7 +396,7 @@ Where in your life could you slow down this week? 🌿
     date: '2026-11-11T10:00',
     format: 'Carousel',
     cover: 'white',
-    imagery: 'AI',
+    imagery: 'Stock photos',
     audience: 'Everyone',
     slides: 7,
     aiImagery: true,
@@ -432,7 +432,7 @@ Will you try it tomorrow?
     date: '2026-11-30T10:00',
     format: 'Carousel',
     cover: 'white',
-    imagery: 'AI',
+    imagery: 'Stock photos',
     audience: 'Everyone',
     slides: 8,
     aiImagery: true,
@@ -575,7 +575,7 @@ Tag who you'd go with. Join the waitlist (link in bio).
     date: '2026-11-02T10:00',
     format: 'Carousel',
     cover: 'white',
-    imagery: 'AI',
+    imagery: 'Stock photos',
     audience: 'Everyone',
     slides: 7,
     aiImagery: true,

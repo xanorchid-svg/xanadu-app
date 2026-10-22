@@ -9,10 +9,10 @@ const F = (p) => 'file://' + p;
 const font = (fam, file, w, style = 'normal') =>
   `@font-face{font-family:'${fam}';src:url('${F(IG + '/node_modules/@fontsource/' + file)}') format('woff2');font-weight:${w};font-style:${style}}`;
 const IMG = path.join(__dirname, 'img2');
-// Oct 19 v2 (Xan): stacked top/bottom halves, original white type cover (Xan, Oct 20), all-new AI images not used anywhere else.
+// Oct 19 v2 (Xan): stacked top/bottom halves, original white type cover (Xan, Oct 20), licensed Unsplash stock photos not used anywhere else (AI version: both-ai.js).
 const PAIRS = [
-  [['work', '50% 45%', 'work hard'], ['sunset', '50% 55%', 'log off at sunset']],
-  [['surf', '50% 55%', 'surf at sunrise'], ['hammock', '50% 55%', 'do absolutely nothing']],
+  [['work', '50% 80%', 'work hard'], ['sunset', '50% 55%', 'log off at sunset']],
+  [['surf', '50% 92%', 'surf at sunrise'], ['hammock', '50% 88%', 'do absolutely nothing']],
   [['table', '50% 45%', 'meet everyone'], ['alone', '50% 55%', 'spend a day alone']],
   [['yoga', '50% 50%', 'move your body'], ['daybed', '50% 50%', 'rest without guilt']],
   [['plan', '50% 50%', 'plan every detail'], ['road', '50% 55%', 'let the place change the plan']],
@@ -58,14 +58,15 @@ slides.push(`<div class="end"><div class="mark"><img src="${F(IG + '/logo-orbit-
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
   const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
-  const p = await b.newPage({ viewport: { width: 1080, height: 1350 } });
+  const p = await b.newPage({ viewport: { width: 1080, height: 1350 }, deviceScaleFactor: 2 }); // 2x; ig/publish.py downsamples
+  const PNG = '/home/claude/ig/out/26-do-both'; fs.mkdirSync(PNG, { recursive: true });
   for (let i = 0; i < slides.length; i++) {
     const f = path.join(__dirname, 's.html');
     fs.writeFileSync(f, `<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head><body>${slides[i]}</body></html>`);
     await p.goto(F(f), { waitUntil: 'load' });
     await p.evaluate(() => document.fonts.ready);
     await p.waitForTimeout(150);
-    await p.screenshot({ path: path.join(OUT, String(i + 1).padStart(2, '0') + '.jpg'), type: 'jpeg', quality: 90 });
+    await p.screenshot({ path: path.join(PNG, '26-do-both-' + String(i + 1).padStart(2, '0') + '.png') });
   }
   await b.close();
   console.log(slides.length, 'slides');
