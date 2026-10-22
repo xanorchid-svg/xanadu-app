@@ -65,7 +65,7 @@ function composeNotification(n: Notification): Email {
 const first = (name: string | null | undefined) => (name ?? '').trim().split(/\s+/)[0] || ''
 const hi = (name: string) => (name ? `Welcome, ${name}.` : 'Welcome.')
 
-function compose(kind: string, name: string, space: string, hasAccount = true): Email | null {
+function compose(kind: string, name: string, space: string): Email | null {
   switch (kind) {
     case 'welcome_seeker':
       return {
@@ -73,7 +73,7 @@ function compose(kind: string, name: string, space: string, hasAccount = true): 
         preheader: 'We’ll let you know as soon as we’re ready for you.',
         heading: hi(name),
         paragraphs: [
-          hasAccount ? 'Thank you for joining the Xanadu waitlist. Your place is held, and your account is ready.' : 'Thank you for joining the Xanadu waitlist. Your place is held.',
+          'Thank you for joining the Xanadu waitlist. Your place is held.',
           'Right now we are gathering our founding circle of spaces and guides. We’ll notify you once we’re ready for you.',
           'Thank you for joining the Xanadu dream.',
         ],
@@ -87,7 +87,7 @@ function compose(kind: string, name: string, space: string, hasAccount = true): 
         heading: hi(name),
         paragraphs: [
           `Thank you for applying to join Xanadu as a founding Container. We’ve received ${space ? `${space}’s` : 'your'} application.`,
-          'Every space on Xanadu is personally reviewed before it joins. We’ll notify you once we review your application, and we may ask for a short intro call.',
+          'Every space on Xanadu is personally reviewed before it joins. We’ll notify you once we review your application.',
           'Thank you for joining the Xanadu dream.',
         ],
         button: { label: 'Visit Xanadu', url: 'https://dreamxanadu.com' }, // the app stays closed until launch
@@ -226,7 +226,7 @@ async function waitlistWelcome(admin: SupabaseClient, id: string) {
   if (!w.email) return fail('no email address')
   const role = (w.role ?? 'seeker').toLowerCase()
   const kind = role === 'container' ? 'application_container' : role === 'facilitator' ? 'application_facilitator' : 'welcome_seeker'
-  const email = compose(kind, first(w.name), '', false)!
+  const email = compose(kind, first(w.name), '')!
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', 'Idempotency-Key': `xanadu-waitlist-${w.id}` },
