@@ -6,6 +6,7 @@ const C = '/home/claude/xanadu-app/console/public/social';
 const IG = '/home/claude/ig';
 // newest first: [folder, isReel, date]
 const ORDER = [
+  ['27-follow-along', 1, 'Dec 30 (parked)'],
   ['04-some-places', 1, 'Dec 21'],
   ['16-pace-of-nature', 0, 'Dec 18'],
   ['25-your-sign', 1, 'Dec 16'],
@@ -28,7 +29,7 @@ const ORDER = [
   ['20-two-hours', 0, 'Nov 6'],
   ['05-a-season', 1, 'Nov 4'],
   ['26-do-both', 0, 'Nov 2'],
-  ['27-follow-along', 1, 'Oct 30'],
+  ['28-your-xanadu', 1, 'Oct 30'],
   ['09-circle', 0, 'Oct 28'],
   ['02-what-is-xanadu', 0, 'Oct 26'],
   ['22-unpopular-opinion', 1, 'Oct 23'],

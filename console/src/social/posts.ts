@@ -85,9 +85,30 @@ Apply to the founding circle (link in bio), or send me a message.
 #nosara #nosaracostarica #guanacaste #retreatcenter #retreatleader #yogateacher #foundingmember`,
   },
   {
-    id: '27-follow-along',
-    title: 'Want to find out more? Follow along (teaser reel)',
+    id: '28-your-xanadu',
+    title: 'Your Xanadu waits for you (B-roll reel, Xan\'s edit)',
     date: '2026-10-30T10:00',
+    format: 'Reel',
+    cover: 'photo',
+    imagery: 'Stock footage',
+    audience: 'Everyone',
+    slides: 1,
+    aiImagery: false,
+    status: 'draft',
+    caption: `Your Xanadu waits for you. ✦
+
+Mornings that start with the sun. Bare feet on the earth. Days that move at the pace of nature.
+
+xan·a·du (noun): an idyllic, exotic, or luxurious place.
+
+Xanadu is a network for awakening places, beginning in Nosara, Costa Rica. Join the waitlist (link in bio).
+
+#xanadu #slowliving #naturelovers #nosara #costarica`,
+  },
+  {
+    id: '27-follow-along',
+    title: 'Want to find out more? Follow along (teaser reel, parked: Xan wants B-roll reels instead)',
+    date: '2026-12-30T10:00',
     format: 'Reel',
     cover: 'photo',
     imagery: 'AI',
