@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { POSTS, slideUrl, videoUrl, type SocialPost } from '../social/posts'
 import { useToast } from '../parts'
 import { Button, Card, PageTitle } from '../ui'
+import { makeZip } from '../lib/zip'
 
 const METRICOOL = 'https://app.metricool.com/planner?blogId=7525297'
 const STATUS: Record<SocialPost['status'], { label: string; cls: string }> = {
@@ -151,6 +152,33 @@ export default function Instagram() {
   async function copy(text: string) {
     try { await navigator.clipboard.writeText(text); toast.show('Caption copied') } catch { toast.show('Could not copy') }
   }
+  const [zipping, setZipping] = useState<string | null>(null)
+  /** All slides of one post at once: share sheet on phones (Save to Photos), one zip elsewhere. */
+  async function downloadAll(p: SocialPost) {
+    setZipping(p.id)
+    try {
+      const files = await Promise.all(Array.from({ length: p.slides }, async (_, i) => {
+        const res = await fetch(slideUrl(p, i + 1))
+        if (!res.ok) throw new Error('fetch')
+        const name = `${p.id}-${String(i + 1).padStart(2, '0')}.jpg`
+        return { name, data: await res.blob() }
+      }))
+      const asFiles = files.map((f) => new File([f.data], f.name, { type: 'image/jpeg' }))
+      const touch = window.matchMedia('(pointer: coarse)').matches
+      if (touch && navigator.canShare?.({ files: asFiles })) {
+        try { await navigator.share({ files: asFiles }); return } catch (e) { if ((e as Error).name === 'AbortError') return }
+      }
+      const url = URL.createObjectURL(await makeZip(files))
+      const a = document.createElement('a')
+      a.href = url; a.download = `${p.id}.zip`; document.body.appendChild(a); a.click(); a.remove()
+      setTimeout(() => URL.revokeObjectURL(url), 10_000)
+      toast.show(`${p.slides} slides downloaded`)
+    } catch {
+      toast.show('Couldn’t download the slides. Try again.')
+    } finally {
+      setZipping(null)
+    }
+  }
   function jump(id: string) {
     setView('list'); setOpen(id)
     setTimeout(() => document.getElementById('post-' + id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
@@ -265,6 +293,11 @@ export default function Instagram() {
                       <pre className="max-h-80 overflow-y-auto whitespace-pre-wrap rounded-xl bg-navy/70 p-4 font-sans text-[13.5px] leading-relaxed text-text ring-1 ring-line">{p.caption}</pre>
                       <div className="flex flex-row flex-wrap gap-2 md:flex-col">
                         <Button variant="quiet" className="h-10" onClick={() => copy(p.caption)}>Copy caption</Button>
+                        {p.format !== 'Reel' && p.slides > 1 && (
+                          <Button variant="quiet" className="h-10" onClick={() => downloadAll(p)} disabled={zipping === p.id}>
+                            {zipping === p.id ? 'Preparing…' : `Download all ${p.slides} slides`}
+                          </Button>
+                        )}
                         {p.format === 'Reel' && (
                           <a href={videoUrl(p)} download className="text-[12.5px] text-subtle underline-offset-2 hover:text-text">Download reel (MP4)</a>
                         )}
