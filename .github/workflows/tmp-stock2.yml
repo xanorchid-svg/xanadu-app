@@ -1,0 +1,20 @@
+name: tmp-stock2
+on:
+  push:
+    branches: [tmp-stock2]
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p diag
+          curl -s -o /dev/null -w 'napi %{http_code} %{time_total}\n' -A 'Mozilla/5.0' 'https://unsplash.com/napi/search/photos?query=yoga&per_page=5' >> diag/out.txt || echo napi fail >> diag/out.txt
+          curl -s -o /dev/null -w 'img %{http_code} %{time_total}\n' 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600' >> diag/out.txt || echo img fail >> diag/out.txt
+          curl -s -o /dev/null -w 'pexels %{http_code} %{time_total}\n' 'https://images.pexels.com/photos/3822622/pexels-photo-3822622.jpeg?w=600' >> diag/out.txt || true
+          cat diag/out.txt
+          git config user.name bot && git config user.email bot@users.noreply.github.com
+          git add diag && git commit -m "diag [skip ci]" && git push
