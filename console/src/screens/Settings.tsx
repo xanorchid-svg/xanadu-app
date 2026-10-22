@@ -55,14 +55,8 @@ export default function Settings() {
           <Card className="p-5">
             <ul className="mb-4 space-y-3">
               {(team.data ?? []).map((t) => (
-                <li key={t.user_id} className="flex items-center gap-3">
-                  <Avatar src={t.photo_url} size="size-9" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[14px] font-semibold text-text">{t.name || t.email}</p>
-                    <p className="truncate text-[12px] text-faint">{t.email} · added {day(t.added_at)}</p>
-                  </div>
-                  <span className="text-[12px] font-semibold text-gold-pale">{t.role === 'admin' ? 'Admin' : 'Reviewer'}</span>
-                </li>
+                <TeamMemberRow key={t.user_id} t={t} canManage={isAdmin && t.user_id !== session?.user.id}
+                  onChanged={(msg) => { team.reload(); toast.show(msg) }} />
               ))}
             </ul>
             {isAdmin && <AddMember onAdded={(e) => { team.reload(); toast.show(`${e} added to the team`) }} />}
@@ -79,6 +73,64 @@ export default function Settings() {
       </section>
       {toast.node}
     </div>
+  )
+}
+
+function TeamMemberRow({ t, canManage, onChanged }: { t: TeamRow; canManage: boolean; onChanged: (msg: string) => void }) {
+  const [confirming, setConfirming] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const who = t.name || t.email
+  const clean = (m: string) => { const s = m.replace(/^.*?: (?=[a-z])/, ''); return s.charAt(0).toUpperCase() + s.slice(1) }
+
+  async function setRole(role: 'admin' | 'reviewer') {
+    if (role === t.role) return
+    setBusy(true); setError(null)
+    const { error } = await supabase.rpc('team_set_member_role', { p_user: t.user_id, p_role: role })
+    setBusy(false)
+    if (error) setError(clean(error.message))
+    else onChanged(`${who} is now ${role === 'admin' ? 'an Admin' : 'a Reviewer'}`)
+  }
+  async function remove() {
+    setBusy(true); setError(null)
+    const { error } = await supabase.rpc('team_remove_member', { p_user: t.user_id })
+    setBusy(false)
+    if (error) { setError(clean(error.message)); setConfirming(false) }
+    else onChanged(`${who} removed from the team`)
+  }
+
+  return (
+    <li>
+      <div className="flex items-center gap-3">
+        <Avatar src={t.photo_url} size="size-9" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[14px] font-semibold text-text">{who}</p>
+          <p className="truncate text-[12px] text-faint">{t.email} · added {day(t.added_at)}</p>
+        </div>
+        {canManage ? (
+          <div className="flex shrink-0 items-center gap-1.5">
+            <select value={t.role} disabled={busy} onChange={(e) => setRole(e.target.value as 'admin' | 'reviewer')} aria-label={`Role for ${who}`}
+              className="h-8 rounded-lg bg-navy/70 px-2 text-[12.5px] font-semibold text-gold-pale ring-1 ring-line-2 disabled:opacity-60">
+              <option value="reviewer">Reviewer</option><option value="admin">Admin</option>
+            </select>
+            <button type="button" onClick={() => setConfirming(true)} disabled={busy} aria-label={`Remove ${who}`} title="Remove from the team"
+              className="grid size-8 place-items-center rounded-lg text-faint ring-1 ring-line-2 hover:text-rose hover:ring-rose/50 disabled:opacity-60">
+              <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+            </button>
+          </div>
+        ) : (
+          <span className="text-[12px] font-semibold text-gold-pale">{t.role === 'admin' ? 'Admin' : 'Reviewer'}</span>
+        )}
+      </div>
+      {confirming && (
+        <div className="mt-2 flex flex-wrap items-center gap-2 rounded-xl bg-navy/60 p-3 ring-1 ring-rose/30">
+          <p className="min-w-0 flex-1 text-[13px] text-subtle">Remove {who}? They'll lose access to the console right away. Their Xanadu account stays.</p>
+          <Button variant="ghost" onClick={() => setConfirming(false)} disabled={busy}>Cancel</Button>
+          <Button onClick={remove} disabled={busy} className="h-9">{busy ? 'Removing…' : 'Remove'}</Button>
+        </div>
+      )}
+      {error && <p role="alert" className="mt-1.5 text-[12.5px] text-rose">{error}</p>}
+    </li>
   )
 }
 
@@ -106,7 +158,7 @@ function AddMember({ onAdded }: { onAdded: (email: string) => void }) {
         </select>
         <Button disabled={busy} className="h-10">{busy ? 'Adding…' : 'Add'}</Button>
       </div>
-      <p className="text-[12px] text-faint">Admins can also add team members. Otherwise both roles can do everything.</p>
+      <p className="text-[12px] text-faint">Admins can also add, change and remove team members. Otherwise both roles can do everything.</p>
       {error && <p role="alert" className="text-[13px] text-rose">{error}</p>}
     </form>
   )
