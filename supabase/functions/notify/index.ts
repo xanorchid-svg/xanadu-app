@@ -4,6 +4,7 @@
 //   { id }    an email_queue row: a welcome email, or a notification email (kind "n:<notification id>")
 //   { push }  a notification id: push it to the member's phones and browsers
 //   { invite } a venue_invites row: a Facilitator invited the venue of their experience to Xanadu
+//   { waitlist } a waitlist row: someone joined from the website without an account (welcome email, once)
 //   { init }  make sure the web-push keys exist (they're created once and kept in public.push_config)
 // It only ever sends things that are already queued or recorded, and each only once,
 // so calling it from anywhere else can't send anything new or twice.
@@ -64,15 +65,16 @@ function composeNotification(n: Notification): Email {
 const first = (name: string | null | undefined) => (name ?? '').trim().split(/\s+/)[0] || ''
 const hi = (name: string) => (name ? `Welcome, ${name}.` : 'Welcome.')
 
-function compose(kind: string, name: string, space: string): Email | null {
+function compose(kind: string, name: string, space: string, hasAccount = true): Email | null {
   switch (kind) {
     case 'welcome_seeker':
       return {
-        subject: 'Thank you for joining Xanadu',
-        preheader: 'You’re on the waitlist. We’ll notify you once you can access the platform fully.',
+        subject: 'Thank you for joining the Xanadu waitlist',
+        preheader: 'We’ll let you know as soon as we’re ready for you.',
         heading: hi(name),
         paragraphs: [
-          'Thank you for joining Xanadu. You are on the waitlist, and we will notify you once you can access our platform fully.',
+          hasAccount ? 'Thank you for joining the Xanadu waitlist. Your place is held, and your account is ready.' : 'Thank you for joining the Xanadu waitlist. Your place is held.',
+          'Right now we are gathering our founding circle of spaces and guides. We’ll notify you once we’re ready for you.',
           'Thank you for joining the Xanadu dream.',
         ],
         button: { label: 'Visit Xanadu', url: 'https://dreamxanadu.com' },
@@ -81,10 +83,11 @@ function compose(kind: string, name: string, space: string): Email | null {
     case 'application_container':
       return {
         subject: 'Thank you for applying to Xanadu',
-        preheader: 'We’ll review your application, then notify you once you can access the platform fully.',
+        preheader: `We’ll notify you once we review ${space ? `${space}’s` : 'your'} application.`,
         heading: hi(name),
         paragraphs: [
-          `Thank you for joining Xanadu.${space ? ` We’ve received ${space}’s application.` : ''} We will review your application, then notify you once you can access our platform fully.`,
+          `Thank you for applying to join Xanadu as a founding Container. We’ve received ${space ? `${space}’s` : 'your'} application.`,
+          'Every space on Xanadu is personally reviewed before it joins. We’ll notify you once we review your application, and we may ask for a short intro call.',
           'Thank you for joining the Xanadu dream.',
         ],
         button: { label: 'Visit Xanadu', url: 'https://dreamxanadu.com' }, // the app stays closed until launch
@@ -93,10 +96,11 @@ function compose(kind: string, name: string, space: string): Email | null {
     case 'application_facilitator':
       return {
         subject: 'Thank you for applying to Xanadu',
-        preheader: 'We’ll review your application, then notify you once you can access the platform fully.',
+        preheader: 'We’ll notify you once we review your application.',
         heading: hi(name),
         paragraphs: [
-          `Thank you for joining Xanadu. We will review your application, then notify you once you can access our platform fully.`,
+          'Thank you for applying to join Xanadu as a founding Facilitator. We’ve received your application.',
+          'Every guide on Xanadu is personally reviewed before joining. We’ll notify you once we review your application.',
           'Thank you for joining the Xanadu dream.',
         ],
         button: { label: 'Visit Xanadu', url: 'https://dreamxanadu.com' }, // the app stays closed until launch
@@ -211,6 +215,30 @@ async function invite(admin: SupabaseClient, id: string) {
   return reply({ ok: true })
 }
 
+/** Someone joined the waitlist on the website (no account yet): send them the welcome email once. */
+async function waitlistWelcome(admin: SupabaseClient, id: string) {
+  const { data: w } = await admin.from('waitlist').update({ welcome_sent_at: new Date().toISOString(), welcome_error: null })
+    .eq('id', id).is('welcome_sent_at', null).select('id, name, email, role').maybeSingle()
+  if (!w) return reply({ ok: true, skipped: 'already sent' })
+  const fail = async (error: string) => { await admin.from('waitlist').update({ welcome_sent_at: null, welcome_error: error }).eq('id', id); return reply({ ok: false, error }, 500) }
+  const key = Deno.env.get('RESEND_API_KEY')
+  if (!key) return fail('RESEND_API_KEY is not set')
+  if (!w.email) return fail('no email address')
+  const role = (w.role ?? 'seeker').toLowerCase()
+  const kind = role === 'container' ? 'application_container' : role === 'facilitator' ? 'application_facilitator' : 'welcome_seeker'
+  const email = compose(kind, first(w.name), '', false)!
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', 'Idempotency-Key': `xanadu-waitlist-${w.id}` },
+    body: JSON.stringify({ from: Deno.env.get('EMAIL_FROM') || 'Xanadu <hello@dreamxanadu.com>', to: [w.email], reply_to: REPLY_TO,
+      subject: email.subject, html: html(email), text: text(email), tags: [{ name: 'kind', value: 'waitlist_' + kind }] }),
+  })
+  const out = await res.json().catch(() => ({}))
+  if (!res.ok) return fail(`Resend ${res.status}: ${out?.message ?? 'error'}`)
+  await admin.from('waitlist').update({ welcome_provider_id: out?.id ?? null }).eq('id', id)
+  return reply({ ok: true })
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return reply({ error: 'Method not allowed' }, 405)
   const input = await req.json().catch(() => ({}))
@@ -220,6 +248,7 @@ Deno.serve(async (req) => {
   if (input?.init) { await vapid(admin); return reply({ ok: true }) }
   if (uuid(input?.push)) return push(admin, input.push)
   if (uuid(input?.invite)) return invite(admin, input.invite)
+  if (uuid(input?.waitlist)) return waitlistWelcome(admin, input.waitlist)
 
   const id = input?.id
   if (!uuid(id)) return reply({ error: 'Missing id' }, 400)
@@ -240,6 +269,11 @@ Deno.serve(async (req) => {
   const { data: u } = await admin.auth.admin.getUserById(job.user_id)
   const to = u?.user?.email
   if (!to) return fail('member has no email address', 'skipped')
+  // joined the website waitlist first and already got this welcome: don't send it twice
+  if (job.kind === 'welcome_seeker') {
+    const { data: w } = await admin.from('waitlist').select('id').ilike('email', to).not('welcome_sent_at', 'is', null).limit(1).maybeSingle()
+    if (w) return fail('already welcomed when they joined the waitlist on the website', 'skipped')
+  }
 
   let email: Email | null
   if (job.kind.startsWith('n:')) {

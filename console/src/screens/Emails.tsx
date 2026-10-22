@@ -40,7 +40,7 @@ const groupOf = (e: EmailRow): Exclude<Group, 'all'> => {
 }
 /** The welcome emails' subjects, as the email itself says them */
 const SUBJECT: Record<string, string> = {
-  welcome_seeker: 'Thank you for joining Xanadu',
+  welcome_seeker: 'Thank you for joining the Xanadu waitlist',
   application_container: 'Thank you for applying to Xanadu',
   application_facilitator: 'Thank you for applying to Xanadu',
 }
