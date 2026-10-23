@@ -1,0 +1,14 @@
+/* C · Golden hour: warm champagne-to-rose gradient on the italic, gold hairlines */
+h1{letter-spacing:-.015em}
+h1 em,.vs .b em,.qt em{background:linear-gradient(100deg,#F3DDB8 0%,#EBC3A4 55%,#DDB0B9 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.iv h1 em,.iv .qt em{background:linear-gradient(100deg,#9A6B40 0%,#A5634F 55%,#9A5A70 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eyebrow{font-size:19px;letter-spacing:.42em;color:#E3C79E;font-weight:500}
+.rule,.qrule{height:1px;width:72px;background:linear-gradient(90deg,#F3DDB8,#DDB0B9)}
+.iv .rule,.iv .qrule{background:linear-gradient(90deg,#9A6B40,#9A5A70)}
+.star,.qm,.big{background:linear-gradient(100deg,#F3DDB8,#EBC3A4,#DDB0B9);-webkit-background-clip:text;background-clip:text;color:transparent}
+.iv .qm,.iv .big{background:linear-gradient(100deg,#B48452,#A5634F,#9A5A70);-webkit-background-clip:text;background-clip:text}
+.ivorybg{background:#F5EEE3}
+.sky{background:radial-gradient(80% 55% at 50% 0%,rgba(243,221,184,.09),transparent 70%),#101B2C}
+.stars{opacity:.55}
+.shade{background:linear-gradient(180deg,rgba(16,27,44,0) 0%,rgba(16,27,44,.12) 40%,rgba(16,27,44,.78) 74%,rgba(16,27,44,.95) 100%)}
+.time{color:#E3C79E;font-weight:500;letter-spacing:.3em;font-size:26px}

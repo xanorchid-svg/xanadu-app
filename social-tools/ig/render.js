@@ -14,7 +14,8 @@ ${font('Manrope', 'manrope/files/manrope-latin-300-normal.woff2', 300)}
 ${font('Manrope', 'manrope/files/manrope-latin-500-normal.woff2', 500)}
 ${font('Manrope', 'manrope/files/manrope-latin-600-normal.woff2', 600)}
 :root{--navy:#101B2C;--ivory:#F6F1E8;--ink:#F3ECDF;--muted:#C4CBD7;--gold:#D2B488;--gold-pale:#E6CDA6;
---iri:linear-gradient(115deg,#9DBB7A 0%,#6FB7BF 18%,#8F9BE6 36%,#B58BE0 54%,#E09AC4 72%,#E8BF8A 88%,#9DBB7A 100%)}
+--iri:linear-gradient(100deg,#F4E7D4 0%,#E2D5EE 38%,#CFE4E3 68%,#F2E2C8 100%);
+--iri-old:linear-gradient(115deg,#9DBB7A 0%,#6FB7BF 18%,#8F9BE6 36%,#B58BE0 54%,#E09AC4 72%,#E8BF8A 88%,#9DBB7A 100%)}
 *{margin:0;padding:0;box-sizing:border-box}
 body{width:1080px;height:1350px;overflow:hidden;background:var(--navy);color:var(--ink);font-family:Manrope;-webkit-font-smoothing:antialiased}
 .slide{position:relative;width:1080px;height:1350px;overflow:hidden;display:flex;flex-direction:column;justify-content:center;padding:0 110px}
@@ -70,9 +71,9 @@ p.body{font-family:Manrope;font-weight:300;font-size:36px;line-height:1.5;color:
 .wordmark{display:block;width:760px;margin:6px auto 0;filter:brightness(0) invert(1) drop-shadow(0 2px 14px rgba(16,27,44,.6));opacity:.96}
 .star{font-family:Cormorant;font-size:220px;line-height:1;background:var(--iri);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:30px}
 /* iridescent ring */
-.ring{width:560px;height:560px;border-radius:50%;margin:0 auto 70px;background:conic-gradient(from 200deg,#9DBB7A,#6FB7BF,#8F9BE6,#B58BE0,#E09AC4,#E8BF8A,#9DBB7A);
+.ring{width:560px;height:560px;border-radius:50%;margin:0 auto 70px;background:conic-gradient(from 200deg,#F4E7D4,#E2D5EE,#CFE4E3,#F2E2C8,#F4E7D4);
  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4px));mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4px));
- position:relative;filter:drop-shadow(0 0 30px rgba(143,155,230,.45))}
+ position:relative;filter:drop-shadow(0 0 24px rgba(226,213,238,.25))}
 .ringwrap{position:relative}
 .ringwrap .inner img{filter:none}
 .ringwrap .inner{position:absolute;left:50%;top:280px;transform:translate(-50%,-50%);width:500px}
@@ -117,6 +118,22 @@ p.body{font-family:Manrope;font-weight:300;font-size:36px;line-height:1.5;color:
 .iv .qs{color:#4A5568}
 .src{font-family:Manrope;font-size:20px;letter-spacing:.06em;color:rgba(16,27,44,.45);margin-top:46px}
 .mk{width:150px;margin:70px auto 0;opacity:.9}
+
+/* ---- Pearl type system (Oct 22, 2026): soft mother-of-pearl italics, hairline rules ---- */
+/* B · Pearl: one soft mother-of-pearl gradient on the italic only, everything else quiet */
+h1{letter-spacing:-.015em}
+h1 em,.vs .b em,.qt em{background:linear-gradient(100deg,#F4E7D4 0%,#E2D5EE 38%,#CFE4E3 68%,#F2E2C8 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.iv h1 em,.iv .qt em{background:linear-gradient(100deg,#8C6A48 0%,#7A6896 50%,#4E7F82 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eyebrow{font-size:19px;letter-spacing:.42em;color:rgba(232,213,181,.9);font-weight:500}
+.rule,.qrule{height:1px;width:72px;background:linear-gradient(90deg,#E8D5B5,#D9CDEB,#C9E0DF)}
+.iv .rule,.iv .qrule{background:linear-gradient(90deg,#8C6A48,#7A6896,#4E7F82)}
+.star,.qm,.big{background:linear-gradient(100deg,#F4E7D4,#E2D5EE,#CFE4E3);-webkit-background-clip:text;background-clip:text;color:transparent}
+.iv .qm,.iv .big{background:linear-gradient(100deg,#B08A60,#8E7CAA,#6A9497);-webkit-background-clip:text;background-clip:text}
+.ivorybg{background:#F4EEE4}
+.sky{background:radial-gradient(70% 55% at 20% 0%,rgba(217,205,235,.10),transparent 70%),radial-gradient(70% 55% at 90% 100%,rgba(201,224,223,.08),transparent 70%),#101B2C}
+.stars{opacity:.55}
+.shade{background:linear-gradient(180deg,rgba(16,27,44,0) 0%,rgba(16,27,44,.12) 40%,rgba(16,27,44,.78) 74%,rgba(16,27,44,.95) 100%)}
+.time{color:#E8D5B5;font-weight:500;letter-spacing:.3em;font-size:26px}
 `;
 
 const MARK = (cls = '') => `<div class="mark ${cls}"><img src="${F('logo-orbit-outer-lit.png')}"><img src="${F('logo-orbit-inner-lit.png')}"><img src="${F('logo-static-lit.png')}"></div>`;
@@ -132,10 +149,11 @@ const bg = (s) => {
 const foot = (s, i, n) => s.nofoot ? '' :
   `<div class="foot"><span>Xanadu</span><span class="n">${n > 1 ? (i + 1) + ' / ' + n : '@dreamxanadu'}</span></div>`;
 
-const html = (s, i, n) => `<!doctype html><html><head><meta charset="utf-8"><style>${CSS}</style></head><body>
+const html = (s, i, n) => `<!doctype html><html><head><meta charset="utf-8"><style>${CSS}${THEME}</style></head><body>
 <div class="slide ${s.split ? 'split' : ''} ${s.ivory ? 'iv' : ''} ${s.cls || ''}">${bg(s)}<div class="c">${s.html}</div>${foot(s, i, n)}</div></body></html>`;
 
-const POSTS = require('./posts.js')({ MARK, F });
+const THEME = process.env.THEME ? fs.readFileSync(process.env.THEME, 'utf8') : '';
+const POSTS = require(process.env.POSTS || './posts.js')({ MARK, F });
 
 (async () => {
   const only = process.argv[2];
@@ -143,7 +161,7 @@ const POSTS = require('./posts.js')({ MARK, F });
   const page = await browser.newPage({ viewport: { width: 1080, height: 1350 }, deviceScaleFactor: 2 }); // 2x supersample; publish.py downsamples to 1080x1350
   for (const [id, slides] of Object.entries(POSTS)) {
     if (only && !id.startsWith(only)) continue;
-    const dir = path.join(__dirname, 'out', id);
+    const dir = path.join(process.env.OUT || path.join(__dirname, 'out'), id);
     fs.mkdirSync(dir, { recursive: true });
     for (let i = 0; i < slides.length; i++) {
       const tmp = path.join(__dirname, '_slide.html'); fs.writeFileSync(tmp, html(slides[i], i, slides.length)); await page.goto('file://' + tmp, { waitUntil: 'load' });

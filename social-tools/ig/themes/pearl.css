@@ -1,0 +1,14 @@
+/* B · Pearl: one soft mother-of-pearl gradient on the italic only, everything else quiet */
+h1{letter-spacing:-.015em}
+h1 em,.vs .b em,.qt em{background:linear-gradient(100deg,#F4E7D4 0%,#E2D5EE 38%,#CFE4E3 68%,#F2E2C8 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.iv h1 em,.iv .qt em{background:linear-gradient(100deg,#8C6A48 0%,#7A6896 50%,#4E7F82 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eyebrow{font-size:19px;letter-spacing:.42em;color:rgba(232,213,181,.9);font-weight:500}
+.rule,.qrule{height:1px;width:72px;background:linear-gradient(90deg,#E8D5B5,#D9CDEB,#C9E0DF)}
+.iv .rule,.iv .qrule{background:linear-gradient(90deg,#8C6A48,#7A6896,#4E7F82)}
+.star,.qm,.big{background:linear-gradient(100deg,#F4E7D4,#E2D5EE,#CFE4E3);-webkit-background-clip:text;background-clip:text;color:transparent}
+.iv .qm,.iv .big{background:linear-gradient(100deg,#B08A60,#8E7CAA,#6A9497);-webkit-background-clip:text;background-clip:text}
+.ivorybg{background:#F4EEE4}
+.sky{background:radial-gradient(70% 55% at 20% 0%,rgba(217,205,235,.10),transparent 70%),radial-gradient(70% 55% at 90% 100%,rgba(201,224,223,.08),transparent 70%),#101B2C}
+.stars{opacity:.55}
+.shade{background:linear-gradient(180deg,rgba(16,27,44,0) 0%,rgba(16,27,44,.12) 40%,rgba(16,27,44,.78) 74%,rgba(16,27,44,.95) 100%)}
+.time{color:#E8D5B5;font-weight:500;letter-spacing:.3em;font-size:26px}

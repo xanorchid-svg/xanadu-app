@@ -193,7 +193,7 @@ export default function Instagram() {
       <p className="mb-6 max-w-2xl text-[14px] leading-relaxed text-subtle">
         Every post is waiting in Metricool as a draft for you to schedule: one reel a week, never two reels in a row, and the grid rotates white → photo → navy → photo.
         Reels are phone-reminder posts, so Metricool pings you and you add a trending sound in Instagram. Nothing goes live until you do.
-        Feed photos are high-resolution licensed stock (Unsplash) and reels use free licensed footage (Mixkit); a few older reels still run over AI stills. The earlier AI versions of the photo posts are saved if you want to go back.
+        Feed photos are AI-generated for mood (checked for hands, faces, text and physics) and upscaled for sharpness; video reels use free licensed footage (Mixkit).
       </p>
 
       <Card className="mb-6 px-5 pb-5 pt-1">
