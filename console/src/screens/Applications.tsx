@@ -6,13 +6,14 @@ import { day, fill, firstName, place, ROLE_LABEL, useTeamQuery, useTemplates, ty
 import { Answers, Avatar, Chips, Composer, Drawer, Gallery, LifeChips, Search, Section, Tabs, ThreadView, useToast } from '../parts'
 import { Button, Card, EmptyState, PageTitle, Spinner, StatusPill, type Status } from '../ui'
 
-type Tab = 'pending' | 'started' | 'approved' | 'declined' | 'all'
+type Tab = 'pending' | 'started' | 'approved' | 'declined' | 'all' | 'removed'
 const TABS = [
   { key: 'pending', label: 'Pending' },
   { key: 'started', label: 'Not finished' },
   { key: 'approved', label: 'Approved' },
   { key: 'declined', label: 'Declined' },
   { key: 'all', label: 'All' },
+  { key: 'removed', label: 'Removed' },
 ] as const
 type RoleFilter = 'all' | 'container' | 'facilitator'
 const ROLES = [
@@ -22,7 +23,7 @@ const ROLES = [
 ] as const
 
 const tabOf = (a: Application): Exclude<Tab, 'all'> =>
-  a.status === 'approved' ? 'approved' : a.status === 'declined' ? 'declined' : a.onboarded ? 'pending' : 'started'
+  a.removed_at ? 'removed' : a.status === 'approved' ? 'approved' : a.status === 'declined' ? 'declined' : a.onboarded ? 'pending' : 'started'
 const pillOf = (a: Application): Status | null =>
   a.status === 'approved' ? 'approved' : a.status === 'declined' ? 'declined' : a.onboarded ? 'pending' : null
 const titleOf = (a: Application) => (a.role === 'container' ? a.space?.name || a.name : a.name) || 'No name yet'
@@ -30,7 +31,9 @@ const photoOf = (a: Application) => (a.role === 'container' ? a.space?.photos?.[
 const whereOf = (a: Application) => (a.role === 'container' ? place(a.space?.town, a.space?.region, a.space?.country) : place(a.town, a.region))
 
 /** Submitted and not yet approved: can be approved from the list */
-const canBulkApprove = (a: Application) => a.onboarded && a.status !== 'approved'
+const canBulkApprove = (a: Application) => a.onboarded && a.status !== 'approved' && !a.removed_at
+/** Declined, pending or unfinished (never approved) can be removed from the list to clear space */
+const canRemove = (a: Application) => a.status !== 'approved' && !a.removed_at
 
 function Check({ on, onClick, label }: { on: boolean; onClick: () => void; label: string }) {
   return (
@@ -71,13 +74,13 @@ export default function Applications() {
 
   const inRole = useMemo(() => (data ?? []).filter((a) => role === 'all' || a.role === role), [data, role])
   const counts = useMemo(() => {
-    const c: Record<Tab, number> = { pending: 0, started: 0, approved: 0, declined: 0, all: 0 }
-    inRole.forEach((a) => { c[tabOf(a)]++; c.all++ })
+    const c: Record<Tab, number> = { pending: 0, started: 0, approved: 0, declined: 0, all: 0, removed: 0 }
+    inRole.forEach((a) => { const t = tabOf(a); c[t]++; if (t !== 'removed') c.all++ })
     return c
   }, [inRole])
   const shown = useMemo(() => {
     const s = q.trim().toLowerCase()
-    return inRole.filter((a) => (tab === 'all' || tabOf(a) === tab) && (!s ||
+    return inRole.filter((a) => (tab === 'all' ? tabOf(a) !== 'removed' : tabOf(a) === tab) && (!s ||
       [a.name, a.email, a.space?.name, a.town, a.region, a.space?.country, a.space?.town].some((v) => v?.toLowerCase().includes(s))))
   }, [inRole, tab, q])
 
@@ -90,26 +93,44 @@ export default function Applications() {
     setOpenId(next.key)
   }, [shown, idx])
 
-  const decided = (key: string, status: Application['status'], label: string) => {
-    setData((list) => list?.map((a) => (a.key === key ? { ...a, status } : a)) ?? null)
+  const decided = (key: string, status: Application['status'], label: string, removed_at?: string | null) => {
+    setData((list) => list?.map((a) => (a.key === key ? { ...a, status, ...(removed_at !== undefined ? { removed_at } : {}) } : a)) ?? null)
     toast.show(label)
     reload()
   }
 
-  // Select several submitted applications and approve them together
+  // Select several applications to approve or remove together
   const [picked, setPicked] = useState<Set<string>>(new Set())
-  const selectable = useMemo(() => shown.filter(canBulkApprove), [shown])
+  const selectable = useMemo(() => shown.filter(canRemove), [shown])
   const pickedList = useMemo(() => selectable.filter((a) => picked.has(a.key)), [selectable, picked])
+  const approvable = useMemo(() => pickedList.filter(canBulkApprove), [pickedList])
   useEffect(() => { setPicked(new Set()) }, [tab, role])
   const toggle = (key: string) => setPicked((s) => { const n = new Set(s); if (n.has(key)) n.delete(key); else n.add(key); return n })
   const allPicked = selectable.length > 0 && pickedList.length === selectable.length
   const tpl = useTemplates()
-  const [confirming, setConfirming] = useState(false)
+  const [confirming, setConfirming] = useState<'approve' | 'remove' | false>(false)
   const [withMessage, setWithMessage] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
 
-  async function approvePicked() {
+  async function removePicked() {
     const list = pickedList
+    const failed: string[] = []
+    const now = new Date().toISOString()
+    for (let i = 0; i < list.length; i++) {
+      const a = list[i]
+      setBusy(`Removing ${i + 1} of ${list.length}…`)
+      const { error } = await supabase.rpc('team_remove_application', { p_member: a.id, p_role: a.role })
+      if (error) failed.push(titleOf(a))
+      else setData((d) => d?.map((x) => (x.key === a.key ? { ...x, removed_at: now } : x)) ?? null)
+    }
+    setBusy(null); setConfirming(false); setPicked(new Set())
+    const ok = list.length - failed.length
+    toast.show(failed.length ? `Removed ${ok}. Couldn’t remove: ${failed.join(', ')}` : `Removed ${ok}. You can find ${ok === 1 ? 'it' : 'them'} under Removed`)
+    reload()
+  }
+
+  async function approvePicked() {
+    const list = approvable
     const failed: string[] = []
     for (let i = 0; i < list.length; i++) {
       const a = list[i]
@@ -149,6 +170,7 @@ export default function Applications() {
           body={q ? 'Try a different name, email or place.' : tab === 'pending'
             ? 'When a Container or Facilitator finishes their application, it appears here for you to review.'
             : tab === 'started' ? 'People who started a Container or Facilitator application but haven’t submitted it yet appear here.'
+            : tab === 'removed' ? 'Applications you remove to clear space are kept here, so you can restore them anytime.'
             : 'Applications you decide on will be listed here.'} />
       )}
 
@@ -158,7 +180,7 @@ export default function Applications() {
             <div className="flex items-center gap-3 border-b border-line px-4 py-2.5 sm:px-5">
               <Check on={allPicked} onClick={() => setPicked(allPicked ? new Set() : new Set(selectable.map((a) => a.key)))} label="Select all" />
               <span className="text-[12.5px] font-semibold text-subtle">
-                {pickedList.length ? `${pickedList.length} selected` : `Select to approve several at once`}
+                {pickedList.length ? `${pickedList.length} selected` : `Select to approve or remove several at once`}
               </span>
             </div>
           )}
@@ -167,7 +189,7 @@ export default function Applications() {
               <li key={a.key} className="flex items-center">
                 {selectable.length > 0 && (
                   <div className="shrink-0 pl-4 sm:pl-5">
-                    {canBulkApprove(a) ? <Check on={picked.has(a.key)} onClick={() => toggle(a.key)} label={`Select ${titleOf(a)}`} /> : <span className="block size-5" />}
+                    {canRemove(a) ? <Check on={picked.has(a.key)} onClick={() => toggle(a.key)} label={`Select ${titleOf(a)}`} /> : <span className="block size-5" />}
                   </div>
                 )}
                 <button onClick={() => setOpenId(a.key)} className="flex min-w-0 flex-1 items-center gap-3.5 px-4 py-3.5 text-left hover:bg-surface/60 sm:px-5">
@@ -202,26 +224,39 @@ export default function Applications() {
       {pickedList.length > 0 && !open && createPortal(
         <div className="xa-page fixed inset-x-0 bottom-20 z-40 flex justify-center px-4 md:bottom-6 md:pl-60">
           <div className="ring-iri w-full max-w-xl rounded-2xl bg-surface p-3.5 shadow-2xl">
-            {confirming ? (
+            {confirming === 'remove' ? (
               <>
                 <p className="text-[14px] font-semibold text-text">
-                  Approve {pickedList.length} {pickedList.length === 1 ? 'application' : 'applications'}?
+                  Remove {pickedList.length} {pickedList.length === 1 ? 'application' : 'applications'} from the list?
                 </p>
                 <p className="mt-0.5 text-[12.5px] text-faint">{pickedList.map(titleOf).join(', ')}</p>
+                <p className="mt-2 text-[12.5px] text-subtle">Nothing is sent and their account isn’t touched. They move to Removed, where you can restore them. If someone resubmits, they come back on their own.</p>
+                <div className="mt-3 flex gap-2">
+                  <Button variant="quiet" onClick={() => setConfirming(false)} disabled={!!busy}>Back</Button>
+                  <Button className="flex-1" onClick={removePicked} disabled={!!busy}>{busy ?? `Remove ${pickedList.length}`}</Button>
+                </div>
+              </>
+            ) : confirming === 'approve' ? (
+              <>
+                <p className="text-[14px] font-semibold text-text">
+                  Approve {approvable.length} {approvable.length === 1 ? 'application' : 'applications'}?
+                </p>
+                <p className="mt-0.5 text-[12.5px] text-faint">{approvable.map(titleOf).join(', ')}</p>
                 <label className="mt-2.5 flex items-center gap-2 text-[13px] text-subtle">
                   <input type="checkbox" checked={withMessage} onChange={(e) => setWithMessage(e.target.checked)} className="size-4 accent-[#B89567]" />
                   Send each their welcome message (your approve templates, with their name)
                 </label>
                 <div className="mt-3 flex gap-2">
                   <Button variant="quiet" onClick={() => setConfirming(false)} disabled={!!busy}>Back</Button>
-                  <Button className="flex-1" onClick={approvePicked} disabled={!!busy}>{busy ?? `Approve ${pickedList.length}`}</Button>
+                  <Button className="flex-1" onClick={approvePicked} disabled={!!busy}>{busy ?? `Approve ${approvable.length}`}</Button>
                 </div>
               </>
             ) : (
               <div className="flex items-center gap-2">
                 <span className="flex-1 pl-1.5 text-[14px] font-semibold text-text">{pickedList.length} selected</span>
                 <Button variant="ghost" onClick={() => setPicked(new Set())}>Clear</Button>
-                <Button onClick={() => setConfirming(true)}>Approve {pickedList.length}</Button>
+                <Button variant="quiet" onClick={() => setConfirming('remove')}>Remove {pickedList.length}</Button>
+                {approvable.length > 0 && <Button onClick={() => setConfirming('approve')}>Approve {approvable.length}</Button>}
               </div>
             )}
           </div>
@@ -244,8 +279,18 @@ const DECISION: Record<Decision, { label: string; send: string; status: Applicat
 
 function Review({ a, onClose, onStep, position, onDecided }: {
   a: Application; onClose: () => void; onStep: (d: number) => void; position: string
-  onDecided: (id: string, status: Application['status'], label: string) => void
+  onDecided: (id: string, status: Application['status'], label: string, removed_at?: string | null) => void
 }) {
+  const [removing, setRemoving] = useState(false)
+  const [removeErr, setRemoveErr] = useState<string | null>(null)
+  async function setRemoved(on: boolean) {
+    setRemoveErr(null)
+    const { error } = await supabase.rpc(on ? 'team_remove_application' : 'team_restore_application', { p_member: a.id, p_role: a.role })
+    if (error) { setRemoveErr(error.message); return }
+    setRemoving(false)
+    onDecided(a.key, a.status, on ? 'Removed. You can find it under Removed' : 'Restored to Applications', on ? new Date().toISOString() : null)
+    if (on) onClose()
+  }
   const [thread, setThread] = useState<Msg[] | null>(null)
   const [decision, setDecision] = useState<Decision | null>(null)
   const tpl = useTemplates()
@@ -263,7 +308,7 @@ function Review({ a, onClose, onStep, position, onDecided }: {
       const k = e.key.toLowerCase()
       if (k === 'j') onStep(1)
       else if (k === 'k') onStep(-1)
-      else if (decision) return
+      else if (decision || removing || a.removed_at) return
       else if (k === 'a' && a.status !== 'approved') setDecision('approve')
       else if (k === 'c' && a.status !== 'approved') setDecision('changes')
       else if (k === 'd' && a.status !== 'declined') setDecision('decline')
@@ -272,7 +317,7 @@ function Review({ a, onClose, onStep, position, onDecided }: {
     }
     window.addEventListener('keydown', key)
     return () => window.removeEventListener('keydown', key)
-  }, [onStep, decision, a.status])
+  }, [onStep, decision, removing, a.status, a.removed_at])
 
   const vars = { name: firstName(a.name), space: a.space?.name || 'Your space' }
   const initial = decision === 'approve' ? fill(tpl.get(a.role === 'container' ? 'approve_container' : 'approve_facilitator'), vars)
@@ -290,7 +335,20 @@ function Review({ a, onClose, onStep, position, onDecided }: {
   }
 
   const s = a.space
-  const footer = decision ? (
+  const footer = a.removed_at ? (
+    <div className="pb-1">
+      <p className="mb-2 text-[13px] text-subtle">Removed from Applications {day(a.removed_at)}. Their account and answers are unchanged.</p>
+      {removeErr && <p className="mb-2 text-[13px] text-rose">{removeErr}</p>}
+      <Button className="w-full" onClick={() => setRemoved(false)}>Restore to Applications</Button>
+    </div>
+  ) : removing ? (
+    <div className="pb-1">
+      <p className="mb-1 text-[13px] font-semibold text-text">Remove this application from the list?</p>
+      <p className="mb-2 text-[12.5px] text-subtle">Nothing is sent and their account isn’t touched. It moves to Removed, where you can restore it. If they resubmit, it comes back on its own.</p>
+      {removeErr && <p className="mb-2 text-[13px] text-rose">{removeErr}</p>}
+      <div className="flex gap-2"><Button variant="quiet" onClick={() => setRemoving(false)}>Cancel</Button><Button className="flex-1" onClick={() => setRemoved(true)}>Remove</Button></div>
+    </div>
+  ) : decision ? (
     <div>
       <p className="mb-2 text-[13px] font-semibold text-text">{DECISION[decision].label}: {decision === 'reopen' ? 'no message is sent' : 'this message goes to their Xanadu inbox'}</p>
       {decision === 'reopen'
@@ -304,6 +362,7 @@ function Review({ a, onClose, onStep, position, onDecided }: {
       {a.status !== 'approved' && <Button variant="quiet" onClick={() => setDecision('changes')} title="C">Ask for changes</Button>}
       {a.status !== 'declined' && <Button variant="quiet" onClick={() => setDecision('decline')} title="D">Decline</Button>}
       {(a.status === 'approved' || a.status === 'declined') && <Button variant="quiet" onClick={() => setDecision('reopen')} className="flex-1">Move back to pending</Button>}
+      {canRemove(a) && <Button variant="ghost" onClick={() => setRemoving(true)}>Remove</Button>}
       <p className="hidden w-full pt-1 text-[11.5px] text-faint lg:block">Shortcuts: A approve · C ask for changes · D decline · J / K next and previous · Esc close {position && `· ${position}`}</p>
     </div>
   )

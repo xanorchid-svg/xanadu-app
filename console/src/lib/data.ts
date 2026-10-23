@@ -25,6 +25,8 @@ export type Application = {
   lifestyle: string[] | null; heard_from: string | null; created_at: string; submitted: string | null; last_sign_in_at: string | null
   phone: string | null; proof: string | null; references_list: Reference[] | null; insurance: string | null; agreed_guidelines: boolean
   space: SpaceForm | null; offerings: number; last_message: { at: string; from_team: boolean } | null
+  /** removed from the Applications list by the team; comes back on its own if they resubmit */
+  removed_at?: string | null
 }
 
 export type Offering = {

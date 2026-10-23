@@ -29,6 +29,7 @@ npx tsc -b && npm run build
 | `am_team_member()`, `is_team()`, `team_is_admin()`, `team_require()`, `team_log()`, `team_me()` | the gate and helpers |
 | `team_counts()`, `team_signups(days)`, `team_heard_from()` | Today |
 | `team_list_applications()`, `team_review_member(member, approve/changes/decline/reopen, message)` | Applications (every answer from the setup forms) |
+| `team_remove_application(member, role)`, `team_restore_application(member, role)`, table `team_removed_applications` | Remove a non-approved application from the list (Removed tab, restorable, nothing sent; returns on its own if they resubmit) |
 | `team_list_offerings()`, `team_review_offering(offering, live/changes/review, message)` | Offerings |
 | `team_inbox()`, `team_reply(member, body)`, `team_member_thread(member)` | Inbox |
 | `team_list_members()`, `team_member_extra(member)` | Members |
