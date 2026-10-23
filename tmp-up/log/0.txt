@@ -1,0 +1,12 @@
+-rw-r--r-- 1 runner runner 67061725 Oct 23 01:00 x2plus.pth
+done tmp-up/in/aerial.jpg
+done tmp-up/in/b-plan.jpg
+done tmp-up/in/b-table.jpg
+done tmp-up/in/breakfast.jpg
+done tmp-up/in/chair.jpg
+done tmp-up/in/kitchen.jpg
+done tmp-up/in/meditate.jpg
+done tmp-up/in/s02-1.jpg
+done tmp-up/in/s02-5.jpg
+done tmp-up/in/s03-3.jpg
+done tmp-up/in/sunriseclass.jpg
