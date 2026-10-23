@@ -1,0 +1,12 @@
+-rw-r--r-- 1 runner runner 67061725 Oct 23 01:00 x2plus.pth
+done tmp-up/in/b-daybed.jpg
+done tmp-up/in/b-sunset.jpg
+done tmp-up/in/b-yoga.jpg
+done tmp-up/in/candles.jpg
+done tmp-up/in/farm.jpg
+done tmp-up/in/lodge.jpg
+done tmp-up/in/path.jpg
+done tmp-up/in/s02-3.jpg
+done tmp-up/in/s03-1.jpg
+done tmp-up/in/s03-5.jpg
+done tmp-up/in/surflesson.jpg
