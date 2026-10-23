@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { supabase } from '../lib/supabase'
-import { POSTS, previewUrl, slideUrl, thumbUrl, videoUrl, type SocialPost } from '../social/posts'
+import { POSTS, previewUrl, slideUrl, thumbUrl, type SocialPost } from '../social/posts'
 import { useToast } from '../parts'
 import { Button, Card, PageTitle } from '../ui'
 import { makeZip } from '../lib/zip'
@@ -279,8 +279,10 @@ export default function Instagram() {
                   <div className="border-t border-line px-5 py-5">
                     <div className="-mx-5 flex snap-x gap-3 overflow-x-auto px-5 pb-3">
                       {p.format === 'Reel' && (
-                        <video src={videoUrl(p)} poster={previewUrl(p, 1)} controls playsInline preload="none"
-                          className="h-[427px] w-[240px] shrink-0 snap-start rounded-xl bg-navy object-cover ring-1 ring-line sm:h-[533px] sm:w-[300px]" />
+                        <div className="relative h-[427px] w-[240px] shrink-0 snap-start overflow-hidden rounded-xl bg-navy ring-1 ring-line sm:h-[533px] sm:w-[300px]">
+                          <img src={previewUrl(p, 1)} alt={`${p.title}, reel cover`} loading="lazy" className="size-full object-cover" />
+                          <p className="absolute inset-x-0 bottom-0 bg-navy/80 px-3 py-2.5 text-[12px] leading-snug text-subtle">Reel cover. The video is in Metricool and in Movies → Xanadu Reels on your Mac.</p>
+                        </div>
                       )}
                       {p.format !== 'Reel' && Array.from({ length: p.slides }, (_, i) => (
                         <a key={i} href={slideUrl(p, i + 1)} target="_blank" rel="noreferrer" className="shrink-0 snap-start">
@@ -297,9 +299,6 @@ export default function Instagram() {
                           <Button variant="quiet" className="h-10" onClick={() => downloadAll(p)} disabled={zipping === p.id}>
                             {zipping === p.id ? 'Preparing…' : `Download all ${p.slides} slides`}
                           </Button>
-                        )}
-                        {p.format === 'Reel' && (
-                          <a href={videoUrl(p)} download className="text-[12.5px] text-subtle underline-offset-2 hover:text-text">Download reel (MP4)</a>
                         )}
                         {Array.from({ length: p.slides }, (_, i) => (
                           <a key={i} href={slideUrl(p, i + 1)} download className="text-[12.5px] text-subtle underline-offset-2 hover:text-text">Download slide {i + 1}</a>

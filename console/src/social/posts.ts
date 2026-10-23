@@ -601,5 +601,5 @@ export const slideUrl = (p: SocialPost, n: number) => `/social/${p.id}/${nn(n)}.
 export const previewUrl = (p: SocialPost, n: number) => `/social/${p.id}/p/${nn(n)}.webp${ver(p)}`
 /** Tiny cover thumbnail (160 wide WebP) for lists */
 export const thumbUrl = (p: SocialPost) => `/social/${p.id}/p/t.webp${ver(p)}`
-/** Reels: the video lives next to its cover (01.jpg) as reel.mp4 */
+/** Reels: videos are NOT hosted on the console (bandwidth). They live in Metricool and on Xan's Mac (Movies → Xanadu Reels); repo history has them under console/public/social/<id>/reel.mp4 before Oct 22, 2026. */
 export const videoUrl = (p: SocialPost) => `/social/${p.id}/reel.mp4${ver(p)}`
