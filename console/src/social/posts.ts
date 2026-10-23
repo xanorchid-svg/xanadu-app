@@ -592,6 +592,14 @@ Xanadu matches you with places and guides we've personally reviewed, for a week,
   },
 ]
 
-export const slideUrl = (p: SocialPost, n: number) => `/social/${p.id}/${String(n).padStart(2, '0')}.jpg`
+declare const __SOCIAL_V__: Record<string, string>
+const ver = (p: SocialPost) => `?v=${__SOCIAL_V__[p.id] ?? '0'}`
+const nn = (n: number) => String(n).padStart(2, '0')
+/** Full-size slide (1080 wide): for downloads, Instagram and Metricool */
+export const slideUrl = (p: SocialPost, n: number) => `/social/${p.id}/${nn(n)}.jpg${ver(p)}`
+/** Small preview (540 wide WebP) for showing slides on the console page */
+export const previewUrl = (p: SocialPost, n: number) => `/social/${p.id}/p/${nn(n)}.webp${ver(p)}`
+/** Tiny cover thumbnail (160 wide WebP) for lists */
+export const thumbUrl = (p: SocialPost) => `/social/${p.id}/p/t.webp${ver(p)}`
 /** Reels: the video lives next to its cover (01.jpg) as reel.mp4 */
-export const videoUrl = (p: SocialPost) => `/social/${p.id}/reel.mp4`
+export const videoUrl = (p: SocialPost) => `/social/${p.id}/reel.mp4${ver(p)}`

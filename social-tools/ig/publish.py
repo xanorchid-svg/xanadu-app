@@ -12,3 +12,7 @@ for pid in sys.argv[1:]:
         im = im.filter(ImageFilter.UnsharpMask(radius=0.6, percent=40, threshold=2))
         im.save(f'{OUT}/{pid}/{n}.jpg', quality=95, subsampling=0, optimize=True)
     print(pid, len(files))
+
+# Small previews for the console page
+import subprocess
+subprocess.run(['python3', '/home/claude/xanadu-app/social-tools/previews.py', *sys.argv[1:]], check=True)

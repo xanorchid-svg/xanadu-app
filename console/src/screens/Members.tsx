@@ -76,13 +76,14 @@ export default function Members() {
 
   const counts = useMemo(() => {
     const c = { all: 0, seeker: 0, container: 0, facilitator: 0, removed: 0 }
-    all?.forEach((m) => { c.all++; c[m.role]++; if (removed.has(m.id)) c.removed++ })
+    // Removed members only show under Removed, not in All or the role tabs
+    all?.forEach((m) => { if (removed.has(m.id)) { c.removed++; return } c.all++; c[m.role]++ })
     return c
   }, [all, removed])
 
   const shown = useMemo(() => {
     const s = q.trim().toLowerCase()
-    return (all ?? []).filter((m) => (tab === 'all' || (tab === 'removed' ? removed.has(m.id) : m.role === tab)) && (!s ||
+    return (all ?? []).filter((m) => (tab === 'removed' ? removed.has(m.id) : !removed.has(m.id) && (tab === 'all' || m.role === tab)) && (!s ||
       [m.name, m.email, m.space_name, m.town, m.region, m.space_country].some((v) => v?.toLowerCase().includes(s))))
   }, [all, tab, q, removed])
 

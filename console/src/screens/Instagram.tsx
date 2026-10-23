@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { supabase } from '../lib/supabase'
-import { POSTS, slideUrl, videoUrl, type SocialPost } from '../social/posts'
+import { POSTS, previewUrl, slideUrl, thumbUrl, videoUrl, type SocialPost } from '../social/posts'
 import { useToast } from '../parts'
 import { Button, Card, PageTitle } from '../ui'
 import { makeZip } from '../lib/zip'
@@ -238,7 +238,7 @@ export default function Instagram() {
         <div className="mx-auto grid max-w-[560px] grid-cols-3 gap-[2px]">
           {[...shown].reverse().map((p) => (
             <button key={p.id} onClick={() => jump(p.id)} className="relative aspect-[3/4] overflow-hidden bg-navy" title={p.title}>
-              <img src={slideUrl(p, 1)} alt={p.title} loading="lazy" className="size-full object-cover" />
+              <img src={previewUrl(p, 1)} alt={p.title} loading="lazy" className="size-full object-cover" />
               <span className="absolute right-1.5 top-1 text-[12px] text-white [text-shadow:0_1px_4px_rgba(0,0,0,.6)]">{p.format === 'Reel' ? '▶' : p.slides > 1 ? '❐' : ''}</span>
               {openCount(p.id) > 0 && <span className="absolute left-1.5 top-1.5 size-2.5 rounded-full bg-iri-teal ring-2 ring-navy" title="Changes requested" />}
               <span className="absolute bottom-1 left-1 rounded-md bg-navy/60 px-1.5 text-[10.5px] font-semibold text-white">{new Date(p.date).toLocaleString('en-US', { month: 'short', day: 'numeric' })}</span>
@@ -262,7 +262,7 @@ export default function Instagram() {
                 <div className="flex items-center">
                 <div className="shrink-0 pl-5"><Check on={picked.has(p.id)} onClick={() => pick(p.id)} label={`Select ${p.title}`} /></div>
                 <button id={'post-' + p.id} onClick={() => setOpen(isOpen ? null : p.id)} className="flex min-w-0 flex-1 scroll-mt-6 flex-wrap items-center gap-x-4 gap-y-2 py-4 pl-4 pr-5 text-left">
-                  <img src={slideUrl(p, 1)} alt="" className="size-14 rounded-lg object-cover ring-1 ring-line" />
+                  <img src={thumbUrl(p)} alt="" loading="lazy" className="size-14 rounded-lg object-cover ring-1 ring-line" />
                   <div className="min-w-0 flex-1">
                     <p className="font-display text-[22px] leading-tight text-ink">{p.title}</p>
                     <p className="flex flex-wrap items-center gap-x-1.5 text-[12.5px] text-faint">
@@ -279,12 +279,12 @@ export default function Instagram() {
                   <div className="border-t border-line px-5 py-5">
                     <div className="-mx-5 flex snap-x gap-3 overflow-x-auto px-5 pb-3">
                       {p.format === 'Reel' && (
-                        <video src={videoUrl(p)} poster={slideUrl(p, 1)} controls playsInline preload="none"
+                        <video src={videoUrl(p)} poster={previewUrl(p, 1)} controls playsInline preload="none"
                           className="h-[427px] w-[240px] shrink-0 snap-start rounded-xl bg-navy object-cover ring-1 ring-line sm:h-[533px] sm:w-[300px]" />
                       )}
                       {p.format !== 'Reel' && Array.from({ length: p.slides }, (_, i) => (
                         <a key={i} href={slideUrl(p, i + 1)} target="_blank" rel="noreferrer" className="shrink-0 snap-start">
-                          <img src={slideUrl(p, i + 1)} alt={`${p.title}, slide ${i + 1}`} loading="lazy"
+                          <img src={previewUrl(p, i + 1)} alt={`${p.title}, slide ${i + 1}`} loading="lazy"
                             className="h-[300px] w-[240px] rounded-xl object-cover ring-1 ring-line sm:h-[375px] sm:w-[300px]" />
                         </a>
                       ))}
@@ -324,7 +324,7 @@ export default function Instagram() {
               <ul className="divide-y divide-line">
                 {clearedPosts.map((p) => (
                   <li key={p.id} className="flex items-center gap-3 px-5 py-3">
-                    <img src={slideUrl(p, 1)} alt="" className="size-10 rounded-md object-cover opacity-70 ring-1 ring-line" />
+                    <img src={thumbUrl(p)} alt="" loading="lazy" className="size-10 rounded-md object-cover opacity-70 ring-1 ring-line" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[14px] font-semibold text-text">{p.title}</p>
                       <p className="text-[12px] text-faint">{fmt(p.date)} · {cleared[p.id] === 'posted' ? 'Already posted' : 'Deleted'}</p>
