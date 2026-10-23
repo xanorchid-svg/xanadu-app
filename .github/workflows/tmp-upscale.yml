@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           mkdir -p tmp-up/out tmp-up/log
-          (pip install -q torch --index-url https://download.pytorch.org/whl/cpu && pip install -q spandrel pillow numpy && curl -sL -o x2plus.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth && ls -la x2plus.pth && python tmp-up/up.py ${{ matrix.shard }} 4) > tmp-up/log/${{ matrix.shard }}.txt 2>&1 || true
+          (pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install -q spandrel pillow numpy && curl -sL -o x2plus.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth && ls -la x2plus.pth && python tmp-up/up.py ${{ matrix.shard }} 4) > tmp-up/log/${{ matrix.shard }}.txt 2>&1 || true
           tail -5 tmp-up/log/${{ matrix.shard }}.txt
       - run: |
           git config user.name bot && git config user.email bot@users.noreply.github.com

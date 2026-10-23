@@ -23,3 +23,4 @@ for f in files:
     Image.fromarray((out * 255 + .5).astype(np.uint8)).save('tmp-up/out/' + os.path.basename(f)[:-4] + '.jpg', quality=96, subsampling=0)
     print('done', f, flush=True)
 # rerun
+# rerun2
