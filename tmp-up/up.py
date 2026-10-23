@@ -22,3 +22,4 @@ for f in files:
                 out[y0*2:y0*2+th, x0*2:x0*2+tw] = o[oy:oy+th, ox:ox+tw]
     Image.fromarray((out * 255 + .5).astype(np.uint8)).save('tmp-up/out/' + os.path.basename(f)[:-4] + '.jpg', quality=96, subsampling=0)
     print('done', f, flush=True)
+# rerun

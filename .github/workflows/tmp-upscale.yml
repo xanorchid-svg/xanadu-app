@@ -10,13 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
+      fail-fast: false
       matrix: { shard: [0, 1, 2, 3] }
     steps:
       - uses: actions/checkout@v4
-      - run: pip install torch --index-url https://download.pytorch.org/whl/cpu && pip install spandrel pillow numpy
-      - run: curl -sL -o x2plus.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth
-      - run: python tmp-up/up.py ${{ matrix.shard }} 4
+      - run: |
+          mkdir -p tmp-up/out tmp-up/log
+          (pip install -q torch --index-url https://download.pytorch.org/whl/cpu && pip install -q spandrel pillow numpy && curl -sL -o x2plus.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth && ls -la x2plus.pth && python tmp-up/up.py ${{ matrix.shard }} 4) > tmp-up/log/${{ matrix.shard }}.txt 2>&1 || true
+          tail -5 tmp-up/log/${{ matrix.shard }}.txt
       - run: |
           git config user.name bot && git config user.email bot@users.noreply.github.com
-          git add -A tmp-up/out && git commit -m "up ${{ matrix.shard }} [skip ci]"
+          git add -A tmp-up/out tmp-up/log && git commit -m "up ${{ matrix.shard }} [skip ci]"
           for i in 1 2 3 4 5 6; do git pull --rebase -q && git push && break; sleep $((RANDOM % 10 + 3)); done
