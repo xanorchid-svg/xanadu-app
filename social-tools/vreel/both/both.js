@@ -26,7 +26,7 @@ body{width:1080px;height:1350px;overflow:hidden;background:#101B2C;-webkit-font-
 .l{top:0}.r{bottom:0}
 .half::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,27,44,0) 55%,rgba(16,27,44,.55))}
 .cap{position:absolute;left:60px;right:60px;bottom:64px;text-align:center;font-family:Cormorant;font-style:italic;font-weight:500;font-size:76px;line-height:1.02;color:#F6F1E8;z-index:2;text-shadow:0 3px 22px rgba(16,27,44,.7)}
-.seam{position:absolute;top:674px;left:0;right:0;height:1.5px;background:linear-gradient(100deg,#F4E7D4,#E2D5EE,#CFE4E3,#F2E2C8);z-index:3}
+.seam{position:absolute;top:674px;left:0;right:0;height:2px;background:linear-gradient(90deg,#9DBB7A,#6FB7BF,#8F9BE6,#B58BE0,#E09AC4,#E8BF8A);z-index:3}
 .amp{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:76px;height:76px;border-radius:50%;background:#101B2C;border:2px solid #D2B488;color:#E6CDA6;font-family:Cormorant;font-style:italic;font-size:46px;display:flex;align-items:center;justify-content:center;z-index:4;padding-bottom:6px}
 .tag{position:absolute;top:44px;left:0;right:0;text-align:center;font-family:Manrope;font-weight:600;font-size:22px;letter-spacing:.38em;padding-left:.38em;color:#E6CDA6;z-index:4;text-shadow:0 2px 14px rgba(16,27,44,.8)}
 .cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%}
@@ -34,18 +34,18 @@ body{width:1080px;height:1350px;overflow:hidden;background:#101B2C;-webkit-font-
 .ct{position:absolute;left:60px;right:60px;top:300px;text-align:center;z-index:2;color:#F6F1E8}
 .btw{font-family:Manrope;font-weight:600;font-size:34px;letter-spacing:.32em;padding-left:.32em;color:#E6CDA6;text-shadow:0 2px 16px rgba(16,27,44,.8)}
 .big{font-family:Cormorant;font-weight:500;font-size:118px;line-height:1;margin-top:26px;text-shadow:0 4px 30px rgba(16,27,44,.6)}
-em{font-style:italic;background:linear-gradient(100deg,#F4E7D4,#E2D5EE,#CFE4E3,#F2E2C8);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 4px 20px rgba(16,27,44,.6))}
+em{font-style:italic;background:linear-gradient(115deg,#9DBB7A,#6FB7BF,#8F9BE6,#B58BE0,#E09AC4,#E8BF8A);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 4px 20px rgba(16,27,44,.6))}
 .swipe{position:absolute;bottom:60px;left:0;right:0;text-align:center;font-family:Manrope;font-weight:600;font-size:24px;letter-spacing:.3em;padding-left:.3em;color:#F6F1E8;opacity:.85;z-index:2;text-shadow:0 2px 12px rgba(16,27,44,.8)}
 .pc{position:absolute;inset:0}.pc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 60%}
 .pc::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,27,44,.72) 0%,rgba(16,27,44,.45) 38%,rgba(16,27,44,.05) 62%,rgba(16,27,44,.35) 100%)}
 .pct{position:absolute;left:60px;right:60px;top:150px;text-align:center;z-index:2;color:#F6F1E8}
 .btw3{font-family:Cormorant;font-style:italic;font-weight:500;font-size:260px;line-height:.9;color:#F6F1E8;text-shadow:0 6px 40px rgba(16,27,44,.55)}
 .big3{font-family:Cormorant;font-weight:500;font-size:108px;line-height:1.02;margin-top:20px;text-shadow:0 4px 30px rgba(16,27,44,.6)}
-.ivc{position:absolute;inset:0;background:#F6F1E8;color:#101B2C;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.btw2{font-family:Manrope;font-weight:600;font-size:34px;letter-spacing:.32em;padding-left:.32em;color:#B8955F}.big2{font-family:Cormorant;font-weight:500;font-size:150px;line-height:1;margin-top:34px}em.d{background:linear-gradient(100deg,#8C6A48 0%,#7A6896 50%,#4E7F82 100%);-webkit-background-clip:text;filter:none}.sw2{margin-top:90px;font-family:Manrope;font-weight:600;font-size:24px;letter-spacing:.3em;padding-left:.3em;opacity:.5}
-.end{background:radial-gradient(70% 55% at 20% 0%,rgba(217,205,235,.10),transparent 70%),radial-gradient(70% 55% at 90% 100%,rgba(201,224,223,.08),transparent 70%),#101B2C;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#F6F1E8;height:100%}
+.ivc{position:absolute;inset:0;background:#F6F1E8;color:#101B2C;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.btw2{font-family:Manrope;font-weight:600;font-size:34px;letter-spacing:.32em;padding-left:.32em;color:#B8955F}.big2{font-family:Cormorant;font-weight:500;font-size:150px;line-height:1;margin-top:34px}em.d{background:linear-gradient(115deg,#6E9550,#3F8E97,#6470C8,#9065C0,#C46A9F,#C79A5E);-webkit-background-clip:text;filter:none}.sw2{margin-top:90px;font-family:Manrope;font-weight:600;font-size:24px;letter-spacing:.3em;padding-left:.3em;opacity:.5}
+.end{background:radial-gradient(60% 35% at 20% 18%,rgba(143,155,230,.28),transparent 70%),radial-gradient(70% 35% at 60% 95%,rgba(111,183,191,.2),transparent 70%),#101B2C;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#F6F1E8;height:100%}
 .mark{position:relative;width:420px;aspect-ratio:900/518}.mark img{position:absolute;inset:0;width:100%;height:100%}
 .e1{font-family:Cormorant;font-weight:500;font-size:84px;line-height:1.05;margin-top:40px}
-.rule{width:72px;height:1px;margin:46px 0 34px;background:linear-gradient(90deg,#E8D5B5,#D9CDEB,#C9E0DF)}
+.rule{width:140px;height:2px;margin:46px 0 34px;background:linear-gradient(115deg,#9DBB7A,#6FB7BF,#8F9BE6,#B58BE0,#E09AC4,#E8BF8A)}
 .cta{font-family:Manrope;font-weight:600;font-size:28px;letter-spacing:.28em;padding-left:.28em;text-transform:uppercase;color:#D2B488}`;
 const slides = [];
 slides.push(`<div class="ivc"><div class="btw2">btw,</div><div class="big2">it’s cool<br>to do <em class="d">both.</em></div><div class="sw2">swipe →</div></div>`);
