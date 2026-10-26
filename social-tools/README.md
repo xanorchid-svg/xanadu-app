@@ -23,3 +23,9 @@ Source images and clips are NOT in git (too big). Re-download them from Canva: i
 
 ## Reel videos are not hosted on the console (Oct 22, 2026)
 To save Vercel bandwidth, `reel.mp4` files were removed from `console/public/social/`. The console shows only the reel cover (`01.jpg`). The videos live in Metricool (its own copies) and on Xan's Mac (Movies → Xanadu Reels), and git history has them before commit "Console: remove reel videos". When you make a new reel, render it outside `console/public` (the reel scripts default there, so move or delete the mp4 before committing). If Metricool needs a public URL to upload it, use a temporary host, not the console.
+
+## New look, v2 "quiet photo" (Oct 26, 2026)
+A second version of the next 20 posts (Oct 26 – Dec 9), modeled on @nexus.villages: a photo on every cover with one flat overlay, small centered Cormorant type with a solid-gold italic accent, the nucleus mark, a thin arrow; inside slides are calm navy or ivory panels (or a photo with a flat overlay) with left-aligned text. **No gradients anywhere.** The current look is untouched.
+- Content: `ig/posts-v2.js`. Renderer: `ig/render-v2.js` (`node render-v2.js [id]`, set `CHROME=` if Chromium lives elsewhere). Publish: `python3 social-tools/ig/publish-v2.py [ids…]` → `console/public/social-v2/<id>/`.
+- Photos: the upscaled AI photos are on the git branch **`tmp-upscale`** in `tmp-up/out/` (don't delete that branch; copy them into `ig/img-ai/`). Five new v2 covers (`v2-circle`, `v2-trail`, `v2-porch`, `v2-hammock`, `v2-veranda`) are pages 93–97 of Canva design DAHYegA5SMA; `v2-reel28` is the first frame of reel 28.
+- Console: the Instagram page has a **Look** switch (Current / New look v2). `console/src/social/posts.ts` → `V2_SLIDES`, `asV2`. Metricool drafts still point at the current look.

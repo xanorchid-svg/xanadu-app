@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { supabase } from '../lib/supabase'
-import { POSTS, previewUrl, slideUrl, thumbUrl, type SocialPost } from '../social/posts'
+import { POSTS, asV2, previewUrl, slideUrl, thumbUrl, type SocialPost } from '../social/posts'
 import { useToast } from '../parts'
 import { Button, Card, PageTitle } from '../ui'
 import { makeZip } from '../lib/zip'
@@ -99,7 +99,10 @@ export default function Instagram() {
   const [open, setOpen] = useState<string | null>(null)
   const [view, setView] = useState<'list' | 'grid'>(() => { try { return (localStorage.getItem(STORE + '-view') as 'list' | 'grid') || 'list' } catch { return 'list' } })
   const [filters, setFilters] = useState<Filters>(() => { try { return JSON.parse(localStorage.getItem(STORE) || '{}') } catch { return {} } })
-  useEffect(() => { try { localStorage.setItem(STORE, JSON.stringify(filters)); localStorage.setItem(STORE + '-view', view) } catch { /* private mode */ } }, [filters, view])
+  // Which look to show: the current posts (what Metricool has) or the new quiet-photo version (v2). Both are kept.
+  const [look, setLook] = useState<'current' | 'v2'>(() => { try { return (localStorage.getItem(STORE + '-look') as 'current' | 'v2') || 'current' } catch { return 'current' } })
+  useEffect(() => { try { localStorage.setItem(STORE, JSON.stringify(filters)); localStorage.setItem(STORE + '-view', view); localStorage.setItem(STORE + '-look', look) } catch { /* private mode */ } }, [filters, view, look])
+  const SOURCE = useMemo(() => (look === 'v2' ? POSTS.map(asV2).filter((p): p is SocialPost => p !== null) : POSTS), [look])
 
   const [reqs, setReqs] = useState<Req[]>([])
   const loadReqs = useCallback(async () => {
@@ -114,8 +117,8 @@ export default function Instagram() {
     setCleared(Object.fromEntries(((data as { post_id: string; state: 'posted' | 'deleted' }[]) || []).map((r) => [r.post_id, r.state])))
   }, [])
   useEffect(() => { loadCleared() }, [loadCleared])
-  const live = useMemo(() => POSTS.filter((p) => !cleared[p.id]), [cleared])
-  const clearedPosts = useMemo(() => POSTS.filter((p) => cleared[p.id]).sort((a, b) => b.date.localeCompare(a.date)), [cleared])
+  const live = useMemo(() => SOURCE.filter((p) => !cleared[p.id]), [cleared, SOURCE])
+  const clearedPosts = useMemo(() => SOURCE.filter((p) => cleared[p.id]).sort((a, b) => b.date.localeCompare(a.date)), [cleared, SOURCE])
   const [showCleared, setShowCleared] = useState(false)
 
   const [picked, setPicked] = useState<Set<string>>(new Set())
@@ -195,6 +198,24 @@ export default function Instagram() {
         Reels are phone-reminder posts, so Metricool pings you and you add a trending sound in Instagram. Nothing goes live until you do.
         Feed photos are AI-generated for mood (checked for hands, faces, text and physics) and upscaled for sharpness; video reels use free licensed footage (Mixkit).
       </p>
+
+      <Card className="mb-6 px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-[11.5px] font-semibold uppercase tracking-[0.14em] text-faint">Look</p>
+            <p className="mt-1 max-w-xl text-[13px] leading-relaxed text-subtle">
+              {look === 'v2'
+                ? 'New look (v2): the next 20 posts, Oct 26 – Dec 9. A photo on every cover, one flat overlay, small centered type, no gradients. Same captions and dates. Metricool drafts still use the current look until you choose this one.'
+                : 'Current look: what the Metricool drafts use. Switch to see the new quiet-photo version of the next 20 posts side by side; nothing is lost either way.'}
+            </p>
+          </div>
+          <div className="inline-flex rounded-full bg-navy/60 p-1 ring-1 ring-line">
+            {([['current', 'Current'], ['v2', 'New look (v2)']] as const).map(([v, label]) => (
+              <button key={v} onClick={() => { setLook(v); setOpen(null) }} className={`h-8 rounded-full px-4 text-[12.5px] font-semibold ${look === v ? 'bg-gold/20 text-gold-pale' : 'text-subtle hover:text-text'}`}>{label}</button>
+            ))}
+          </div>
+        </div>
+      </Card>
 
       <Card className="mb-6 px-5 pb-5 pt-1">
         <Requests postId="general" reqs={reqs} reload={loadReqs} placeholder="Anything not tied to one post: new post ideas, moving dates, the grid, captions in general…" />

@@ -20,6 +20,8 @@ export type SocialPost = {
   /** AI and stock imagery is mood only, never a real place or member (see claude/CONTENT-RULES.md). AI photos are upscaled 2x (Real-ESRGAN) from the Canva originals. */
   aiImagery: boolean
   status: 'draft' | 'scheduled' | 'posted' | 'manual'
+  /** Which image folder the slides come from: 'social' (current look, default) or 'social-v2' (new look). */
+  base?: 'social' | 'social-v2'
 }
 
 export const POSTS: SocialPost[] = [
@@ -593,13 +595,32 @@ Xanadu matches you with places and guides we've personally reviewed, for a week,
 ]
 
 declare const __SOCIAL_V__: Record<string, string>
-const ver = (p: SocialPost) => `?v=${__SOCIAL_V__[p.id] ?? '0'}`
+const root = (p: SocialPost) => p.base ?? 'social'
+const ver = (p: SocialPost) => `?v=${__SOCIAL_V__[root(p) === 'social-v2' ? 'v2:' + p.id : p.id] ?? '0'}`
 const nn = (n: number) => String(n).padStart(2, '0')
 /** Full-size slide (1080 wide): for downloads, Instagram and Metricool */
-export const slideUrl = (p: SocialPost, n: number) => `/social/${p.id}/${nn(n)}.jpg${ver(p)}`
+export const slideUrl = (p: SocialPost, n: number) => `/${root(p)}/${p.id}/${nn(n)}.jpg${ver(p)}`
 /** Small preview (540 wide WebP) for showing slides on the console page */
-export const previewUrl = (p: SocialPost, n: number) => `/social/${p.id}/p/${nn(n)}.webp${ver(p)}`
+export const previewUrl = (p: SocialPost, n: number) => `/${root(p)}/${p.id}/p/${nn(n)}.webp${ver(p)}`
 /** Tiny cover thumbnail (160 wide WebP) for lists */
-export const thumbUrl = (p: SocialPost) => `/social/${p.id}/p/t.webp${ver(p)}`
+export const thumbUrl = (p: SocialPost) => `/${root(p)}/${p.id}/p/t.webp${ver(p)}`
 /** Reels: videos are NOT hosted on the console (bandwidth). They live in Metricool and on Xan's Mac (Movies → Xanadu Reels); repo history has them under console/public/social/<id>/reel.mp4 before Oct 22, 2026. */
-export const videoUrl = (p: SocialPost) => `/social/${p.id}/reel.mp4${ver(p)}`
+export const videoUrl = (p: SocialPost) => `/social/${p.id}/reel.mp4${ver({ ...p, base: 'social' })}`
+
+/**
+ * New look ("v2", Oct 26, 2026): the next 20 posts (Oct 26 – Dec 9) re-rendered in a quiet photo style
+ * modeled on @nexus.villages: every cover a photo with one flat overlay, small centered type, no gradients.
+ * Slides live in /public/social-v2/<id>/. Same captions and dates. The current look stays in /public/social/
+ * and is what the Metricool drafts point at, so switching back is just choosing "Current" on the page.
+ * Reels 05, 10, 14, 23 and 24 keep their current covers (their text is part of the footage).
+ * Source: social-tools/ig/render-v2.js + posts-v2.js; publish with social-tools/ig/publish-v2.py.
+ */
+export const V2_SLIDES: Record<string, number> = {
+  '02-what-is-xanadu': 6, '09-circle': 1, '28-your-xanadu': 1, '26-do-both': 7, '05-a-season': 1,
+  '20-two-hours': 7, '10-just-one-week': 1, '17-rest-is-rhythm': 6, '03-why-join': 5, '14-three-ways-in': 1,
+  '08-who': 6, '18-morning-light': 7, '07-reviewed': 5, '13-week-vs-season': 6, '23-day-1-vs-day-30': 1,
+  '19-deliberately': 8, '06-a-day': 6, '24-cost-nothing': 1, '11-which-stay': 5, '12-signs': 7,
+}
+/** The post as it looks in the new version (v2), or null if it has no v2. */
+export const asV2 = (p: SocialPost): SocialPost | null =>
+  V2_SLIDES[p.id] ? { ...p, base: 'social-v2', slides: V2_SLIDES[p.id], imagery: p.format === 'Reel' ? p.imagery : 'AI', aiImagery: p.format === 'Reel' ? p.aiImagery : true } : null

@@ -7,10 +7,14 @@ import { join } from 'node:path'
 
 // A short content hash per social post folder. Image URLs carry ?v=<hash>, so they can be
 // cached for a long time and still refresh the moment a post is re-rendered.
+// Both looks are hashed: 'social' (current) by post id, 'social-v2' (new look) as 'v2:<id>'.
 function socialVersions() {
-  const root = join(__dirname, 'public', 'social')
   const out: Record<string, string> = {}
-  for (const id of readdirSync(root)) {
+  for (const [folder, prefix] of [['social', ''], ['social-v2', 'v2:']] as const) {
+  const root = join(__dirname, 'public', folder)
+  let ids: string[] = []
+  try { ids = readdirSync(root) } catch { continue }
+  for (const id of ids) {
     const dir = join(root, id)
     if (!statSync(dir).isDirectory()) continue
     const h = createHash('sha1')
@@ -19,7 +23,8 @@ function socialVersions() {
       if (statSync(p).isDirectory()) walk(p); else h.update(f).update(readFileSync(p))
     })
     walk(dir)
-    out[id] = h.digest('hex').slice(0, 8)
+    out[prefix + id] = h.digest('hex').slice(0, 8)
+  }
   }
   return out
 }
