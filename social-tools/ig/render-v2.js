@@ -32,11 +32,11 @@ body{width:1080px;height:1350px;overflow:hidden;background:var(--navy);-webkit-f
 .light .solid{background:var(--paper)}
 .c{position:absolute;inset:0;display:flex;flex-direction:column}
 /* covers: centered, small, airy */
-.cover:not(.light) .c,.photoText .c,.end.ph .c{text-shadow:0 2px 26px rgba(16,27,44,.55)}
+.cover:not(.light) .c,.photoText .c,.end.ph .c{text-shadow:0 1px 3px rgba(16,27,44,.35),0 2px 28px rgba(16,27,44,.6)}
 .cover .c{align-items:center;justify-content:center;text-align:center;padding:0 130px}
 .mark{width:46px;height:56px;background:currentColor;-webkit-mask:url('${DATA('logo-nucleus.png')}') center/contain no-repeat;mask:url('${DATA('logo-nucleus.png')}') center/contain no-repeat;margin:0 auto 44px;opacity:.95}
 .eb{font-family:Manrope;font-weight:500;font-size:19px;letter-spacing:.34em;text-transform:uppercase;padding-left:.34em;margin-bottom:34px;opacity:.9}
-.cover .eb{padding-left:.34em}
+.cover .eb{padding-left:.34em;font-weight:600;font-size:20px;opacity:1}
 .text .eb,.photoText .eb{padding-left:0}
 h1{font-family:Cormorant;font-weight:400;font-size:84px;line-height:1.1;letter-spacing:-.005em}
 h1.hl{font-size:100px;line-height:1.04}
@@ -79,7 +79,7 @@ em{font-style:italic;color:var(--gold-pale)}
 .amp{position:absolute;left:50%;top:675px;transform:translate(-50%,-50%);width:76px;height:76px;border-radius:50%;background:var(--ivory);color:var(--navy);font-family:Cormorant;font-style:italic;font-size:44px;display:flex;align-items:center;justify-content:center;padding-bottom:6px}
 `;
 
-const VEIL = { photo: 'rgba(16,27,44,.34)', navy: 'rgba(16,27,44,.60)', ivory: 'rgba(246,241,232,.62)', dusk: 'rgba(16,27,44,.46)', inside: 'rgba(16,27,44,.54)', soft: 'rgba(16,27,44,.18)' };
+const VEIL = { photo: 'rgba(16,27,44,.38)', bright: 'rgba(16,27,44,.48)', navy: 'rgba(16,27,44,.60)', ivory: 'rgba(246,241,232,.62)', dusk: 'rgba(16,27,44,.46)', inside: 'rgba(16,27,44,.54)', soft: 'rgba(16,27,44,.18)' };
 const ARROW = (cls = '') => `<svg class="arrow ${cls}" viewBox="0 0 76 20"><path d="M1 10H74M65 2l9 8-9 8"/></svg>`;
 const bgPhoto = (s, veil) => `<div class="photo" style="background-image:url('${F(s.photo)}');${s.pos ? 'background-position:' + s.pos : ''}"></div><div class="veil" style="background:${veil}"></div>`;
 

@@ -609,7 +609,8 @@ export const videoUrl = (p: SocialPost) => `/social/${p.id}/reel.mp4${ver({ ...p
 
 /**
  * New look ("v2", Oct 26, 2026): the next 20 posts (Oct 26 – Dec 9) re-rendered in a quiet photo style
- * modeled on @nexus.villages: every cover a photo with one flat overlay, small centered type, no gradients.
+ * modeled on @nexus.villages: every cover a photo with one flat dark overlay, small centered type, no gradients.
+ * (Oct 26: Xan dropped the white overlay on the former white tiles; they're now photo tiles with a normal dark overlay.)
  * Slides live in /public/social-v2/<id>/. Same captions and dates. The current look stays in /public/social/
  * and is what the Metricool drafts point at, so switching back is just choosing "Current" on the page.
  * Reels 05, 10, 14, 23 and 24 keep their current covers (their text is part of the footage).
@@ -623,4 +624,4 @@ export const V2_SLIDES: Record<string, number> = {
 }
 /** The post as it looks in the new version (v2), or null if it has no v2. */
 export const asV2 = (p: SocialPost): SocialPost | null =>
-  V2_SLIDES[p.id] ? { ...p, base: 'social-v2', slides: V2_SLIDES[p.id], imagery: p.format === 'Reel' ? p.imagery : 'AI', aiImagery: p.format === 'Reel' ? p.aiImagery : true } : null
+  V2_SLIDES[p.id] ? { ...p, base: 'social-v2', slides: V2_SLIDES[p.id], cover: p.cover === 'white' ? 'photo' : p.cover, imagery: p.format === 'Reel' ? p.imagery : 'AI', aiImagery: p.format === 'Reel' ? p.aiImagery : true } : null

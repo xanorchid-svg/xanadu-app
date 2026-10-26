@@ -30,7 +30,7 @@ module.exports = {
 
   // Nov 2 · white
   '26-do-both': [
-    { kind: 'cover', tone: 'ivory', veil: 'rgba(246,241,232,.74)', photo: I('v2-veranda'), eb: 'btw,', h: 'It’s cool<br>to do <em>both.</em>', size: 'l' },
+    { kind: 'cover', tone: 'bright', photo: I('v2-veranda'), eb: 'btw,', h: 'It’s cool<br>to do <em>both.</em>', size: 'l' },
     { kind: 'halves', a: [I('b-work'), '50% 45%', 'work hard'], b: [I('b-sunset'), '50% 55%', 'log off at sunset'] },
     { kind: 'halves', a: [I('b-surf'), '50% 55%', 'surf at sunrise'], b: [I('b-hammock'), '50% 55%', 'do absolutely nothing'] },
     { kind: 'halves', a: [I('b-table'), '50% 45%', 'meet everyone'], b: [I('b-alone'), '50% 55%', 'spend a day alone'] },
@@ -52,7 +52,7 @@ module.exports = {
 
   // Nov 11 · white
   '17-rest-is-rhythm': [
-    { kind: 'cover', tone: 'ivory', veil: 'rgba(246,241,232,.74)', photo: I('restcorner'), h: 'Rest is not a reward.<br><em>It’s part of the rhythm.</em>' },
+    { kind: 'cover', tone: 'bright', photo: I('restcorner'), h: 'Rest is not a reward.<br><em>It’s part of the rhythm.</em>' },
     { kind: 'text', bg: 'ivory', eb: 'Rest comes in more than one shape', h: 'Sleep.', b: 'The deep kind, with no alarm to cut it short.' },
     { kind: 'text', bg: 'ivory', eb: 'Rest comes in more than one shape', h: '<em>Stillness.</em>', b: 'An hour with no screens and nothing to answer.' },
     { kind: 'text', bg: 'ivory', eb: 'Rest comes in more than one shape', h: 'Nature.', b: 'Trees, water, open sky. Your eyes looking far away for once.' },
@@ -81,7 +81,7 @@ module.exports = {
 
   // Nov 20 · white
   '18-morning-light': [
-    { kind: 'cover', tone: 'ivory', veil: 'rgba(246,241,232,.74)', photo: I('v2-porch'), eb: 'A small ritual', h: 'Step outside in the<br><em>first hour of your day.</em>' },
+    { kind: 'cover', tone: 'bright', photo: I('v2-porch'), eb: 'A small ritual', h: 'Step outside in the<br><em>first hour of your day.</em>' },
     { kind: 'text', bg: 'ivory', eb: 'Why it works', h: 'Morning daylight helps<br><em>set your body clock.</em>', b: 'So you wake more alert and wind down more easily at night.' },
     { kind: 'text', bg: 'ivory', pre: '<div class="num">01</div>', h: 'Go outside <em>within an hour</em><br>of waking.', b: 'A balcony, a porch or the street all count.' },
     { kind: 'text', bg: 'ivory', pre: '<div class="num">02</div>', h: 'Leave <em>the phone inside.</em>', b: 'Just you and the morning.' },
@@ -111,7 +111,7 @@ module.exports = {
 
   // Nov 30 · white
   '19-deliberately': [
-    { kind: 'cover', tone: 'ivory', veil: 'rgba(246,241,232,.74)', photo: I('forest'), eb: 'Henry David Thoreau', h: '“I went to the woods<br>because I wished to<br><em>live deliberately.</em>”' },
+    { kind: 'cover', tone: 'bright', photo: I('forest'), eb: 'Henry David Thoreau', h: '“I went to the woods<br>because I wished to<br><em>live deliberately.</em>”' },
     { kind: 'text', bg: 'ivory', eb: 'For a quiet evening', h: 'Five questions for<br><em>living deliberately.</em>' },
     { kind: 'text', bg: 'ivory', pre: '<div class="num">i.</div>', h: 'What do I want<br><em>more of</em> this season?' },
     { kind: 'text', bg: 'ivory', pre: '<div class="num">ii.</div>', h: 'What am I ready<br><em>to let go of?</em>' },
@@ -142,7 +142,7 @@ module.exports = {
 
   // Dec 9 · white
   '12-signs': [
-    { kind: 'cover', tone: 'ivory', photo: I('v2-hammock'), eb: 'A gentle diagnosis', h: 'Signs you need<br><em>a season,</em><br>not a vacation.' },
+    { kind: 'cover', tone: 'bright', photo: I('v2-hammock'), eb: 'A gentle diagnosis', h: 'Signs you need<br><em>a season,</em><br>not a vacation.' },
     { kind: 'text', bg: 'ivory', pre: '<div class="num">01</div>', h: 'You come home from vacation <em>more tired than you left.</em>' },
     { kind: 'text', bg: 'ivory', pre: '<div class="num">02</div>', h: 'You “work from anywhere.”<br><em>Anywhere is your kitchen.</em>' },
     { kind: 'text', bg: 'ivory', pre: '<div class="num">03</div>', h: 'You’ve said “one day”<br><em>about the same place</em><br>for years.' },
