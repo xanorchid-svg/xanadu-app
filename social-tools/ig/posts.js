@@ -26,7 +26,7 @@ module.exports = ({ MARK, F }) => {
       { photo: 'img-ai/s03-2.jpg', shade: 'strong', cls: 'bottom', html: `<div class="num">i.</div><h1 class="m">Aligned guests,<br><em>matched to you.</em></h1><p class="body">Seekers and Facilitators looking for exactly what your place or practice holds.</p>` },
       { photo: 'img-ai/s03-3.jpg', shade: 'strong', cls: 'bottom', html: `<div class="num">ii.</div><h1 class="m">A personally<br><em>reviewed ✦ profile.</em></h1><p class="body">We meet every space and guide before they join, so guests arrive trusting you.</p>` },
       { photo: 'img-ai/s03-4.jpg', shade: 'strong', cls: 'bottom', html: `<div class="num">iii.</div><h1 class="m">Our storytelling,<br><em>behind you.</em></h1><p class="body">Spotlights here, on our website and at launch.</p>` },
-      { photo: 'img-ai/s03-5.jpg', shade: 'top', cls: 'topal', html: `<h1 class="m">Free to join.<br><em>No commission.</em></h1><p class="body">And a voice in how Xanadu grows.<br>15 spaces · 15 guides · Nosara</p>${cta('Apply to the founding circle · link in bio')}` },
+      { photo: 'img-ai/s03-5.jpg', shade: 'top', cls: 'topal', html: `<h1 class="m">Free to join.<br><em>No commission.</em></h1><p class="body">And a voice in how Xanadu grows.<br>15 spaces · 30 guides · Nosara</p>${cta('Apply to the founding circle · link in bio')}` },
     ],
 
     // Post 6 · A day in a season-long stay (Seekers)
@@ -55,13 +55,13 @@ module.exports = ({ MARK, F }) => {
       { photo: 'img-ai/studio.jpg', shade: 'strong', cls: 'bottom', html: `<div class="eyebrow">Spaces</div><h1>Studios &amp;<br><em>open-air shalas.</em></h1>` },
       { photo: 'img-ai/farm.jpg', shade: 'strong', cls: 'bottom', html: `<div class="eyebrow">Spaces</div><h1>Land, farms<br>&amp; <em>gardens.</em></h1><p class="body">Places that welcome volunteers and long stays.</p>` },
       { photo: 'img-ai/breathwork.jpg', shade: 'top', cls: 'topal', html: `<div class="eyebrow">Guides</div><h1>Teachers who<br><em>hold the room.</em></h1><p class="body">Yoga, breathwork, meditation, sound.</p>` },
-      { photo: 'img-ai/surflesson.jpg', shade: 'strong', cls: 'bottom', html: `<div class="eyebrow">Guides</div><h1>Surf, movement<br>&amp; <em>the outdoors.</em></h1>${cta('15 spaces · 15 guides · Apply · link in bio')}` },
+      { photo: 'img-ai/surflesson.jpg', shade: 'strong', cls: 'bottom', html: `<div class="eyebrow">Guides</div><h1>Surf, movement<br>&amp; <em>the outdoors.</em></h1>${cta('15 spaces · 30 guides · Apply · link in bio')}` },
     ],
 
     // Post 9 · The founding circle is forming (single, graphic tile for grid variety)
     '09-circle': [
       { cls: 'center', html: `<div class="ringwrap"><div class="ring"></div><div class="inner">${MARK('s').replace('class="mark s"', 'class="mark s" style="width:500px"')}</div></div>
-        <h1 class="m">The founding circle<br><em>is forming in Nosara.</em></h1><p class="body" style="font-size:30px;letter-spacing:.18em;text-transform:uppercase;color:#D2B488;font-weight:500">15 spaces · 15 guides</p>` },
+        <h1 class="m">The founding circle<br><em>is forming in Nosara.</em></h1><p class="body" style="font-size:30px;letter-spacing:.18em;text-transform:uppercase;color:#D2B488;font-weight:500">15 spaces · 30 guides</p>` },
     ],
 
     // Post 11 · Quiz: which stay are you? (comments)

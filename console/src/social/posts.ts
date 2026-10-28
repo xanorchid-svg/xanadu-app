@@ -78,7 +78,7 @@ We're beginning in Nosara, Costa Rica. Join the waitlist (link in bio).
     status: 'draft',
     caption: `For the spaces and guides of Nosara.
 
-We're inviting 15 spaces and 15 guides to be Xanadu's founding circle. It's free, with no commission. You get guests and collaborators matched to what you hold, a personally reviewed ✦ profile, and our storytelling behind you.
+We're inviting 15 spaces and 30 guides to be Xanadu's founding circle. It's free, with no commission. You get guests and collaborators matched to what you hold, a personally reviewed ✦ profile, and our storytelling behind you.
 
 I'm in Nosara this month to meet each of you in person.
 
@@ -219,7 +219,7 @@ Join the waitlist (link in bio).
     status: 'draft',
     caption: `Who we're looking for.
 
-Xanadu's founding circle in Nosara is 15 spaces and 15 guides. We're looking for retreat centers, eco-lodges, studios and land that hold people well, and for the teachers and guides who hold the room.
+Xanadu's founding circle in Nosara is 15 spaces and 30 guides. We're looking for retreat centers, eco-lodges, studios and land that hold people well, and for the teachers and guides who hold the room.
 
 If that's you, apply (link in bio). I'm in Nosara this month to meet you.
 
@@ -238,7 +238,7 @@ If that's you, apply (link in bio). I'm in Nosara this month to meet you.
     status: 'draft',
     caption: `The founding circle is forming in Nosara.
 
-We're welcoming 15 spaces and 15 guides as Xanadu's first members. I'll be in Nosara from early November to meet each one in person.
+We're welcoming 15 spaces and 30 guides as Xanadu's first members. I'll be in Nosara from early November to meet each one in person.
 
 Spaces and guides: apply (link in bio), or send me a message.
 Seekers: join the waitlist.

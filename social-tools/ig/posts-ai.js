@@ -35,13 +35,13 @@ module.exports = ({ MARK, F }) => {
       { photo: 'img/studio.png', shade: 'strong', cls: 'bottom', html: `<div class="eyebrow">Spaces</div><h1>Studios &amp;<br><em>open-air shalas.</em></h1>` },
       { photo: 'img/farm.png', shade: 'strong', cls: 'bottom', html: `<div class="eyebrow">Spaces</div><h1>Land, farms<br>&amp; <em>gardens.</em></h1><p class="body">Places that welcome volunteers and long stays.</p>` },
       { photo: 'img/breathwork.png', shade: 'top', cls: 'topal', html: `<div class="eyebrow">Guides</div><h1>Teachers who<br><em>hold the room.</em></h1><p class="body">Yoga, breathwork, meditation, sound.</p>` },
-      { photo: 'img/surflesson.png', shade: 'strong', cls: 'bottom', html: `<div class="eyebrow">Guides</div><h1>Surf, movement<br>&amp; <em>the outdoors.</em></h1>${cta('15 spaces · 15 guides · Apply · link in bio')}` },
+      { photo: 'img/surflesson.png', shade: 'strong', cls: 'bottom', html: `<div class="eyebrow">Guides</div><h1>Surf, movement<br>&amp; <em>the outdoors.</em></h1>${cta('15 spaces · 30 guides · Apply · link in bio')}` },
     ],
 
     // Post 9 · The founding circle is forming (single, graphic tile for grid variety)
     '09-circle': [
       { cls: 'center', html: `<div class="ringwrap"><div class="ring"></div><div class="inner">${MARK('s').replace('class="mark s"', 'class="mark s" style="width:500px"')}</div></div>
-        <h1 class="m">The founding circle<br><em>is forming in Nosara.</em></h1><p class="body" style="font-size:30px;letter-spacing:.18em;text-transform:uppercase;color:#D2B488;font-weight:500">15 spaces · 15 guides</p>` },
+        <h1 class="m">The founding circle<br><em>is forming in Nosara.</em></h1><p class="body" style="font-size:30px;letter-spacing:.18em;text-transform:uppercase;color:#D2B488;font-weight:500">15 spaces · 30 guides</p>` },
     ],
 
     // Post 11 · Quiz: which stay are you? (comments)

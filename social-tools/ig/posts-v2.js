@@ -20,7 +20,7 @@ module.exports = {
 
   // Oct 28 · navy
   '09-circle': [
-    { kind: 'cover', tone: 'navy', photo: I('v2-circle'), eb: '15 spaces · 15 guides', h: 'The founding circle<br><em>is forming in Nosara.</em>' },
+    { kind: 'cover', tone: 'navy', photo: I('v2-circle'), eb: '15 spaces · 30 guides', h: 'The founding circle<br><em>is forming in Nosara.</em>' },
   ],
 
   // Oct 30 · photo (reel cover only)
@@ -66,7 +66,7 @@ module.exports = {
     { kind: 'photoText', photo: I('s03-2'), pre: '<div class="num">i.</div>', h: 'Aligned guests,<br><em>matched to you.</em>', b: 'Seekers and Facilitators looking for exactly what your place or practice holds.' },
     { kind: 'photoText', photo: I('s03-3'), pre: '<div class="num">ii.</div>', h: 'A personally<br><em>reviewed profile.</em>', b: 'We meet every space and guide before they join, so guests arrive trusting you.' },
     { kind: 'photoText', photo: I('s03-4'), pre: '<div class="num">iii.</div>', h: 'Our storytelling,<br><em>behind you.</em>', b: 'Spotlights here, on our website and at launch.' },
-    { kind: 'end', photo: I('s03-5'), h: 'Free to join.<br><em>No commission.</em>', sub: 'And a voice in how Xanadu grows.<br>15 spaces · 15 guides · Nosara', cta: 'Apply to the founding circle · link in bio' },
+    { kind: 'end', photo: I('s03-5'), h: 'Free to join.<br><em>No commission.</em>', sub: 'And a voice in how Xanadu grows.<br>15 spaces · 30 guides · Nosara', cta: 'Apply to the founding circle · link in bio' },
   ],
 
   // Nov 18 · photo
@@ -76,7 +76,7 @@ module.exports = {
     { kind: 'photoText', photo: I('studio'), eb: 'Spaces', h: 'Studios &amp;<br><em>open-air shalas.</em>' },
     { kind: 'photoText', photo: I('farm'), eb: 'Spaces', h: 'Land, farms<br>&amp; <em>gardens.</em>', b: 'Places that welcome volunteers and long stays.' },
     { kind: 'photoText', photo: I('breathwork'), eb: 'Guides', h: 'Teachers who<br><em>hold the room.</em>', b: 'Yoga, breathwork, meditation, sound.' },
-    { kind: 'end', photo: I('surflesson'), h: 'Surf, movement<br>&amp; <em>the outdoors.</em>', sub: '15 spaces · 15 guides', cta: CTA_HOST },
+    { kind: 'end', photo: I('surflesson'), h: 'Surf, movement<br>&amp; <em>the outdoors.</em>', sub: '15 spaces · 30 guides', cta: CTA_HOST },
   ],
 
   // Nov 20 · white
