@@ -26,7 +26,7 @@ export default function ResetPassword() {
 
   const save = async () => {
     setError('')
-    if (password.length < 6) { setError('Your password needs at least 6 characters.'); return }
+    if (password.length < 8) { setError('Your password needs at least 8 characters.'); return }
     if (password !== confirm) { setError("Those passwords don't match."); return }
     setBusy(true)
     const { error } = await supabase.auth.updateUser({ password })
