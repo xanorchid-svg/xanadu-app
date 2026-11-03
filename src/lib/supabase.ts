@@ -5,11 +5,14 @@ import { createClient } from '@supabase/supabase-js'
  * they only allow what the database's row-level security rules allow.
  * Override them with VITE_SUPABASE_URL / VITE_SUPABASE_KEY if the project ever changes.
  */
-const URL = import.meta.env.VITE_SUPABASE_URL ?? 'https://gutqzqxybcnnpwfbkjsq.supabase.co'
+// auth.dreamxanadu.com is the project's custom domain (Nov 2026), so Google's sign-in screen shows dreamxanadu.com
+// instead of the supabase.co address. Same project, same data; the supabase.co address still works server-side.
+const URL = import.meta.env.VITE_SUPABASE_URL ?? 'https://auth.dreamxanadu.com'
 const KEY = import.meta.env.VITE_SUPABASE_KEY ?? 'sb_publishable_7jInxBTTLrcqSP_OgCZApA_NlZG8Mpg'
 
 export const supabase = createClient(URL, KEY, {
-  auth: { flowType: 'pkce', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+  // storageKey pinned to the key supabase-js derived from the old supabase.co URL, so nobody is signed out by the domain switch
+  auth: { flowType: 'pkce', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'sb-gutqzqxybcnnpwfbkjsq-auth-token' },
 })
 
 export const PHOTO_BUCKET = 'photos'
