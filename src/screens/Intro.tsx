@@ -215,7 +215,7 @@ export default function Intro() {
             <div style={rise(3)}><Field label="Email"><input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} /></Field></div>
             <div style={rise(4)}>
               <Field label={<span className="flex justify-between">{signup ? 'Create a password' : 'Password'}{!signup && <button type="button" onClick={forgot} className="text-gold-soft">Forgot?</button>}</span>}>
-                <input type="password" required minLength={6} autoComplete={signup ? 'new-password' : 'current-password'} value={password} onChange={(e) => setPassword(e.target.value)} className={inputCls} />
+                <input type="password" required minLength={8} autoComplete={signup ? 'new-password' : 'current-password'} value={password} onChange={(e) => setPassword(e.target.value)} className={inputCls} />
               </Field>
             </div>
 

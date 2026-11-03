@@ -33,7 +33,8 @@ export function friendlyError(message: string | undefined): string {
   if (m.includes('invalid login credentials')) return "That email and password don't match. Try again, or reset your password."
   if (m.includes('email not confirmed')) return 'Please confirm your email first. Check your inbox for the link from Xanadu.'
   if (m.includes('user already registered')) return 'There is already an account with this email. Sign in instead.'
-  if (m.includes('password should be at least')) return 'Your password needs at least 6 characters.'
+  if (m.includes('known to be weak') || m.includes('easy to guess') || m.includes('pwned')) return 'That password has shown up in a data leak elsewhere, so it isn\'t safe. Please choose a different one.'
+  if (m.includes('password should be at least')) return 'Your password needs at least 8 characters.'
   if (m.includes('rate limit') || m.includes('too many')) return 'Too many tries in a short time. Please wait a minute and try again.'
   if (m.includes('provider is not enabled') || m.includes('unsupported provider')) return "That sign-in option isn't switched on yet. Please use email for now."
   if (m.includes('failed to fetch') || m.includes('network')) return "We couldn't reach Xanadu. Check your connection and try again."
