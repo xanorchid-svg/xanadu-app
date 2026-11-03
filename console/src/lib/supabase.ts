@@ -6,7 +6,8 @@ import { createClient } from '@supabase/supabase-js'
  * public.is_team() (on the team list AND signed in with two-step verification), so this key
  * on its own can do nothing a member couldn't. Never put the service-role key in this app.
  */
-export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? 'https://gutqzqxybcnnpwfbkjsq.supabase.co'
+// Custom domain (Nov 2026): Google's sign-in screen shows dreamxanadu.com instead of supabase.co.
+export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? 'https://auth.dreamxanadu.com'
 const KEY = import.meta.env.VITE_SUPABASE_KEY ?? 'sb_publishable_7jInxBTTLrcqSP_OgCZApA_NlZG8Mpg'
 
 export const supabase = createClient(SUPABASE_URL, KEY, {
