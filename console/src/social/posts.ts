@@ -592,6 +592,145 @@ Xanadu matches you with places and guides we've personally reviewed, for a week,
 
 #slowliving #slowtravel #balance #nosara #costarica`,
   },
+  {
+    id: '29-guide-to-guide',
+    title: 'You became a guide to guide (video reel)',
+    date: '2026-11-12T10:00',
+    format: 'Reel',
+    cover: 'photo',
+    imagery: 'Stock footage',
+    audience: 'Spaces & guides',
+    slides: 1,
+    aiImagery: false,
+    status: 'draft',
+    caption: `You became a guide to guide. Not to post every day, chase the next room and answer every inquiry at midnight.
+
+Xanadu matches founding Facilitators with spaces that fit your work and people looking for what you hold. Every guide is personally reviewed. It's free for the founding circle, with no commission.
+
+Know a guide who needs this? Send it to them. ✦
+
+Apply to the founding circle (link in bio).
+
+#retreatleader #facilitator #yogateacher #soundhealer #breathwork`,
+  },
+  {
+    id: '30-prepared-the-land',
+    title: 'You prepared the land (video reel)',
+    date: '2026-11-19T10:00',
+    format: 'Reel',
+    cover: 'photo',
+    imagery: 'Stock footage',
+    audience: 'Spaces & guides',
+    slides: 1,
+    aiImagery: false,
+    status: 'draft',
+    caption: `You prepared the land. The space is ready. But the right guides don't find you, and the guests who would thrive there don't know you exist.
+
+Xanadu closes that gap. Every space is personally reviewed, and every space joins as part of a circle, not a listing. It's free for the founding circle, with no commission. ✦
+
+Apply to the founding circle (link in bio).
+
+#retreatcenter #retreatspace #retreatvenue #holisticliving #retreatleader`,
+  },
+  {
+    id: '31-fifteen-thirty',
+    title: '15 spaces. 30 guides. (video reel)',
+    date: '2026-11-24T10:00',
+    format: 'Reel',
+    cover: 'photo',
+    imagery: 'Stock footage',
+    audience: 'Spaces & guides',
+    slides: 1,
+    aiImagery: false,
+    status: 'draft',
+    caption: `15 spaces. 30 guides. That's the whole founding circle.
+
+It's free, with no commission. We read every application by hand and meet each person on a short call. When the circle feels complete, we open Xanadu to Seekers. Not before. ✦
+
+Tag the space or guide who belongs here.
+
+Apply to the founding circle (link in bio).
+
+#retreatcenter #retreatleader #facilitator #consciouscommunity #foundingmember`,
+  },
+  {
+    id: '32-not-a-listing',
+    title: 'You are not a listing (video reel)',
+    date: '2026-12-01T10:00',
+    format: 'Reel',
+    cover: 'photo',
+    imagery: 'Stock footage',
+    audience: 'Spaces & guides',
+    slides: 1,
+    aiImagery: false,
+    status: 'draft',
+    caption: `You are not a listing.
+
+A space here isn't competing for clicks. A guide isn't posting into a void. Every member is known, and the founding circle shapes what Xanadu becomes: its standards, its spirit and the first Seekers it welcomes. ✦
+
+Apply to the founding circle (link in bio).
+
+#consciouscommunity #retreatcenter #facilitator #retreatleader #holisticliving`,
+  },
+  {
+    id: '33-should-already-know',
+    title: 'The space and the guide who should already know each other',
+    date: '2026-11-05T10:00',
+    format: 'Carousel',
+    cover: 'photo',
+    imagery: 'AI',
+    audience: 'Spaces & guides',
+    slides: 6,
+    aiImagery: true,
+    status: 'draft',
+    caption: `There's a room somewhere that would fit your work perfectly. There's a guide somewhere your land has been waiting for.
+
+Most of them never find each other. We'd like to change that, one introduction at a time. ✦
+
+Send this to the guide your space is missing, or the space your work is missing.
+
+Apply to the founding circle (link in bio).
+
+#retreatcenter #retreatspace #facilitator #retreatleader #consciouscommunity`,
+  },
+  {
+    id: '34-after-you-apply',
+    title: 'What happens after you apply',
+    date: '2026-11-17T10:00',
+    format: 'Carousel',
+    cover: 'photo',
+    imagery: 'AI',
+    audience: 'Spaces & guides',
+    slides: 6,
+    aiImagery: true,
+    status: 'draft',
+    caption: `Curious what applying to Xanadu actually looks like?
+
+No forms that disappear into silence. You share your work, a few people vouch for it, we read it ourselves and then we talk. ✦
+
+Save this for when you're ready. Apply to the founding circle (link in bio).
+
+#retreatleader #retreatcenter #facilitator #yogateacher #soundhealer`,
+  },
+  {
+    id: '35-founding-badge',
+    title: "The founding badge can't be bought",
+    date: '2026-11-26T10:00',
+    format: 'Carousel',
+    cover: 'photo',
+    imagery: 'AI',
+    audience: 'Spaces & guides',
+    slides: 5,
+    aiImagery: true,
+    status: 'draft',
+    caption: `We could have sold placement. We chose not to.
+
+A place in Xanadu comes from your work, the people who know it and a real conversation with us. That's what lets a guest trust what they find here. ✦
+
+Founding Containers and Facilitators join free. Apply to the founding circle (link in bio).
+
+#retreatcenter #retreatleader #facilitator #foundingmember #consciouscommunity`,
+  },
 ]
 
 declare const __SOCIAL_V__: Record<string, string>

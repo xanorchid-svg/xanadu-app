@@ -102,7 +102,7 @@ export default function Instagram() {
   // Which look to show: the current posts (what Metricool has) or the new quiet-photo version (v2). Both are kept.
   const [look, setLook] = useState<'current' | 'v2'>(() => { try { return (localStorage.getItem(STORE + '-look') as 'current' | 'v2') || 'current' } catch { return 'current' } })
   useEffect(() => { try { localStorage.setItem(STORE, JSON.stringify(filters)); localStorage.setItem(STORE + '-view', view); localStorage.setItem(STORE + '-look', look) } catch { /* private mode */ } }, [filters, view, look])
-  const SOURCE = useMemo(() => (look === 'v2' ? POSTS.map(asV2).filter((p): p is SocialPost => p !== null) : POSTS), [look])
+  const SOURCE = useMemo(() => (look === 'v2' ? POSTS.map((p) => asV2(p) ?? (/^(29|3[0-5])-/.test(p.id) ? p : null)).filter((p): p is SocialPost => p !== null) : POSTS), [look])
 
   const [reqs, setReqs] = useState<Req[]>([])
   const loadReqs = useCallback(async () => {
@@ -302,7 +302,7 @@ export default function Instagram() {
                       {p.format === 'Reel' && (
                         <div className="relative h-[427px] w-[240px] shrink-0 snap-start overflow-hidden rounded-xl bg-navy ring-1 ring-line sm:h-[533px] sm:w-[300px]">
                           <img src={previewUrl(p, 1)} alt={`${p.title}, reel cover`} loading="lazy" className="size-full object-cover" />
-                          <p className="absolute inset-x-0 bottom-0 bg-navy/80 px-3 py-2.5 text-[12px] leading-snug text-subtle">Reel cover. The video is in Metricool and in Movies → Xanadu Reels on your Mac.</p>
+                          <p className="absolute inset-x-0 bottom-0 bg-navy/80 px-3 py-2.5 text-[12px] leading-snug text-subtle">Reel cover. The video is on your Mac in Movies → Xanadu Reels{/^(29|30|31|32)-/.test(p.id) ? ' → Guides and Spaces Content → Reels' : ''}.</p>
                         </div>
                       )}
                       {p.format !== 'Reel' && Array.from({ length: p.slides }, (_, i) => (
