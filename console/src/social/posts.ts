@@ -643,7 +643,7 @@ Apply to the founding circle (link in bio).
     slides: 1,
     aiImagery: false,
     status: 'draft',
-    caption: `15 spaces. 30 guides. That's the whole founding circle.
+    caption: `15 spaces. 30 guides. That's the starting circle. This is just the beginning.
 
 It's free, with no commission. We read every application by hand and meet each person on a short call. When the circle feels complete, we open Xanadu to Seekers. Not before. ✦
 
