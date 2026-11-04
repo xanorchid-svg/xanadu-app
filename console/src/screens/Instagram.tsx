@@ -23,6 +23,7 @@ const month = (p: SocialPost) => new Date(p.date).toLocaleString('en-US', { mont
 type Group = { key: string; label: string; get: (p: SocialPost) => string; options: { value: string; label: string }[] }
 const uniq = (xs: string[]) => [...new Set(xs)]
 const GROUPS: Group[] = [
+  { key: 'collection', label: 'Collection', get: (p) => (p.audience === 'Spaces & guides' ? 'founding' : 'other'), options: [{ value: 'founding', label: 'Founding circle posts' }, { value: 'other', label: 'Other posts' }] },
   { key: 'cover', label: 'Grid tile', get: (p) => p.cover, options: [{ value: 'white', label: 'White' }, { value: 'photo', label: 'Photo' }, { value: 'navy', label: 'Navy' }] },
   { key: 'format', label: 'Format', get: (p) => p.format, options: [{ value: 'Reel', label: 'Reels' }, { value: 'Carousel', label: 'Carousels' }, { value: 'Single image', label: 'Single posts' }] },
   { key: 'audience', label: 'For', get: (p) => p.audience, options: [{ value: 'Seekers', label: 'Seekers' }, { value: 'Spaces & guides', label: 'Spaces & guides' }, { value: 'Everyone', label: 'Everyone' }] },
