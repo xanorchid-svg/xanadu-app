@@ -23,6 +23,7 @@ const VOCAB: Record<string, string[]> = {
   Sound: ['sound bath', 'sound healing', 'sound journey', 'singing bowl', 'gong', 'sound'],
   'Ecstatic dance': ['ecstatic dance', 'dance', 'movement', 'conscious dance'],
   Kirtan: ['kirtan', 'chanting', 'mantra', 'singing'],
+  'Bodywork & therapy': ['massage', 'bodywork', 'body work', 'somatic', 'somatics', 'craniosacral', 'reflexology', 'shiatsu', 'lomi lomi', 'therapist', 'therapy', 'psychotherapy', 'counseling', 'counselor', 'one-on-one session', 'one on one session', 'private session'],
   Permaculture: ['permaculture', 'farm', 'farming', 'garden', 'gardening', 'regenerative', 'agriculture', 'land', 'growing food', 'eco', 'sustainable', 'sustainability'],
   'Plant medicine': ['plant medicine', 'ayahuasca', 'huachuma', 'san pedro', 'kambo', 'psilocybin', 'mushroom ceremony', 'cacao ceremony', 'sacred plant', 'curandero', 'shaman', 'shamanic'],
   Residencies: ['residency', 'residencies', 'artist residency', 'writer residency', 'creative residency', 'artist in residence', 'fellowship', 'studio time'],

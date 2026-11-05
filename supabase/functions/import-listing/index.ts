@@ -31,7 +31,7 @@ const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body)
 const oops = (error: string, status = 400) => reply({ error }, status)
 
 // Same words the app uses (src/data.ts). Paused categories (plant medicine, recovery) are left out on purpose.
-const PRACTICES = ['Yoga', 'Breathwork', 'Meditation', 'Sound', 'Ecstatic dance', 'Kirtan', "Women's", "Men's", 'Residencies']
+const PRACTICES = ['Yoga', 'Breathwork', 'Meditation', 'Sound', 'Ecstatic dance', 'Kirtan', 'Bodywork & therapy', "Women's", "Men's", 'Residencies']
 const TAKE_PART = ['A class or session', 'Weekly or monthly sessions', 'A weekend', '1–3 weeks', 'A month or more', 'A season', 'Community living']
 const LANDSCAPES = ['Beach', 'Ocean', 'Jungle', 'Mountains', 'Desert', 'Forest', 'Countryside', 'Town', 'City']
 
