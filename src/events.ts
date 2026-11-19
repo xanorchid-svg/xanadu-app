@@ -23,7 +23,36 @@ export const EMPTY_EVENT: EventDraft = {
 
 /** What the community calendar is for (the same list the poster reader uses). */
 export const EVENT_TAGS = ['Yoga', 'Breathwork', 'Meditation', 'Sound healing', 'Dance', 'Ecstatic dance', 'Healing', 'Embodiment', 'Womb work',
-  "Women's circle", "Men's circle", 'Kirtan', 'Cacao', 'Reiki', 'Bodywork', 'Workshop', 'Retreat'] as const
+  "Women's circle", "Men's circle", 'Kirtan', 'Cacao', 'Reiki', 'Bodywork', 'Workshop', 'Retreat', 'Kids & family', 'Nature & adventure', 'Art & creativity'] as const
+
+/**
+ * The Calendar's filters. Each groups community-event tags and experience practices/formats,
+ * so a seeker can ask for "Sound healing" and see sound baths, kirtan and sound journeys together.
+ */
+export const CATEGORIES: { label: string; tags: string[]; practices?: string[]; formats?: string[] }[] = [
+  { label: 'Yoga', tags: ['Yoga'], practices: ['Yoga'] },
+  { label: 'Meditation', tags: ['Meditation'], practices: ['Meditation'] },
+  { label: 'Breathwork', tags: ['Breathwork'], practices: ['Breathwork'] },
+  { label: 'Sound healing', tags: ['Sound healing', 'Kirtan'], practices: ['Sound', 'Kirtan'] },
+  { label: 'Dance & movement', tags: ['Dance', 'Ecstatic dance', 'Embodiment'], practices: ['Ecstatic dance'] },
+  { label: 'Cacao & ceremony', tags: ['Cacao'] },
+  { label: 'Circles', tags: ["Women's circle", "Men's circle", 'Womb work'], practices: ["Women's", "Men's"] },
+  { label: 'Healing & bodywork', tags: ['Healing', 'Bodywork', 'Reiki'], practices: ['Bodywork & therapy'] },
+  { label: 'Workshops & trainings', tags: ['Workshop'], practices: ['Trainings'], formats: ['Training'] },
+  { label: 'Retreats', tags: ['Retreat'], formats: ['Retreat'] },
+  { label: 'Kids & family', tags: ['Kids & family'] },
+  { label: 'Nature & adventure', tags: ['Nature & adventure'] },
+  { label: 'Art & creativity', tags: ['Art & creativity'] },
+]
+
+/** Does a community event or experience belong under this filter? */
+export function inCategory(e: { tags?: string[]; practices?: string[]; format?: string }, label: string) {
+  const c = CATEGORIES.find((x) => x.label === label)
+  if (!c) return true
+  return (e.tags ?? []).some((t) => c.tags.includes(t))
+    || (e.practices ?? []).some((p) => c.practices?.includes(p))
+    || (!!e.format && !!c.formats?.includes(e.format))
+}
 
 const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
 

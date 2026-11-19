@@ -116,7 +116,7 @@ const FACILITATOR_TOOL = {
 
 // Community events: what Xanadu's community calendar is for (Xan, Oct 21)
 const EVENT_TAGS = ['Yoga', 'Breathwork', 'Meditation', 'Sound healing', 'Dance', 'Ecstatic dance', 'Healing', 'Embodiment', 'Womb work',
-  "Women's circle", "Men's circle", 'Kirtan', 'Cacao', 'Reiki', 'Bodywork', 'Workshop', 'Retreat']
+  "Women's circle", "Men's circle", 'Kirtan', 'Cacao', 'Reiki', 'Bodywork', 'Workshop', 'Retreat', 'Kids & family', 'Nature & adventure', 'Art & creativity']
 const EVENT_TOOL = {
   name: 'fill_event',
   description: 'Read a community event (a poster, flyer or message) and fill in its details. Leave a field empty when the source does not say it.',

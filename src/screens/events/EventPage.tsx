@@ -4,6 +4,7 @@ import { Screen } from '../../components/ui'
 import { IconBack } from '../../components/icons'
 import { Loading, useAuth } from '../../auth'
 import { ReportSheet } from '../../components/Report'
+import FoundingInvite from '../../components/FoundingInvite'
 import { contactLink, deleteSharedEvent, fetchCommunityEvent, safeLink, whenLabel, type CommunityEvent } from '../../events'
 
 /** A community event: what a member shared, clearly marked as not verified by Xanadu. */
@@ -87,6 +88,8 @@ export default function EventPage() {
         )}
 
         {e.description && <p className="m-0 text-[15px] leading-relaxed whitespace-pre-line text-muted">{e.description}</p>}
+
+        {!mine && <FoundingInvite variant="line" />}
 
         {error && <p role="alert" className="m-0 text-[13px] text-gold-pale">{error}</p>}
         {mine

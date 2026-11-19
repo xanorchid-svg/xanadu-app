@@ -4,7 +4,8 @@ import { Chip, EmptyState, H1, Page, Screen, SeekerTabs, Segmented } from '../..
 import { IconBack, IconCalendar, IconNext } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
 import CommunityEventCard from '../../components/CommunityEventCard'
-import { useCommunityEvents, type CommunityEvent } from '../../events'
+import FoundingInvite from '../../components/FoundingInvite'
+import { CATEGORIES, inCategory, useCommunityEvents, type CommunityEvent } from '../../events'
 import { useListings, type Listing } from '../../store'
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -18,6 +19,8 @@ const fmt = (s: string, o: Intl.DateTimeFormatOptions) => at(s).toLocaleDateStri
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 type View = 'Month' | 'Week' | 'Day'
+type Quick = '' | 'Today' | 'This weekend' | 'This week' | 'Next 2 weeks' | 'This month' | 'Choose dates'
+const QUICK: Quick[] = ['Today', 'This weekend', 'This week', 'Next 2 weeks', 'This month', 'Choose dates']
 type Flex = 0 | 3 | 7 | 14
 const FLEX: [Flex, string][] = [[0, 'Exact'], [3, '± 3 days'], [7, '± 1 week'], [14, '± 2 weeks']]
 const shift = (s: string, n: number) => iso(add(at(s), n))
@@ -44,14 +47,18 @@ export default function Calendar() {
   const [picking, setPicking] = useState(false) // a first date was just tapped: the next later tap ends the range
   const [place, setPlace] = useState('Everywhere')
   const [flex, setFlex] = useState<Flex>(0)
+  const [cat, setCat] = useState('All')
+  const [quick, setQuick] = useState<Quick>('')
   const { listings, loading } = useListings()
   const { events } = useCommunityEvents()
 
   const countries = Array.from(new Set(listings.map((e) => e.space?.country.trim()).filter(Boolean) as string[])).sort()
-  const dated: Item[] = [
+  const all: Item[] = [
     ...listings.filter((e) => e.start_date && (place === 'Everywhere' || e.space?.country === place)),
     ...events.filter((e) => e.start_date),
   ].sort((a, b) => (a.start_date ?? '').localeCompare(b.start_date ?? ''))
+  const dated = cat === 'All' ? all : all.filter((e) => inCategory(e, cat))
+  const has = (label: string) => all.some((e) => inCategory(e, label))
   const busyOn = (d: string) => dated.filter((e) => runs(e, d)).length
 
   const c = at(cursor)
@@ -61,12 +68,30 @@ export default function Calendar() {
     if (view === 'Day') { setFrom(iso(next)); setTo('') }
   }
   const pick = (d: string) => {
+    if (quick !== 'Choose dates') setQuick('')
     // first tap: a day; second tap later in time: the end of a range; any other tap starts again
     if (view === 'Month' && picking && d > from) { setTo(d); setPicking(false) }
     else { setFrom(d); setTo(''); setPicking(true) }
   }
-  const changeView = (v: View) => { setView(v); setCursor(from || cursor) }
-  const goToday = () => { setCursor(today); setFrom(today); setTo(''); setPicking(false) }
+  const changeView = (v: View) => { setView(v); setCursor(from || cursor); setQuick('') }
+  const goToday = () => { setCursor(today); setFrom(today); setTo(''); setPicking(false); setQuick('Today') }
+  /** Quick periods: one tap for the common questions ("what's on this weekend?"). */
+  const choose = (q: Quick) => {
+    setQuick(q); setPicking(false)
+    const t = at(today), dow = t.getDay() // 0 Sun … 6 Sat
+    if (q === 'Today') { setView('Day'); setCursor(today); setFrom(today); setTo(''); return }
+    if (q === 'This week') { setView('Week'); setCursor(today); setFrom(today); setTo(''); return }
+    setView('Month')
+    if (q === 'This weekend') {
+      const fri = dow === 0 ? add(t, -2) : dow === 6 ? add(t, -1) : add(t, 5 - dow)
+      const a = iso(fri) < today ? today : iso(fri), b = iso(add(fri, 2))
+      setCursor(a); setFrom(a); setTo(b); return
+    }
+    if (q === 'Next 2 weeks') { setCursor(today); setFrom(today); setTo(iso(add(t, 13))); return }
+    if (q === 'This month') { const end = iso(new Date(t.getFullYear(), t.getMonth() + 1, 0, 12)); setCursor(today); setFrom(today); setTo(end === today ? '' : end); return }
+    // Choose dates: the next two taps on the month set the range
+    setCursor(today); setFrom(today); setTo(''); setPicking(true)
+  }
 
   const title = view === 'Month' ? c.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
     : view === 'Week' ? (() => { const a = startOfWeek(c), b = add(a, 6); return `${a.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${b.toLocaleDateString('en-US', a.getMonth() === b.getMonth() ? { day: 'numeric' } : { month: 'short', day: 'numeric' })}` })()
@@ -81,9 +106,9 @@ export default function Calendar() {
   )
 
   const empty = (
-    <EmptyState icon={<IconCalendar size={36} />} title={dated.length ? 'Nothing on these dates' : 'Nothing scheduled yet'}
+    <EmptyState icon={<IconCalendar size={36} />} title={dated.length ? 'Nothing on these dates' : cat !== 'All' && all.length ? `No ${cat.toLowerCase()} yet` : 'Nothing scheduled yet'}
       action={<Link to="/discover" className="flex min-h-11 items-center text-sm no-underline">Back to Discover</Link>}>
-      {dated.length ? 'Days with a dot have something on. Try another day or week.' : 'When spaces and Facilitators publish retreats, trainings and classes, they’ll show up here by day. Seen a poster for something nearby? Share it.'}
+      {dated.length ? 'Days with a dot have something on. Try another day, a longer period, or All.' : cat !== 'All' && all.length ? 'Try another type, or All to see everything on.' : 'When spaces and Facilitators publish retreats, trainings and classes, they’ll show up here by day. Seen a poster for something nearby? Share it.'}
     </EmptyState>
   )
 
@@ -93,6 +118,19 @@ export default function Calendar() {
         <div className="flex items-end justify-between gap-3">
           <H1>Calendar</H1>
           <Link to="/events/new" className="mb-1 flex min-h-10 flex-none items-center rounded-full border border-line-2 px-3.5 text-[13px] text-text no-underline">+ Share an event</Link>
+        </div>
+        <div className="flex flex-col gap-2">
+          <span className="text-xs tracking-[0.14em] text-subtle uppercase">I’m looking for</span>
+          <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-0.5" role="group" aria-label="Filter by type">
+            {['All', ...CATEGORIES.map((c) => c.label)].map((l) => <Chip key={l} on={cat === l} dim={l !== 'All' && !has(l)} onClick={() => setCat(l)}>{l}</Chip>)}
+          </div>
+        </div>
+        <div className="flex flex-col gap-2">
+          <span className="text-xs tracking-[0.14em] text-subtle uppercase">When</span>
+          <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-0.5" role="group" aria-label="Choose a period">
+            {QUICK.map((q) => <Chip key={q} solid on={quick === q} onClick={() => choose(q)}>{q}</Chip>)}
+          </div>
+          {quick === 'Choose dates' && picking && <span className="text-[12px] text-gold-soft">Tap a start date, then an end date on the calendar below.</span>}
         </div>
         <Segmented options={['Month', 'Week', 'Day'] as const} value={view} onChange={changeView} label="Calendar view" />
         {countries.length > 1 && (
@@ -120,9 +158,10 @@ export default function Calendar() {
                     {FLEX.map(([k, label]) => <Chip key={k} solid on={flex === k} onClick={() => setFlex(k)}>{label}</Chip>)}
                   </div>
                 </div>
-                <Picked from={view === 'Day' ? cursor : from} to={view === 'Day' ? '' : to} flex={flex} list={dated} empty={empty} onClear={to ? () => setTo('') : undefined} />
+                <Picked from={view === 'Day' ? cursor : from} to={view === 'Day' ? '' : to} flex={flex} list={dated} empty={empty} onClear={to ? () => { setTo(''); setQuick('') } : undefined} />
               </>
             )}
+        {!loading && <FoundingInvite />}
       </Page>
     </Screen>
   )
@@ -160,7 +199,7 @@ function MonthGrid({ cursor, today, from, to, flex, busyOn, onPick }: {
           )
         })}
       </div>
-      <span className="pt-1 text-[12px] text-subtle">{flex ? `Tap a date or a range. The tinted days around it are your flexible ${flex === 14 ? 'two weeks' : flex === 7 ? 'week' : 'days'}.` : 'Tap a date, then a later one to see a range.'}</span>
+      <span className="pt-1 text-[12px] text-subtle">{flex ? `Tap a date or a range. The tinted days around it are your flexible ${flex === 14 ? 'two weeks' : flex === 7 ? 'week' : 'days'}.` : 'Tap a day to see it, or tap two days to see everything in between.'}</span>
     </div>
   )
 }
