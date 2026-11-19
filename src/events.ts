@@ -149,7 +149,10 @@ export function categoriesOf(e: Sortable): Set<string> {
     if ((e.tags ?? []).some((t) => c.tags.includes(t)) || (e.practices ?? []).some((p) => c.practices?.includes(p))
       || (!!e.format && !!c.formats?.includes(e.format))) out.add(c.label)
   }
-  for (const l of categoriesIn(`${e.title ?? ''}. ${e.description ?? ''}`)) out.add(l)
+  // Kids' programs: the description talks about what children do ("mindfulness", "yoga games"), which isn't an adult
+  // class. Their tags place them; only the title is read for more.
+  const kids = (e.tags ?? []).includes('Kids & family')
+  for (const l of categoriesIn(kids ? (e.title ?? '') : `${e.title ?? ''}. ${e.description ?? ''}`)) out.add(l)
   cache.set(e, out)
   return out
 }
