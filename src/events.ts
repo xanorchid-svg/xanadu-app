@@ -22,36 +22,68 @@ export const EMPTY_EVENT: EventDraft = {
 }
 
 /** What the community calendar is for (the same list the poster reader and the WhatsApp scan use). */
-export const EVENT_TAGS = ['Yoga', 'Acro', 'Breathwork', 'Meditation', 'Sound healing', 'Music', 'Dance', 'Ecstatic dance', 'Healing', 'Embodiment', 'Womb work',
-  "Women's circle", "Men's circle", 'Family constellations', 'Inner work', 'Kirtan', 'Cacao', 'Reiki', 'Bodywork', 'Workshop', 'Retreat', 'Community gathering',
-  'Kids & family', 'Nature & adventure', 'Art & creativity'] as const
+export const EVENT_TAGS = ['Yoga', 'Pilates', 'Acro', 'Dance', 'Ecstatic dance', 'Contact improv', 'Martial arts', 'Surf & ocean',
+  'Meditation', 'Breathwork', 'Sound healing', 'Healing', 'Bodywork', 'Reiki', 'Ice bath & sauna',
+  'Inner work', 'Family constellations', 'Embodiment', 'Tantra',
+  "Women's circle", 'Womb work', "Men's circle", 'Cacao', 'Moon gathering', 'Music', 'Kirtan', 'Community gathering', 'Festival',
+  'Art & creativity', 'Writing', 'Theater', 'Workshop', 'Retreat', 'Language',
+  'Kids & family', 'Nature & adventure', 'Permaculture', 'Volunteering'] as const
 
 /**
- * The Calendar's and Discover's types. Each groups community-event tags and experience practices/formats,
- * so a seeker can ask for "Sound healing" and see sound baths and sound journeys together.
- * Seekers can pick several at once; an event shows if it fits any of them.
+ * The types seekers filter by on the Calendar, Discover and in Filters. Each groups community-event tags and
+ * experience practices/formats, so "Sound healing" shows sound baths and sound journeys together.
  */
 export const CATEGORIES: { label: string; tags: string[]; practices?: string[]; formats?: string[] }[] = [
+  // Move
   { label: 'Yoga', tags: ['Yoga'], practices: ['Yoga'] },
+  { label: 'Pilates & mobility', tags: ['Pilates'] },
+  { label: 'Acro & aerial', tags: ['Acro'] },
   { label: 'Ecstatic dance', tags: ['Ecstatic dance'], practices: ['Ecstatic dance'] },
-  { label: 'Music', tags: ['Music', 'Kirtan'], practices: ['Kirtan'] },
-  { label: 'Sound healing', tags: ['Sound healing'], practices: ['Sound'] },
+  { label: 'Dance & movement', tags: ['Dance', 'Ecstatic dance'], practices: ['Ecstatic dance'] },
+  { label: 'Contact improv', tags: ['Contact improv'] },
+  { label: 'Martial arts', tags: ['Martial arts'] },
+  { label: 'Surf & ocean', tags: ['Surf & ocean'] },
+  // Still & heal
   { label: 'Meditation', tags: ['Meditation'], practices: ['Meditation'] },
   { label: 'Breathwork', tags: ['Breathwork'], practices: ['Breathwork'] },
-  { label: 'Dance & movement', tags: ['Dance', 'Ecstatic dance'], practices: ['Ecstatic dance'] },
-  { label: 'Acro', tags: ['Acro'] },
+  { label: 'Sound healing', tags: ['Sound healing'], practices: ['Sound'] },
+  { label: 'Healing & bodywork', tags: ['Healing', 'Bodywork', 'Reiki'], practices: ['Bodywork & therapy'] },
+  { label: 'Ice bath & sauna', tags: ['Ice bath & sauna'] },
+  // Inner work
+  { label: 'Shadow & inner child', tags: ['Inner work'] },
+  { label: 'Family constellations', tags: ['Family constellations'] },
+  { label: 'Somatic & embodied', tags: ['Embodiment'] },
+  { label: 'Tantra & relating', tags: ['Tantra'] },
+  // Gather
   { label: "Women's", tags: ["Women's circle", 'Womb work'], practices: ["Women's"] },
   { label: "Men's", tags: ["Men's circle"], practices: ["Men's"] },
   { label: 'Cacao & ceremony', tags: ['Cacao'] },
-  { label: 'Inner work', tags: ['Inner work', 'Family constellations', 'Embodiment'] },
-  { label: 'Family constellations', tags: ['Family constellations'] },
-  { label: 'Healing & bodywork', tags: ['Healing', 'Bodywork', 'Reiki'], practices: ['Bodywork & therapy'] },
+  { label: 'Moon gatherings', tags: ['Moon gathering'] },
+  { label: 'Music & jams', tags: ['Music', 'Kirtan'], practices: ['Kirtan'] },
   { label: 'Community gatherings', tags: ['Community gathering'] },
+  { label: 'Festivals & parties', tags: ['Festival'] },
+  // Create & learn
+  { label: 'Art & creativity', tags: ['Art & creativity'] },
+  { label: 'Writing', tags: ['Writing'] },
+  { label: 'Theater & improv', tags: ['Theater'] },
   { label: 'Workshops & trainings', tags: ['Workshop'], practices: ['Trainings'], formats: ['Training'] },
   { label: 'Retreats', tags: ['Retreat'], formats: ['Retreat'] },
+  { label: 'Spanish & languages', tags: ['Language'] },
+  // Family & nature
   { label: 'Kids & family', tags: ['Kids & family'] },
   { label: 'Nature & adventure', tags: ['Nature & adventure'] },
-  { label: 'Art & creativity', tags: ['Art & creativity'] },
+  { label: 'Permaculture & garden', tags: ['Permaculture'] },
+  { label: 'Volunteering', tags: ['Volunteering'] },
+]
+
+/** The types in six families, so the filter row stays short: tap a family for all of it, or open it to pick. */
+export const FAMILIES: { label: string; types: string[] }[] = [
+  { label: 'Move', types: ['Yoga', 'Pilates & mobility', 'Acro & aerial', 'Ecstatic dance', 'Dance & movement', 'Contact improv', 'Martial arts', 'Surf & ocean'] },
+  { label: 'Still & heal', types: ['Meditation', 'Breathwork', 'Sound healing', 'Healing & bodywork', 'Ice bath & sauna'] },
+  { label: 'Inner work', types: ['Shadow & inner child', 'Family constellations', 'Somatic & embodied', 'Tantra & relating'] },
+  { label: 'Gather', types: ["Women's", "Men's", 'Cacao & ceremony', 'Moon gatherings', 'Music & jams', 'Community gatherings', 'Festivals & parties'] },
+  { label: 'Create & learn', types: ['Art & creativity', 'Writing', 'Theater & improv', 'Workshops & trainings', 'Retreats', 'Spanish & languages'] },
+  { label: 'Family & nature', types: ['Kids & family', 'Nature & adventure', 'Permaculture & garden', 'Volunteering'] },
 ]
 
 /**
@@ -61,25 +93,39 @@ export const CATEGORIES: { label: string; tags: string[]; practices?: string[]; 
  */
 const KEYWORDS: Record<string, RegExp> = {
   'Yoga': /\b(yoga|yin|vinyasa|hatha|ashtanga|asanas?|nidra|kundalini|acro ?yoga)\b/,
+  'Pilates & mobility': /\b(pilates|mobility|stretch\w*|barre|reformer|functional (training|movement)|fitness)\b/,
+  'Acro & aerial': /\b(acro|acroyoga|acro ?yoga|partner yoga|acrobatic\w*|aerial\w*|silks|trapeze|circus|handstands?|hoop)\b/,
   'Ecstatic dance': /\b(ecstatic)\b/,
-  'Music': /\b(music|musical|musicians?|drums?|drumming|drum circles?|music jams?|jam sessions?|concerts?|live (band|set|music)|dj|djs|kirtan|songs?|singing|sing-?along|guitar|bands?)\b/,
+  'Dance & movement': /\b(danc\w*|ecstatic|5 ?rhythms|qi ?gong|tai chi|salsa|bachata|tango|(conscious|free|authentic) movement|movement (practice|medicine))\b/,
+  'Contact improv': /\b(contact improv\w*|contact dance)\b/,
+  'Martial arts': /\b(martial arts?|capoeira|jiu[- ]?jitsu|bjj|boxing|muay thai|kung fu|karate|aikido|self[- ]defen[cs]e)\b/,
+  'Surf & ocean': /\b(surf\w*|ocean|paddle ?board\w*|snorkel\w*|free ?div\w*|swim\w*|kayak\w*|sea)\b/,
   'Meditation': /\b(meditat\w*|mindful\w*|vipassana|silent|silence|stillness|contemplat\w*|koans?|nidra)\b/,
   'Breathwork': /\b(breath\w*|pranayama|holotropic|wim hof)\b/,
-  'Sound healing': /\b(sound|sound ?baths?|singing bowls?|bowls|gongs?|mantras?|chant\w*|voices?|frequenc\w*|cymatic\w*)\b/,
-  'Dance & movement': /\b(danc\w*|ecstatic|embodi\w*|somatic\w*|5 ?rhythms|contact improv|qi ?gong|tai chi|(conscious|free|authentic) movement|movement (practice|medicine))\b/,
-  'Acro': /\b(acro|acroyoga|acro ?yoga|partner yoga|acrobatic\w*|aerial\w*|silks|trapeze|circus|handstands?|contact improv)\b/,
+  'Sound healing': /\b(sound|sound ?baths?|sound bowls?|bowls|gongs?|mantras?|chant\w*|voices?|frequenc\w*|cymatic\w*)\b/,
+  'Healing & bodywork': /\b(heal\w*|bodywork|massage|reiki|acupuncture|craniosacral|chiropract\w*|osteopath\w*|myofascial|lymphatic|cupping|therap\w*|detox|cleanse|water ?fast\w*|fasting|recovery)\b/,
+  'Ice bath & sauna': /\b(ice ?baths?|cold (plunge\w*|water|exposure)|sauna\w*|temazcal|sweat lodge|wim hof|contrast therapy)\b/,
+  'Shadow & inner child': /\b(inner work|shadow ?work|shadow|inner child|archetypes?|rage|grief|self-?love|internal family systems|ifs|parts work|drama therapy|psychodrama|enneagram|death|die|dying|release|integration)\b/,
+  'Family constellations': /\b(constellations?|systemic)\b/,
+  'Somatic & embodied': /\b(somatic\w*|embodi\w*|trauma\w*|nervous system|polyvagal|body awareness|trust the body)\b/,
+  'Tantra & relating': /\b(tantra\w*|circling|authentic relating|relational|connection practices?|intimacy|couples?)\b/,
   "Women's": /\b(women'?s|womens|woman|sisterhood|sisters|goddess\w*|feminine|womb|red tent|red temple|moon ?time|menstrua\w*)\b/,
   "Men's": /\b(men'?s|mens|brotherhood|brothers|masculine)\b/,
-  'Cacao & ceremony': /\b(cacao|ceremon\w*|rituals?|full moon|new moon|temazcal|plant medicine)\b/,
-  'Inner work': /\b(inner work|shadow ?work|shadow|inner child|constellations?|somatic\w*|embodied healing|trauma\w*|internal family systems|ifs|parts work|archetypes?|rage|grief|self-?love|tantra\w*|circling|authentic relating|relational|drama therapy|psychodrama|enneagram|inquiry|koans?|death|die|dying|release|integration)\b/,
-  'Family constellations': /\b(constellations?|systemic)\b/,
-  'Healing & bodywork': /\b(heal\w*|bodywork|massage|reiki|acupuncture|craniosacral|chiropract\w*|osteopath\w*|myofascial|lymphatic|thai massage|cupping|therap\w*|detox|cleanse|water ?fast\w*|fasting|recovery)\b/,
-  'Community gatherings': /\b(potlucks?|dinners?|suppers?|brunch|feasts?|community (gathering|meal|party|night|celebration)|(community|social) gatherings?|part(y|ies)|socials?|meet-?ups?|mixers?|bonfires?|fire circles?|drum circles?|open mic)\b/,
+  'Cacao & ceremony': /\b(cacao|ceremon\w*|rituals?|temazcal|plant medicine)\b/,
+  'Moon gatherings': /\b(full moon|new moon|moon (circle|gathering|ceremony|ritual)|equinox|solstice|eclipse)\b/,
+  'Music & jams': /\b(music|musical|musicians?|drums?|drumming|drum circles?|music jams?|jam sessions?|jammings?|concerts?|live (band|set|music)|dj|djs|kirtan|songs?|singing|sing-?along|guitar|bands?|open mic)\b/,
+  'Community gatherings': /\b(potlucks?|dinners?|suppers?|brunch|feasts?|community (gathering|meal|night|celebration)|(community|social) gatherings?|socials?|meet-?ups?|mixers?|bonfires?|fire circles?|drum circles?|open mic)\b/,
+  'Festivals & parties': /\b(festivals?|fest|part(y|ies)|celebrat\w*|carnival|fiesta|gala)\b/,
+  'Art & creativity': /\b(art|arts|artist\w*|paint\w*|pottery|ceramic\w*|clay|craft\w*|drawing|creativ\w*|photograph\w*)\b/,
+  'Writing': /\b(writing|writers?|poetry|poems?|poets?|journal\w*|storytelling|book club)\b/,
+  'Theater & improv': /\b(theat(er|re)|drama|improv|acting|clown\w*|performance|play reading)\b/,
   'Workshops & trainings': /\b(workshops?|trainings?|teacher training|certifications?|courses?|masterclass|ytt)\b/,
   'Retreats': /\b(retreats?|residenc\w*|residential|(four|five|six|seven|eight|nine|ten|[4-9]|[1-9]\d)[- ]day)\b/,
+  'Spanish & languages': /\b(spanish|español|espanol|language (exchange|class\w*|school)|english class\w*|intercambio)\b/,
   'Kids & family': /\b(kids?|children|families|parents?|all ages|ages \d+|toddlers?|teens?|family (day|workshop|yoga|friendly))\b/,
-  'Nature & adventure': /\b(hikes?|hiking|trails?|surf\w*|swim\w*|ocean|jungle|rivers?|riverbanks?|waterfalls?|snorkel\w*|kayak\w*|paddle\w*|plant walk|nature|outdoors?|permaculture|garden\w*)\b/,
-  'Art & creativity': /\b(art|arts|artist\w*|paint\w*|pottery|ceramic\w*|clay|craft\w*|drawing|creativ\w*|writing|drama|theatre|theater|photograph\w*)\b/,
+  'Nature & adventure': /\b(hikes?|hiking|trails?|jungle|rivers?|riverbanks?|waterfalls?|plant walk|nature|outdoors?|horse\w*|turtles?|birding|bird ?watching|camping|adventure\w*)\b/,
+  'Permaculture & garden': /\b(permaculture|garden\w*|farm\w*|seed (swap|saving)|compost\w*|ferment\w*|food forest)\b/,
+  'Volunteering': /\b(volunteer\w*|beach clean\w*|clean[- ]?ups?|tree planting|reforest\w*|conservation|community service)\b/,
 }
 
 /** Lower-case text with "sound healing" read as sound, not general healing. */
@@ -356,4 +402,12 @@ export function useMemberReviews(kind: ReviewTarget, id: string | undefined) {
     return () => { live = false }
   }, [kind, id])
   return s
+}
+
+/** "Move, Breathwork" — whole families by their name, single types as themselves. */
+export function typesLabel(types: string[]): string {
+  const left = new Set(types)
+  const out: string[] = []
+  for (const f of FAMILIES) if (f.types.every((t) => left.has(t))) { out.push(f.label); f.types.forEach((t) => left.delete(t)) }
+  return [...out, ...left].join(', ')
 }

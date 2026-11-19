@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Chip, EmptyState, Glow, H1, H2, Page, RowLink, Screen, SeekerTabs } from '../../components/ui'
+import { EmptyState, Glow, H1, H2, Page, RowLink, Screen, SeekerTabs } from '../../components/ui'
 import { IconSearch } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
 import FilterSheet from '../../components/FilterSheet'
@@ -12,7 +12,8 @@ import { activeCount, destinations, NO_FILTERS, passes, sortListings, spacePasse
 import { Bell } from '../../components/Bell'
 import ApplicationBanner from '../../components/ApplicationBanner'
 import CommunityEventCard from '../../components/CommunityEventCard'
-import { CATEGORIES, categoriesIn, inCategory, matchEvents, nextOfEach, useCommunityEvents, useGoingCounts, type CommunityEvent } from '../../events'
+import TypePicker from '../../components/TypePicker'
+import { categoriesIn, inCategory, matchEvents, nextOfEach, useCommunityEvents, useGoingCounts, type CommunityEvent } from '../../events'
 
 const isoDay = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 /** "6:30 pm" → minutes after midnight (unknown times sort last). */
@@ -24,7 +25,6 @@ const minutes = (t: string) => {
 }
 
 /** The same filters as the Calendar, so "Sound healing" means the same thing everywhere. */
-const TYPES = ['All', ...CATEGORIES.map((c) => c.label)]
 const evText = (e: CommunityEvent) => `${e.title} ${e.description} ${e.venue} ${e.town} ${e.tags.join(' ')}`.toLowerCase()
 
 function SpaceRow({ s, wide = false }: { s: PublicSpace; wide?: boolean }) {
@@ -52,7 +52,6 @@ function SpaceRow({ s, wide = false }: { s: PublicSpace; wide?: boolean }) {
 
 export default function Discover() {
   const [picked, setPicked] = useState<string[]>([]) // none = All; several = any of them
-  const toggleType = (t: string) => setPicked((p) => t === 'All' ? [] : p.includes(t) ? p.filter((x) => x !== t) : [...p, t])
   const [query, setQuery] = useState('')
   const [f, setF] = useFilters()
   const [sheet, setSheet] = useState(false)
@@ -129,9 +128,7 @@ export default function Discover() {
           </button>
         </div>
 
-        <div className="-mx-5 flex gap-2 overflow-x-auto px-5">
-          {TYPES.map((p) => <Chip key={p} solid on={p === 'All' ? !picked.length : picked.includes(p)} dim={!typeHas(p)} onClick={() => toggleType(p)}>{p}</Chip>)}
-        </div>
+        <TypePicker value={picked} onChange={setPicked} has={typeHas} />
         {filtering && <button type="button" onClick={clearAll} className="-mt-3 min-h-9 self-start text-[13px] text-gold-soft">Clear search and filters</button>}
 
         {!filtering && (forYou.length > 0 ? (

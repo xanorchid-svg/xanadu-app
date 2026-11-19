@@ -5,7 +5,8 @@ import { IconBack, IconCalendar, IconNext } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
 import CommunityEventCard from '../../components/CommunityEventCard'
 import FoundingInvite from '../../components/FoundingInvite'
-import { CATEGORIES, inCategory, useCommunityEvents, type CommunityEvent } from '../../events'
+import { CATEGORIES, inCategory, typesLabel, useCommunityEvents, type CommunityEvent } from '../../events'
+import TypePicker from '../../components/TypePicker'
 import { useListings, type Listing } from '../../store'
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -62,7 +63,6 @@ export default function Calendar() {
   ].sort((a, b) => (a.start_date ?? '').localeCompare(b.start_date ?? '') || minutes(timeOf(a)) - minutes(timeOf(b)))
   const dated = cats.length ? all.filter((e) => cats.some((c) => inCategory(e, c))) : all
   const has = (label: string) => all.some((e) => inCategory(e, label))
-  const toggle = (l: string) => setCats((c) => (l === 'All' ? [] : c.includes(l) ? c.filter((x) => x !== l) : [...c, l]))
 
   /** Quick periods: one tap for the common questions ("what's on this weekend?"). */
   const choose = (q: Quick) => {
@@ -112,13 +112,9 @@ export default function Calendar() {
         <div className="flex flex-col gap-2">
           <div className="flex items-baseline justify-between gap-3">
             <span className="text-xs tracking-[0.14em] text-subtle uppercase">I’m looking for</span>
-            <span className="text-[12px] text-faint">{cats.length ? `${cats.length} chosen` : 'Pick as many as you like'}</span>
+            <span className="text-[12px] text-faint">{cats.length ? typesLabel(cats) : 'Pick as many as you like'}</span>
           </div>
-          <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-0.5" role="group" aria-label="Filter by type">
-            {['All', ...CATEGORIES.map((c) => c.label)].map((l) => (
-              <Chip key={l} on={l === 'All' ? !cats.length : cats.includes(l)} dim={l !== 'All' && !has(l)} onClick={() => toggle(l)}>{l}</Chip>
-            ))}
-          </div>
+          <TypePicker value={cats} onChange={setCats} has={has} />
         </div>
 
         <div className="flex flex-col gap-2">
@@ -137,7 +133,7 @@ export default function Calendar() {
         <div className="flex items-center justify-between gap-3 rounded-[18px] bg-surface px-4 py-3">
           <div className="flex min-w-0 flex-col">
             <span className="truncate font-display text-[20px] leading-tight text-ink">{period}</span>
-            <span className="text-[12px] text-subtle">{loading ? 'Finding what’s on…' : `${on.length} on${cats.length ? ` · ${cats.join(', ')}` : ''}`}</span>
+            <span className="text-[12px] text-subtle">{loading ? 'Finding what’s on…' : `${on.length} on${cats.length ? ` · ${typesLabel(cats)}` : ''}`}</span>
           </div>
           <button type="button" onClick={() => setPicking((p) => !p)} aria-expanded={picking}
             className={`flex min-h-10 flex-none items-center gap-1.5 rounded-full border px-3.5 text-[13px] ${picking ? 'border-gold bg-gold/15 text-gold-pale' : 'border-line-2 text-text'}`}>
@@ -162,7 +158,7 @@ export default function Calendar() {
             ))}
           </div>
         ) : (
-          <EmptyState icon={<IconCalendar size={36} />} title={cats.length ? `No ${cats.length === 1 ? cats[0].toLowerCase() : 'events of these types'} on these dates` : 'Nothing on these dates'}
+          <EmptyState icon={<IconCalendar size={36} />} title={cats.length ? `No ${typesLabel(cats).toLowerCase()} on these dates` : 'Nothing on these dates'}
             action={<button type="button" onClick={() => setPicking(true)} className="flex min-h-11 items-center text-sm font-semibold text-gold-soft">Pick other dates</button>}>
             {all.length ? 'Try a longer period, another type, or see what’s coming up next below.' : 'When spaces and Facilitators publish classes, circles and retreats, they’ll show up here by day. Seen a poster for something nearby? Share it.'}
           </EmptyState>

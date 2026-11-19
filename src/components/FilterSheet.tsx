@@ -4,7 +4,8 @@ import { Chip, Field, inputCls } from './ui'
 import { IconClose } from './icons'
 import { FLEX, LENGTHS, NO_FILTERS, SORTS, TYPES, WORK, passes, priceCeiling, spacePasses, toggled, type Filters } from '../filters'
 import type { Listing, PublicSpace } from '../store'
-import { CATEGORIES, inCategory, type CommunityEvent } from '../events'
+import { inCategory, type CommunityEvent } from '../events'
+import TypePicker from './TypePicker'
 
 const Section = ({ title, aside, children }: { title: string; aside?: ReactNode; children: ReactNode }) => (
   <section className="flex flex-col gap-2.5">
@@ -30,7 +31,6 @@ export default function FilterSheet({ value, kinds: kinds0 = [], events = [], on
   const [f, setF] = useState<Filters>(value)
   // what they're looking for: the same types as the chips under the search bar and the Calendar
   const [kinds, setKinds] = useState<string[]>(kinds0)
-  const toggleKind = (l: string) => setKinds((k) => (l === 'All' ? [] : k.includes(l) ? k.filter((x) => x !== l) : [...k, l]))
   const fitsKinds = (e: Parameters<typeof inCategory>[0]) => !kinds.length || kinds.some((k) => inCategory(e, k))
   const set = (patch: Partial<Filters>) => setF((x) => ({ ...x, ...patch }))
 
@@ -62,9 +62,7 @@ export default function FilterSheet({ value, kinds: kinds0 = [], events = [], on
 
         <div className="flex flex-col gap-6 overflow-y-auto px-5 py-5">
           <Section title="I’m looking for" aside={<span className="text-[12px] text-faint">Pick as many as you like</span>}>
-            {['All', ...CATEGORIES.map((c) => c.label)].map((l) => (
-              <Chip key={l} on={l === 'All' ? !kinds.length : kinds.includes(l)} dim={l !== 'All' && !events.some((e) => inCategory(e, l)) && !listings.some((e) => inCategory(e, l))} onClick={() => toggleKind(l)}>{l}</Chip>
-            ))}
+            <div className="w-full"><TypePicker inset={false} value={kinds} onChange={setKinds} has={(l) => events.some((e) => inCategory(e, l)) || listings.some((e) => inCategory(e, l))} /></div>
           </Section>
           <Section title="Format">
             {TYPES.map(([k, label]) => {
