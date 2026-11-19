@@ -23,7 +23,7 @@ export const EMPTY_EVENT: EventDraft = {
 
 /** What the community calendar is for (the same list the poster reader and the WhatsApp scan use). */
 export const EVENT_TAGS = ['Yoga', 'Acro', 'Breathwork', 'Meditation', 'Sound healing', 'Music', 'Dance', 'Ecstatic dance', 'Healing', 'Embodiment', 'Womb work',
-  "Women's circle", "Men's circle", 'Family constellations', 'Kirtan', 'Cacao', 'Reiki', 'Bodywork', 'Workshop', 'Retreat', 'Community gathering',
+  "Women's circle", "Men's circle", 'Family constellations', 'Inner work', 'Kirtan', 'Cacao', 'Reiki', 'Bodywork', 'Workshop', 'Retreat', 'Community gathering',
   'Kids & family', 'Nature & adventure', 'Art & creativity'] as const
 
 /**
@@ -43,6 +43,7 @@ export const CATEGORIES: { label: string; tags: string[]; practices?: string[]; 
   { label: "Women's", tags: ["Women's circle", 'Womb work'], practices: ["Women's"] },
   { label: "Men's", tags: ["Men's circle"], practices: ["Men's"] },
   { label: 'Cacao & ceremony', tags: ['Cacao'] },
+  { label: 'Inner work', tags: ['Inner work', 'Family constellations', 'Embodiment'] },
   { label: 'Family constellations', tags: ['Family constellations'] },
   { label: 'Healing & bodywork', tags: ['Healing', 'Bodywork', 'Reiki'], practices: ['Bodywork & therapy'] },
   { label: 'Community gatherings', tags: ['Community gathering'] },
@@ -66,12 +67,13 @@ const KEYWORDS: Record<string, RegExp> = {
   'Breathwork': /\b(breath\w*|pranayama|holotropic|wim hof)\b/,
   'Sound healing': /\b(sound|sound ?baths?|singing bowls?|bowls|gongs?|mantras?|chant\w*|voices?|frequenc\w*|cymatic\w*)\b/,
   'Dance & movement': /\b(danc\w*|ecstatic|embodi\w*|somatic\w*|5 ?rhythms|contact improv|qi ?gong|tai chi|(conscious|free|authentic) movement|movement (practice|medicine))\b/,
-  'Acro': /\b(acro|acroyoga|acro ?yoga|partner yoga|acrobatic\w*|aerial\w*|circus|handstands?|contact improv)\b/,
+  'Acro': /\b(acro|acroyoga|acro ?yoga|partner yoga|acrobatic\w*|aerial\w*|silks|trapeze|circus|handstands?|contact improv)\b/,
   "Women's": /\b(women'?s|womens|woman|sisterhood|sisters|goddess\w*|feminine|womb|red tent|red temple|moon ?time|menstrua\w*)\b/,
   "Men's": /\b(men'?s|mens|brotherhood|brothers|masculine)\b/,
   'Cacao & ceremony': /\b(cacao|ceremon\w*|rituals?|full moon|new moon|temazcal|plant medicine)\b/,
+  'Inner work': /\b(inner work|shadow ?work|shadow|inner child|constellations?|somatic\w*|embodied healing|trauma\w*|internal family systems|ifs|parts work|archetypes?|rage|grief|self-?love|tantra\w*|circling|authentic relating|relational|drama therapy|psychodrama|enneagram|inquiry|koans?|death|die|dying|release|integration)\b/,
   'Family constellations': /\b(constellations?|systemic)\b/,
-  'Healing & bodywork': /\b(heal\w*|bodywork|massage|reiki|acupuncture|craniosacral|constellations?|therap\w*|detox|cleanse|water ?fast\w*|fasting|recovery)\b/,
+  'Healing & bodywork': /\b(heal\w*|bodywork|massage|reiki|acupuncture|craniosacral|chiropract\w*|osteopath\w*|myofascial|lymphatic|thai massage|cupping|therap\w*|detox|cleanse|water ?fast\w*|fasting|recovery)\b/,
   'Community gatherings': /\b(potlucks?|dinners?|suppers?|brunch|feasts?|community (gathering|meal|party|night|celebration)|(community|social) gatherings?|part(y|ies)|socials?|meet-?ups?|mixers?|bonfires?|fire circles?|drum circles?|open mic)\b/,
   'Workshops & trainings': /\b(workshops?|trainings?|teacher training|certifications?|courses?|masterclass|ytt)\b/,
   'Retreats': /\b(retreats?|residenc\w*|residential|(four|five|six|seven|eight|nine|ten|[4-9]|[1-9]\d)[- ]day)\b/,
