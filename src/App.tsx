@@ -37,6 +37,10 @@ const Messages = lazy(() => import('./screens/messages/Messages'))
 const Thread = lazy(() => import('./screens/messages/Thread'))
 const Compose = lazy(() => import('./screens/messages/Compose'))
 const Notifications = lazy(() => import('./screens/Notifications'))
+const Sessions = lazy(() => import('./screens/sessions/Sessions'))
+const ServicePage = lazy(() => import('./screens/sessions/ServicePage'))
+const MySessions = lazy(() => import('./screens/facilitator/Sessions'))
+const EditSession = lazy(() => import('./screens/facilitator/Sessions').then((m) => ({ default: m.EditSession })))
 
 /** Once signed in, quietly fetch the screens this member is most likely to open next, so tabs open instantly. */
 function usePrefetch() {
@@ -106,6 +110,8 @@ export default function App() {
           <Route path="/experience/:id" element={<RequireRole role="any"><Experience /></RequireRole>} />
           <Route path="/space/:id" element={<RequireRole role="any"><Space /></RequireRole>} />
           <Route path="/event/:id" element={<RequireRole role="any"><EventPage /></RequireRole>} />
+          <Route path="/sessions" element={<RequireRole role="any"><Sessions /></RequireRole>} />
+          <Route path="/service/:id" element={<RequireRole role="any"><ServicePage /></RequireRole>} />
           <Route path="/events/new" element={<RequireRole role="any"><ShareEvent /></RequireRole>} />
           <Route path="/saved" element={<RequireRole role="seeker"><Saved /></RequireRole>} />
           <Route path="/you" element={<RequireRole role="seeker"><You /></RequireRole>} />
@@ -137,6 +143,8 @@ export default function App() {
           <Route path="/facilitator/offering" element={<RequireRole role="facilitator"><ManageOffering /></RequireRole>} />
           <Route path="/facilitator/inbox" element={<Navigate to="/messages" replace />} />
           <Route path="/facilitator/profile" element={<RequireRole role="facilitator"><FacilitatorProfile /></RequireRole>} />
+          <Route path="/facilitator/sessions" element={<RequireRole role="facilitator"><MySessions /></RequireRole>} />
+          <Route path="/facilitator/sessions/edit" element={<RequireRole role="facilitator"><EditSession /></RequireRole>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

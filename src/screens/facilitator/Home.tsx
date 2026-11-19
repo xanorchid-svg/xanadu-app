@@ -66,6 +66,12 @@ export default function FacilitatorHome() {
           <span className="text-[13px] leading-normal text-subtle">After each experience, Seekers who sat with you can vouch for you.</span>
         </section>
 
+        <Link to="/facilitator/sessions" className="ring-iri flex flex-col gap-1 rounded-[20px] bg-plum/60 p-[18px] text-text no-underline">
+          <span className="text-iri text-[11px] font-semibold tracking-[0.18em] uppercase">New · Sessions</span>
+          <span className="font-display text-[22px] leading-tight text-ink">Offer your one-on-one work</span>
+          <span className="text-[13px] text-muted">Bodywork, readings, coaching, private classes, private chef… The community finds you under Sessions, and you’re told when someone’s interested. ›</span>
+        </Link>
+
         <section className="flex flex-col gap-2.5">
           <div className="flex items-baseline justify-between">
             <H2>Your offerings</H2>

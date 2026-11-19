@@ -51,6 +51,11 @@ export default function ContainerHome() {
           </EmptyState>}
         </section>
 
+        <Link to={`/sessions?cat=${encodeURIComponent('Retreat support')}`} className="flex flex-col gap-0.5 rounded-[18px] bg-surface p-4 text-text no-underline">
+          <span className="text-[15px] font-semibold text-ink">Retreat support ›</span>
+          <span className="text-[13px] leading-snug text-subtle">Private chefs, photo & video, transport and retreat assistants from the community, for the retreats you host.</span>
+        </Link>
+
         <section className="flex items-center gap-3.5 rounded-[18px] border border-line-2 p-4">
           <IconPeople size={28} className="flex-none text-gold-soft" />
           <div className="flex flex-col gap-0.5">

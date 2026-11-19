@@ -176,6 +176,12 @@ export default function Calendar() {
           </section>
         )}
 
+        {!loading && (
+          <Link to="/sessions" className="flex flex-col gap-0.5 rounded-[18px] bg-surface px-4 py-3.5 text-text no-underline">
+            <span className="text-[15px] font-semibold text-ink">Looking for one-on-one? ›</span>
+            <span className="text-[13px] text-subtle">Massage, guidance, private classes and more, with practitioners Xanadu has welcomed.</span>
+          </Link>
+        )}
         {!loading && <FoundingInvite />}
       </Page>
     </Screen>

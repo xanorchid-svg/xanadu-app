@@ -1,0 +1,10 @@
+-- Applied Nov 19, 2026 (migrations sessions_services, facilitator_trust, + revoke on services_guard).
+-- Sessions: one-on-one services offered by Facilitators Xanadu has approved. Built on trust:
+--   * only approved Facilitators can post (insert policy), and only their live services are shown;
+--   * the team can take a service down (status 'removed'); only the team can bring it back;
+--   * "I'm interested" (service_interest) tells the Facilitator (notification 'service_interest', grouped per service);
+--   * facilitator_trust() ranks practitioners by their community reviews so the most trusted come first.
+-- Tables: public.services, public.service_interest
+-- Functions: services_guard (trigger), service_interest_notify (trigger), service_interest_info(uuid),
+--            my_service_interest(), facilitator_trust(uuid[])
+-- See the migration history in Supabase for the exact statements; summary of rules above.

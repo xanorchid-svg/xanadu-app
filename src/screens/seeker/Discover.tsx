@@ -13,6 +13,8 @@ import { Bell } from '../../components/Bell'
 import ApplicationBanner from '../../components/ApplicationBanner'
 import CommunityEventCard from '../../components/CommunityEventCard'
 import TypePicker from '../../components/TypePicker'
+import ServiceCard from '../../components/ServiceCard'
+import { serviceText, useServices } from '../../sessions'
 import { categoriesIn, inCategory, matchEvents, nextOfEach, useCommunityEvents, useGoingCounts, type CommunityEvent } from '../../events'
 
 const isoDay = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -58,6 +60,7 @@ export default function Discover() {
   const { profile } = useAuth()
   const { matches } = useMatches(6)
   const [keywords] = useMyKeywords()
+  const { services, providers } = useServices()
   const scores = useMatchScores()
   const { events } = useCommunityEvents()
   const goingCounts = useGoingCounts(events.map((e) => e.id))
@@ -91,6 +94,8 @@ export default function Discover() {
   const monthOut = isoDay(new Date(Date.now() + 30 * 86400000))
   const { picks } = matchEvents(events.filter((e) => !e.start_date || e.start_date <= monthOut), { lifestyle, prefs, seeking: profile?.seeking, keywords })
   const forYou = picks.slice(0, 8)
+  // one-on-one sessions answer the search too (not the event types: they aren't dated)
+  const sessionsShown = q ? services.filter((x) => serviceText(x, providers[x.owner_id]).includes(q)).slice(0, 6) : []
   const dests = destinations(listings, spaces)
   const nFilters = activeCount(f)
   const filtering = picked.length > 0 || !!q || nFilters > 0
@@ -179,6 +184,16 @@ export default function Discover() {
             </section>
           ) : null}
 
+        {sessionsShown.length > 0 && (
+          <section className="flex flex-col gap-3">
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex flex-col gap-0.5"><H2>{`${sessionsShown.length} ${sessionsShown.length === 1 ? 'session' : 'sessions'}`}</H2><span className="text-xs text-subtle">One-on-one with practitioners Xanadu has welcomed</span></div>
+              <Link to="/sessions" className="flex min-h-9 flex-none items-center text-[13px] no-underline">All sessions ›</Link>
+            </div>
+            {sessionsShown.map((x) => <ServiceCard key={x.id} s={x} p={providers[x.owner_id]} />)}
+          </section>
+        )}
+
         {filtering && eventsShown.length > 0 && (
           <section className="flex flex-col gap-3">
             <div className="flex items-end justify-between gap-3">
@@ -192,7 +207,7 @@ export default function Discover() {
           </section>
         )}
 
-        {!loading && filtering && shown.length === 0 && eventsShown.length === 0 && (
+        {!loading && filtering && shown.length === 0 && eventsShown.length === 0 && sessionsShown.length === 0 && (
           <EmptyState title={emptyTitle} action={<button type="button" onClick={clearAll} className="flex min-h-11 items-center text-sm font-semibold text-gold-soft">Show everything</button>}>
             {places.length ? 'Nothing coming up matches these choices yet. The spaces below do.' : 'Try another type, a shorter search, or Show everything.'}
           </EmptyState>
@@ -220,6 +235,18 @@ export default function Discover() {
               <span className="text-xs text-subtle">{volunteering ? 'Give your time, receive a place to stay, meals and practice' : 'Founding spaces welcomed by Xanadu'}</span>
             </div>
             <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">{places.map((s) => <SpaceRow key={s.id} s={s} />)}</div>
+          </section>
+        )}
+
+        {!filtering && (
+          <section className="flex flex-col gap-3">
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex flex-col gap-0.5"><H2>Sessions</H2><span className="text-xs text-subtle">One-on-one with practitioners Xanadu has welcomed</span></div>
+              <Link to="/sessions" className="flex min-h-9 flex-none items-center text-[13px] no-underline">See all ›</Link>
+            </div>
+            {services.length > 0
+              ? <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">{services.slice(0, 10).map((x) => <ServiceCard key={x.id} s={x} p={providers[x.owner_id]} wide={false} />)}</div>
+              : <RowLink to="/sessions" title="Bodywork, guidance, private classes, retreat chefs" sub="Trusted practitioners are joining now. See what’s coming." />}
           </section>
         )}
 
