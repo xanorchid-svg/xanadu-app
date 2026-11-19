@@ -49,7 +49,7 @@ const datesOn = (f: Filters) => f.when === 'dates' && !!(f.from || f.to)
 
 /** How many filters are switched on (sort doesn't count). */
 export const activeCount = (f: Filters) =>
-  [f.types.length > 0, !!f.country, !!f.land, datesOn(f), f.lengths.length > 0, f.work !== 'none', f.maxPrice != null].filter(Boolean).length
+  [f.types.length > 0, !!f.country, datesOn(f), f.lengths.length > 0, f.work !== 'none', f.maxPrice != null].filter(Boolean).length
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 const shift = (day: string, n: number) => { const d = new Date(day + 'T12:00:00'); d.setDate(d.getDate() + n); return iso(d) }
@@ -71,7 +71,6 @@ const remoteOk = (s: { lifestyle?: string[] | null } | null | undefined) => (s?.
 export function passes(e: Listing, f: Filters) {
   if (f.types.length && !f.types.includes(e.format)) return false
   if (!inPlace(e.space, f)) return false
-  if (f.land && !(e.space?.lifestyle ?? []).includes(f.land)) return false
   if (f.work === 'volunteer' && !(e.volunteer_exchange || e.space?.volunteer_exchange)) return false
   if (f.work === 'remote' && !remoteOk(e.space)) return false
   if (datesOn(f)) {
@@ -91,7 +90,6 @@ export function passes(e: Listing, f: Filters) {
 /** Spaces shown alongside: only the filters that describe a place apply. */
 export function spacePasses(s: PublicSpace, f: Filters) {
   if (!inPlace(s, f)) return false
-  if (f.land && !(s.lifestyle ?? []).includes(f.land)) return false
   if (f.work === 'volunteer' && !s.volunteer_exchange) return false
   if (f.work === 'remote' && !remoteOk(s)) return false
   return true

@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Chip, EmptyState, Glow, H1, H2, Page, RowLink, Screen, SeekerTabs } from '../../components/ui'
-import { LandChip } from '../../components/Lifestyle'
 import { IconSearch } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
 import FilterSheet from '../../components/FilterSheet'
-import { CONTACT_EMAIL, formatLabel, LANDSCAPES, placeLabel } from '../../data'
+import { CONTACT_EMAIL, formatLabel, placeLabel } from '../../data'
 import { useAuth } from '../../auth'
 import { useMatches, useMatchScores, useMyKeywords } from '../../matching'
 import { useListings, useSpaces, type Listing, type PublicSpace } from '../../store'
@@ -91,7 +90,7 @@ export default function Discover() {
   const typeHas = (l: string) => l === 'All' || events.some((e) => inCategory(e, l)) || listings.some((e) => inCategory(e, l))
   // Picked for you: this month's events that fit what the seeker told us
   const monthOut = isoDay(new Date(Date.now() + 30 * 86400000))
-  const { picks } = matchEvents(events.filter((e) => !e.start_date || e.start_date <= monthOut), { prefs, seeking: profile?.seeking, keywords })
+  const { picks } = matchEvents(events.filter((e) => !e.start_date || e.start_date <= monthOut), { lifestyle, prefs, seeking: profile?.seeking, keywords })
   const forYou = picks.slice(0, 8)
   const dests = destinations(listings, spaces)
   const nFilters = activeCount(f)
@@ -135,34 +134,25 @@ export default function Discover() {
         </div>
         {filtering && <button type="button" onClick={clearAll} className="-mt-3 min-h-9 self-start text-[13px] text-gold-soft">Clear search and filters</button>}
 
-        {!filtering && (lifestyle.length === 0 ? (
-          <Link to="/you" className="ring-iri relative flex flex-col gap-2 overflow-hidden rounded-[22px] bg-plum/70 p-[18px] text-text no-underline">
-            <span aria-hidden className="bg-iri-strong pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full opacity-25 blur-2xl" />
-            <span className="text-iri text-[11px] font-semibold tracking-[0.18em] uppercase">Design your way</span>
-            <span className="font-display text-[24px] leading-tight text-ink">One class, a season, or a place to call home</span>
-            <span className="text-[13px] text-muted">Drop in, stay a while, or join a community. Work remotely, volunteer, or just be. We match you. ›</span>
-          </Link>
-        ) : (
-          <div className="-mx-5 flex items-center gap-2 overflow-x-auto px-5">
-            <span className="flex-none text-xs text-subtle">Your way</span>
-            {LANDSCAPES.filter((l) => lifestyle.includes(l)).map((l) => <LandChip key={l} name={l} on={f.land === l} onClick={() => setF({ ...f, land: f.land === l ? '' : l })} />)}
-            <Link to="/you" className="flex min-h-9 flex-none items-center px-1 text-[13px] no-underline">Edit ›</Link>
-          </div>
-        ))}
-
         {!filtering && (forYou.length > 0 ? (
           <section className="flex flex-col gap-3">
             <div className="flex items-end justify-between gap-3">
-              <div className="flex flex-col gap-0.5"><H2>Picked for you</H2><span className="text-xs text-subtle">Xanadu matched these events to what you're seeking</span></div>
+              <div className="flex flex-col gap-0.5"><H2>Picked for you</H2><span className="text-xs text-subtle">Matched to your way of living and what you're seeking</span></div>
               <Link to="/you" className="flex min-h-9 flex-none items-center text-[13px] no-underline">Refine ›</Link>
             </div>
             <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">
               {forYou.map(({ e, shared }) => <CommunityEventCard key={e.id} e={e} wide={false} note={`For you · ${shared.slice(0, 2).join(', ')}`} />)}
             </div>
           </section>
+        ) : hasWords ? (
+          <RowLink to="/you" title="Nothing this month fits yet" sub="Add to your way of living or your practices and Xanadu will match you as new events land." />
         ) : (
-          <RowLink to="/you" title={hasWords ? 'Nothing this month fits yet' : "Tell us what you're seeking"}
-            sub={hasWords ? 'Add a few more practices or words and Xanadu will match you as new events land.' : 'Pick your practices or describe it in your own words. Xanadu will match you with events and places that fit.'} />
+          <Link to="/you" className="ring-iri relative flex flex-col gap-2 overflow-hidden rounded-[22px] bg-plum/70 p-[18px] text-text no-underline">
+            <span aria-hidden className="bg-iri-strong pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full opacity-25 blur-2xl" />
+            <span className="text-iri text-[11px] font-semibold tracking-[0.18em] uppercase">Design your way</span>
+            <span className="font-display text-[24px] leading-tight text-ink">One class, a weekend, or a season</span>
+            <span className="text-[13px] text-muted">Tell us your way of living and what calls to you. Xanadu will match you. ›</span>
+          </Link>
         ))}
 
         {!filtering && matches.length > 0 && (
@@ -255,7 +245,7 @@ export default function Discover() {
         </section>
       </Page>
 
-      {sheet && <FilterSheet value={f} onClose={() => setSheet(false)} onApply={(next) => { setF(next); setSheet(false) }}
+      {sheet && <FilterSheet value={f} kinds={picked} events={events} onClose={() => setSheet(false)} onApply={(next, k) => { setF(next); setPicked(k); setSheet(false) }}
         listings={listings} spaces={spaces} places={dests} />}
     </Screen>
   )

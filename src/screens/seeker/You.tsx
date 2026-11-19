@@ -9,12 +9,15 @@ import { AvatarPicker, EditFooter, SignOutButton, TextArea, TextField } from '..
 import { useAuth } from '../../auth'
 import { useSeekerProfile, type SeekerProfile } from '../../store'
 import { LifestylePicker } from '../../components/Lifestyle'
+import CommunityEventCard from '../../components/CommunityEventCard'
+import { useMyGoing, whenLabel } from '../../events'
 
 const JOURNEY_TABS = ['Upcoming', 'Past'] as const
 
 export default function You() {
   const [me, save] = useSeekerProfile()
   const [tab, setTab] = useState<(typeof JOURNEY_TABS)[number]>('Upcoming')
+  const going = useMyGoing()
   const { profile, session, updateProfile } = useAuth()
   const joined = new Date(session?.user.created_at ?? Date.now()).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
   const chart = profile?.chart_early ?? false
@@ -67,8 +70,33 @@ export default function You() {
           <button type="button" aria-label="Edit profile" onClick={() => { setDraft(me); setError(''); setEditing(true) }} className="flex h-11 w-11 items-center justify-center rounded-full border border-line text-muted"><IconSettings /></button>
         </div>
 
+
+        <section className="flex flex-col gap-3">
+          <H2 className="text-[22px]">Your journeys</H2>
+          <Segmented label="Journeys" options={JOURNEY_TABS} value={tab} onChange={setTab} />
+          {tab === 'Upcoming' ? (
+            going.upcoming.length ? (
+              <div className="flex flex-col gap-2.5">
+                {going.upcoming.map((e) => <CommunityEventCard key={e.id} e={e} note={`You're going · ${whenLabel(e)}`} />)}
+              </div>
+            ) : (
+              <EmptyState title="No upcoming journeys" action={<Link to="/calendar" className="flex min-h-11 items-center text-sm font-semibold no-underline">See what’s on</Link>}>
+                Tap “I’m going” on any event and it will appear here, with who else is going.
+              </EmptyState>
+            )
+          ) : going.past.length ? (
+            <div className="flex flex-col gap-2.5">
+              {going.past.map((e) => <CommunityEventCard key={e.id} e={e} note={`You went · ${whenLabel(e)}`} />)}
+            </div>
+          ) : (
+            <EmptyState title="No past journeys yet">
+              After each gathering you can leave a review of the space and the facilitator. Reviews help the community choose well.
+            </EmptyState>
+          )}
+        </section>
+
         <section className="ring-iri flex flex-col gap-4 rounded-[22px] bg-plum/60 p-[18px]">
-          <div className="flex flex-col gap-0.5"><H2 className="text-[22px]">Your way of living</H2><span className="text-xs text-subtle">How you want to take part, how you spend your days, and where. We match you to the places and gatherings that fit.</span></div>
+          <div className="flex flex-col gap-0.5"><H2 className="text-[22px]">Your way of living</H2><span className="text-xs text-subtle">How you'd like to take part and how you spend your days. Xanadu matches you to the gatherings and places that fit.</span></div>
           <LifestylePicker value={me.lifestyle} onChange={(v) => save({ ...me, lifestyle: v })} />
         </section>
 
@@ -95,19 +123,6 @@ export default function You() {
           )}
         </section>
 
-        <section className="flex flex-col gap-3">
-          <H2 className="text-[22px]">Your journeys</H2>
-          <Segmented label="Journeys" options={JOURNEY_TABS} value={tab} onChange={setTab} />
-          {tab === 'Upcoming' ? (
-            <EmptyState title="No upcoming journeys" action={<Link to="/discover" className="flex min-h-11 items-center text-sm font-semibold no-underline">Explore Discover</Link>}>
-              Experiences you book will appear here with your schedule and what to bring.
-            </EmptyState>
-          ) : (
-            <EmptyState title="No past journeys yet">
-              After each experience you can leave a review and vouch for the space and facilitator. Vouches help them earn ✦ Verified.
-            </EmptyState>
-          )}
-        </section>
 
         <section className="flex flex-col gap-2.5 rounded-[20px] border border-plum-line bg-[#1A1528] p-[18px]">
           <div className="flex items-center gap-2.5 text-gold-soft"><IconChart /><span className="text-[11px] tracking-[0.16em] uppercase">Coming soon</span></div>

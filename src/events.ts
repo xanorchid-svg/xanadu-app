@@ -118,24 +118,65 @@ export function nextOfEach<T extends { title: string; start_date: string | null 
   return list.filter((e) => { const k = e.title.trim().toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true })
 }
 
+/** How long an event runs, in the words of "Your way of living" (how they'd like to take part). */
+function lengthFits(e: CommunityEvent, lifestyle: string[]): string {
+  if (!e.start_date) return ''
+  const days = Math.round((new Date((e.end_date || e.start_date) + 'T12:00:00').getTime() - new Date(e.start_date + 'T12:00:00').getTime()) / 86400000) + 1
+  if (days === 1 && lifestyle.some((l) => l === 'A class or session' || l === 'Weekly or monthly sessions')) return 'A class or session'
+  if (days >= 2 && days <= 4 && lifestyle.includes('A weekend')) return 'A weekend'
+  if (days >= 5 && lifestyle.some((l) => ['1–3 weeks', 'A month or more', 'A season'].includes(l))) return 'A longer stay'
+  return ''
+}
+
 /**
- * Xanadu's match between a seeker and the events on: what they told us (their practices, their own words
- * and the keywords picked up from them) read through the same filters as the events.
- * Returns upcoming events that share at least one, best fit first, with the filters they share.
+ * Xanadu's match between a seeker and the events on. Led by their way of living (how they'd like to take part:
+ * a class, a weekend, a longer stay), together with their practices, their own words and the keywords picked up
+ * from them, read through the same types as the events.
+ * Returns upcoming events that fit, best fit first, with why ("Yoga, A weekend").
  */
-export function matchEvents(events: CommunityEvent[], seeker: { prefs?: string[]; seeking?: string; keywords?: string[] }) {
+export function matchEvents(events: CommunityEvent[], seeker: { lifestyle?: string[]; prefs?: string[]; seeking?: string; keywords?: string[] }) {
+  const lifestyle = seeker.lifestyle ?? []
   const wants = new Set(categoriesIn([...(seeker.prefs ?? []), seeker.seeking ?? '', ...(seeker.keywords ?? [])].join('. ')))
-  if (!wants.size) return { wants: [] as string[], picks: [] as { e: CommunityEvent; shared: string[] }[] }
+  if (!wants.size && !lifestyle.length) return { wants: [] as string[], picks: [] as { e: CommunityEvent; shared: string[] }[] }
   const picks = events
-    .map((e) => ({ e, shared: [...categoriesOf(e)].filter((l) => wants.has(l)) }))
-    .filter((x) => x.shared.length > 0)
-    // more shared filters first, then the sooner one
-    .sort((a, b) => b.shared.length - a.shared.length || (a.e.start_date ?? '').localeCompare(b.e.start_date ?? ''))
+    .map((e) => {
+      const types = [...categoriesOf(e)].filter((l) => wants.has(l))
+      const length = lengthFits(e, lifestyle)
+      // with practices chosen, a type must match; the way of living then lifts what fits how they take part
+      const ok = wants.size ? types.length > 0 : !!length
+      return { e, ok, score: types.length * 2 + (length ? 1 : 0), shared: [...types, ...(length ? [length] : [])] }
+    })
+    .filter((x) => x.ok)
+    .sort((a, b) => b.score - a.score || (a.e.start_date ?? '').localeCompare(b.e.start_date ?? ''))
   const seen = new Set<string>()
   return {
     wants: [...wants],
-    picks: picks.filter(({ e }) => { const k = e.title.trim().toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true }),
+    picks: picks.filter(({ e }) => { const k = e.title.trim().toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true })
+      .map(({ e, shared }) => ({ e, shared })),
   }
+}
+
+/** Events I said I'm going to: what's ahead, and what's happened (newest first). */
+export function useMyGoing() {
+  const { session } = useAuth()
+  const [state, setState] = useState<{ upcoming: CommunityEvent[]; past: CommunityEvent[]; loading: boolean }>({ upcoming: [], past: [], loading: true })
+  useEffect(() => {
+    if (!session) return
+    let live = true
+    supabase.from('event_going').select('event_id, community_events(*)').eq('user_id', session.user.id).then(({ data }) => {
+      if (!live) return
+      const today = todayIso()
+      const evs = ((data as unknown as { community_events: CommunityEvent | null }[] | null) ?? [])
+        .map((g) => g.community_events).filter((e): e is CommunityEvent => !!e && !!e.start_date)
+      setState({
+        upcoming: evs.filter((e) => (e.end_date || e.start_date)! >= today).sort((a, b) => a.start_date!.localeCompare(b.start_date!)),
+        past: evs.filter((e) => (e.end_date || e.start_date)! < today).sort((a, b) => b.start_date!.localeCompare(a.start_date!)),
+        loading: false,
+      })
+    })
+    return () => { live = false }
+  }, [session])
+  return state
 }
 
 const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }

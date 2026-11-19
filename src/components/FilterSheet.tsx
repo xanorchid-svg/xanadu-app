@@ -4,6 +4,7 @@ import { Chip, Field, inputCls } from './ui'
 import { IconClose } from './icons'
 import { FLEX, LENGTHS, NO_FILTERS, SORTS, TYPES, WORK, passes, priceCeiling, spacePasses, toggled, type Filters } from '../filters'
 import type { Listing, PublicSpace } from '../store'
+import { CATEGORIES, inCategory, type CommunityEvent } from '../events'
 
 const Section = ({ title, aside, children }: { title: string; aside?: ReactNode; children: ReactNode }) => (
   <section className="flex flex-col gap-2.5">
@@ -22,11 +23,15 @@ const money = (n: number) => `$${n.toLocaleString('en-US')}`
  * chips toggle on and off, and an option that would show nothing right now is dimmed (still tappable).
  * The button says how many experiences the choices give.
  */
-export default function FilterSheet({ value, onApply, onClose, listings, spaces, places }: {
-  value: Filters; onApply: (f: Filters) => void; onClose: () => void
+export default function FilterSheet({ value, kinds: kinds0 = [], events = [], onApply, onClose, listings, spaces, places }: {
+  value: Filters; kinds?: string[]; events?: CommunityEvent[]; onApply: (f: Filters, kinds: string[]) => void; onClose: () => void
   listings: Listing[]; spaces: PublicSpace[]; places: { country: string; regions: string[] }[]
 }) {
   const [f, setF] = useState<Filters>(value)
+  // what they're looking for: the same types as the chips under the search bar and the Calendar
+  const [kinds, setKinds] = useState<string[]>(kinds0)
+  const toggleKind = (l: string) => setKinds((k) => (l === 'All' ? [] : k.includes(l) ? k.filter((x) => x !== l) : [...k, l]))
+  const fitsKinds = (e: Parameters<typeof inCategory>[0]) => !kinds.length || kinds.some((k) => inCategory(e, k))
   const set = (patch: Partial<Filters>) => setF((x) => ({ ...x, ...patch }))
 
   // how much an option would show with every other choice kept
@@ -34,7 +39,7 @@ export default function FilterSheet({ value, onApply, onClose, listings, spaces,
     const g = { ...f, ...patch }
     return listings.filter((e) => passes(e, g)).length + (patch.work ? spaces.filter((s) => spacePasses(s, g)).length : 0)
   }
-  const results = listings.filter((e) => passes(e, f)).length
+  const results = listings.filter((e) => passes(e, f) && fitsKinds(e)).length + events.filter(fitsKinds).length
   const ceiling = priceCeiling(listings)
   const price = f.maxPrice == null ? ceiling : Math.min(f.maxPrice, ceiling)
   const regions = places.find((p) => p.country === f.country)?.regions ?? []
@@ -52,11 +57,16 @@ export default function FilterSheet({ value, onApply, onClose, listings, spaces,
         <div className="flex items-center justify-between border-b border-[#1F2B3E] px-5 pt-4 pb-3">
           <button type="button" aria-label="Close filters" onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-full bg-surface text-text"><IconClose size={18} /></button>
           <span className="text-[16px] font-semibold text-ink">Filters</span>
-          <button type="button" onClick={() => setF({ ...NO_FILTERS, sort: f.sort })} className="min-h-10 px-1 text-[13px] text-gold-soft">Clear all</button>
+          <button type="button" onClick={() => { setF({ ...NO_FILTERS, sort: f.sort }); setKinds([]) }} className="min-h-10 px-1 text-[13px] text-gold-soft">Clear all</button>
         </div>
 
         <div className="flex flex-col gap-6 overflow-y-auto px-5 py-5">
-          <Section title="Type">
+          <Section title="I’m looking for" aside={<span className="text-[12px] text-faint">Pick as many as you like</span>}>
+            {['All', ...CATEGORIES.map((c) => c.label)].map((l) => (
+              <Chip key={l} on={l === 'All' ? !kinds.length : kinds.includes(l)} dim={l !== 'All' && !events.some((e) => inCategory(e, l)) && !listings.some((e) => inCategory(e, l))} onClick={() => toggleKind(l)}>{l}</Chip>
+            ))}
+          </Section>
+          <Section title="Format">
             {TYPES.map(([k, label]) => {
               const on = f.types.includes(k)
               return <Chip key={k} solid on={on} dim={!on && n({ types: [k] }) === 0} onClick={() => set({ types: toggled(f.types, k) })}>{label}</Chip>
@@ -128,8 +138,8 @@ export default function FilterSheet({ value, onApply, onClose, listings, spaces,
         </div>
 
         <div className="border-t border-[#1F2B3E] bg-navy-deep px-5 pt-3.5 pb-safe">
-          <button type="button" onClick={() => onApply(f)} className="min-h-[54px] w-full rounded-2xl bg-iri text-[15px] font-semibold text-navy">
-            {results === 0 ? 'Show results (none yet)' : `Show ${results} ${results === 1 ? 'experience' : 'experiences'}`}
+          <button type="button" onClick={() => onApply(f, kinds)} className="min-h-[54px] w-full rounded-2xl bg-iri text-[15px] font-semibold text-navy">
+            {results === 0 ? 'Nothing matches yet' : `Show ${results} ${results === 1 ? 'result' : 'results'}`}
           </button>
         </div>
       </div>

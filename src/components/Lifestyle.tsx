@@ -45,9 +45,12 @@ export function LifestylePicker({ value, onChange, host = false }: { value: stri
       <Group title={host ? 'Good for remote work?' : 'Work while you’re there?'} sub={host ? 'Reliable Wi-Fi and a place to work' : undefined}>
         {work.map((w) => <Chip key={w} on={value.includes(w)} onClick={() => toggle(w)}>{host ? 'Yes, guests can work remotely' : w}</Chip>)}
       </Group>
-      <Group title={host ? 'Your landscape' : 'Where do you feel most alive?'} sub={host ? 'What surrounds your space' : 'Beach, desert, mountains, jungle, city…'}>
-        {LANDSCAPES.map((l) => <LandChip key={l} name={l} on={value.includes(l)} onClick={() => toggle(l)} />)}
-      </Group>
+      {/* seekers: landscapes are paused while Xanadu starts in Nosara; hosts still describe their surroundings */}
+      {host && (
+        <Group title="Your landscape" sub="What surrounds your space">
+          {LANDSCAPES.map((l) => <LandChip key={l} name={l} on={value.includes(l)} onClick={() => toggle(l)} />)}
+        </Group>
+      )}
     </div>
   )
 }

@@ -60,6 +60,9 @@ export default function EventGoing({ e }: { e: CommunityEvent }) {
           {busy ? '…' : me ? 'You’re going ✓  ·  Tap to change' : 'I’m going'}
         </button>
       )}
+      {isSeeker && !over && me && (
+        <Link to="/you" className="-mt-1 text-center text-[12px] text-gold-soft no-underline">Added to your journeys ›</Link>
+      )}
       {me && started && (
         <button type="button" onClick={() => setReviewing(true)}
           className="flex min-h-12 items-center justify-center rounded-2xl bg-iri text-[15px] font-semibold text-navy">
