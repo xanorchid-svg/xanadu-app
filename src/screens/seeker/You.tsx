@@ -75,11 +75,11 @@ export default function You() {
         <section className="flex flex-col gap-3">
           <div className="flex items-baseline justify-between"><H2 className="text-[22px]">Your alignment</H2><span className="text-xs text-subtle">Tap all that call to you</span></div>
           <div className="flex flex-wrap gap-2">{ALIGN.map((p) => <Chip key={p} on={prefs.includes(p)} onClick={() => toggle(p)}>{p}</Chip>)}</div>
-          <p className="m-0 text-[13px] text-subtle">{prefs.length ? 'Discover will show experiences aligned with these first.' : 'Pick a few practices so Discover can show you what fits.'}</p>
+          <p className="m-0 text-[13px] text-subtle">{prefs.length ? 'Xanadu will match you with events and places for these.' : 'Pick a few practices and Xanadu will match you with what fits.'}</p>
         </section>
 
         <section className="flex flex-col gap-3">
-          <div className="flex flex-col gap-0.5"><H2 className="text-[22px]">What you're looking for</H2><span className="text-xs text-subtle">In your own words. Xanadu's AI uses this to find your best matches.</span></div>
+          <div className="flex flex-col gap-0.5"><H2 className="text-[22px]">What you're looking for</H2><span className="text-xs text-subtle">In your own words. Xanadu will match you with the events and places that fit.</span></div>
           <TextArea label="Your words" value={words} onChange={(v) => { setWords(v); setWordsState('idle') }} rows={4}
             placeholder="e.g. A volunteer exchange near the ocean where I can help in the garden, practice yoga daily and meet like-minded people." />
           <div className="flex items-center justify-between gap-3">

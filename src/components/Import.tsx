@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { inputCls } from './ui'
 
 /**
- * "Fill this in for me": paste a website or choose a photo of a flyer, and Xanadu's AI reads it and fills in the form.
+ * "Fill this in for me": paste a website or choose a photo of a flyer, and Xanadu reads it and fills in the form.
  * The member checks every field before submitting, and the Xanadu team still reviews it.
  * Runs in the import-listing edge function (Claude), which also keeps a monthly spend limit.
  */
@@ -107,7 +107,7 @@ export function ImportCard<F extends SpaceImport | OfferingImport>({ kind, onFil
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-0.5">
           <span className="text-[15px] font-semibold text-ink">Fill this in for me</span>
-          <span className="text-[13px] leading-snug text-subtle">Xanadu's AI reads it and fills in the form. Check every field before you submit.</span>
+          <span className="text-[13px] leading-snug text-subtle">Xanadu reads it and fills in the form. Check every field before you submit.</span>
         </div>
         <button type="button" onClick={() => setOpen(false)} className="min-h-9 text-[13px] text-subtle">Close</button>
       </div>

@@ -5,15 +5,15 @@ import { LandChip } from '../../components/Lifestyle'
 import { IconSearch } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
 import FilterSheet from '../../components/FilterSheet'
-import { CONTACT_EMAIL, formatLabel, LANDSCAPES, placeLabel, PRACTICES } from '../../data'
+import { CONTACT_EMAIL, formatLabel, LANDSCAPES, placeLabel } from '../../data'
 import { useAuth } from '../../auth'
-import { useMatches, useMatchScores } from '../../matching'
+import { useMatches, useMatchScores, useMyKeywords } from '../../matching'
 import { useListings, useSpaces, type Listing, type PublicSpace } from '../../store'
 import { activeCount, destinations, NO_FILTERS, passes, sortListings, spacePasses, useFilters } from '../../filters'
 import { Bell } from '../../components/Bell'
 import ApplicationBanner from '../../components/ApplicationBanner'
 import CommunityEventCard from '../../components/CommunityEventCard'
-import { useCommunityEvents, useGoingCounts, type CommunityEvent } from '../../events'
+import { CATEGORIES, categoriesIn, inCategory, matchEvents, nextOfEach, useCommunityEvents, useGoingCounts, type CommunityEvent } from '../../events'
 
 const isoDay = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 /** "6:30 pm" → minutes after midnight (unknown times sort last). */
@@ -24,9 +24,9 @@ const minutes = (t: string) => {
   return h * 60 + Number(m[2] ?? 0)
 }
 
-/** Does a practice chip match this experience or space? ("Trainings" also matches the Training format.) */
-const fits = (picked: string, practices: string[], format?: string) =>
-  picked === 'All' || practices.includes(picked) || (picked === 'Trainings' && format === 'Training')
+/** The same filters as the Calendar, so "Sound healing" means the same thing everywhere. */
+const TYPES = ['All', ...CATEGORIES.map((c) => c.label)]
+const evText = (e: CommunityEvent) => `${e.title} ${e.description} ${e.venue} ${e.town} ${e.tags.join(' ')}`.toLowerCase()
 
 function SpaceRow({ s, wide = false }: { s: PublicSpace; wide?: boolean }) {
   const sub = [placeLabel({ town: s.town, region: s.region }) || s.country, s.volunteer_exchange ? 'Welcomes volunteers' : ''].filter(Boolean).join(' · ')
@@ -58,6 +58,7 @@ export default function Discover() {
   const [sheet, setSheet] = useState(false)
   const { profile } = useAuth()
   const { matches } = useMatches(6)
+  const [keywords] = useMyKeywords()
   const scores = useMatchScores()
   const { events } = useCommunityEvents()
   const goingCounts = useGoingCounts(events.map((e) => e.id))
@@ -68,7 +69,7 @@ export default function Discover() {
     || (a.start_date ?? '').localeCompare(b.start_date ?? '') || minutes(a.start_time) - minutes(b.start_time)
   const todays = events.filter((e) => on(e, today, today)).sort(rank)
   const soughtToday = todays.length >= 3
-  const sought = (soughtToday ? todays : events.filter((e) => on(e, today, weekEnd)).sort(rank)).slice(0, 6)
+  const sought = nextOfEach(soughtToday ? todays : events.filter((e) => on(e, today, weekEnd)).sort(rank)).slice(0, 6)
   const { listings, loading } = useListings()
   const { spaces } = useSpaces()
   const lifestyle = profile?.lifestyle ?? []
@@ -79,8 +80,18 @@ export default function Discover() {
   const textOf = (e: Listing) => `${e.title} ${formatLabel(e.format)} ${e.practices.join(' ')} ${e.description} ${e.space?.name ?? ''} ${placeLabel(e.space ?? {})}`.toLowerCase()
   const spaceText = (s: PublicSpace) => `${s.name} ${placeLabel(s)} ${s.about} ${s.practices.join(' ')}`.toLowerCase()
 
-  const shown = sortListings(listings.filter((e) => passes(e, f) && fits(picked, e.practices, e.format) && (!q || textOf(e).includes(q))), f, prefs, scores)
-  const places = spaces.filter((s) => spacePasses(s, f) && fits(picked, s.practices) && (!q || spaceText(s).includes(q)))
+  const fits = (x: Parameters<typeof inCategory>[0]) => picked === 'All' || inCategory(x, picked)
+  const shown = sortListings(listings.filter((e) => passes(e, f) && fits(e) && (!q || textOf(e).includes(q))), f, prefs, scores)
+  const places = spaces.filter((s) => spacePasses(s, f) && fits({ practices: s.practices, title: s.name, description: s.about }) && (!q || spaceText(s).includes(q)))
+  // community events answer the same chips and search
+  // a search reads like a seeker's words too: "kids" finds every family event, "sound bath" every sound healing one
+  const qTypes = q ? categoriesIn(q) : []
+  const eventsShown = nextOfEach(events.filter((e) => fits(e) && (!q || evText(e).includes(q) || qTypes.some((l) => inCategory(e, l)))))
+  const typeHas = (l: string) => l === 'All' || events.some((e) => inCategory(e, l)) || listings.some((e) => inCategory(e, l))
+  // Picked for you: this month's events that fit what the seeker told us
+  const monthOut = isoDay(new Date(Date.now() + 30 * 86400000))
+  const { picks } = matchEvents(events.filter((e) => !e.start_date || e.start_date <= monthOut), { prefs, seeking: profile?.seeking, keywords })
+  const forYou = picks.slice(0, 8)
   const dests = destinations(listings, spaces)
   const nFilters = activeCount(f)
   const filtering = picked !== 'All' || !!q || nFilters > 0
@@ -108,7 +119,7 @@ export default function Discover() {
           <label className="flex min-h-12 min-w-0 flex-1 items-center gap-2.5 rounded-[14px] border border-line bg-surface-2 px-4 text-subtle">
             <IconSearch />
             <span className="sr-only">Search</span>
-            <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Retreats, places, practices"
+            <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Yoga, sound bath, kids, a place…"
               className="min-w-0 flex-1 bg-transparent text-[15px] text-text outline-none placeholder:text-faint" />
           </label>
           <button type="button" onClick={() => setSheet(true)} aria-label={nFilters ? `Filters, ${nFilters} on` : 'Filters'}
@@ -119,7 +130,7 @@ export default function Discover() {
         </div>
 
         <div className="-mx-5 flex gap-2 overflow-x-auto px-5">
-          {['All', ...PRACTICES].map((p) => <Chip key={p} solid on={picked === p} onClick={() => setPicked(p)}>{p}</Chip>)}
+          {TYPES.map((p) => <Chip key={p} solid on={picked === p} dim={!typeHas(p)} onClick={() => setPicked(p)}>{p}</Chip>)}
         </div>
         {filtering && <button type="button" onClick={clearAll} className="-mt-3 min-h-9 self-start text-[13px] text-gold-soft">Clear search and filters</button>}
 
@@ -138,10 +149,24 @@ export default function Discover() {
           </div>
         ))}
 
-        {!filtering && (
+        {!filtering && (forYou.length > 0 ? (
           <section className="flex flex-col gap-3">
-            <div className="flex flex-col gap-0.5"><H2>Top matches for you</H2><span className="text-xs text-subtle">Chosen by Xanadu's AI from what you're seeking</span></div>
-            {matches.length > 0 ? (
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex flex-col gap-0.5"><H2>Picked for you</H2><span className="text-xs text-subtle">Xanadu matched these events to what you're seeking</span></div>
+              <Link to="/you" className="flex min-h-9 flex-none items-center text-[13px] no-underline">Refine ›</Link>
+            </div>
+            <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">
+              {forYou.map(({ e, shared }) => <CommunityEventCard key={e.id} e={e} wide={false} note={`For you · ${shared.slice(0, 2).join(', ')}`} />)}
+            </div>
+          </section>
+        ) : (
+          <RowLink to="/you" title={hasWords ? 'Nothing this month fits yet' : "Tell us what you're seeking"}
+            sub={hasWords ? 'Add a few more practices or words and Xanadu will match you as new events land.' : 'Pick your practices or describe it in your own words. Xanadu will match you with events and places that fit.'} />
+        ))}
+
+        {!filtering && matches.length > 0 && (
+          <section className="flex flex-col gap-3">
+            <div className="flex flex-col gap-0.5"><H2>Places for you</H2><span className="text-xs text-subtle">Spaces and experiences that fit what you're seeking</span></div>
               <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">
                 {matches.map((m) => (
                   <Link key={`${m.kind}-${m.id}`} to={m.kind === 'offering' ? `/experience/${m.id}` : `/space/${m.id}`}
@@ -155,10 +180,6 @@ export default function Discover() {
                   </Link>
                 ))}
               </div>
-            ) : (
-              <RowLink to="/you" title={hasWords ? 'Your matches will appear here' : "Tell us what you're seeking"}
-                sub={hasWords ? 'As spaces and experiences join, the ones that fit you best show up first.' : 'Describe it in your own words and Xanadu will find your best fits.'} />
-            )}
           </section>
         )}
 
@@ -168,11 +189,26 @@ export default function Discover() {
               <H2>{filtering ? `${shown.length} ${shown.length === 1 ? 'experience' : 'experiences'}` : 'Aligned for you'}</H2>
               {shown.map((e) => <ExperienceCard key={e.id} e={e} />)}
             </section>
-          ) : filtering && (listings.length > 0 || places.length > 0) ? (
-            <EmptyState title={emptyTitle} action={<button type="button" onClick={clearAll} className="flex min-h-11 items-center text-sm font-semibold text-gold-soft">Show everything</button>}>
-              {places.length ? 'No experiences match these choices yet. The spaces below do.' : 'Try another practice, date or price.'}
-            </EmptyState>
           ) : null}
+
+        {filtering && eventsShown.length > 0 && (
+          <section className="flex flex-col gap-3">
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex flex-col gap-0.5">
+                <H2>{`${eventsShown.length} ${eventsShown.length === 1 ? 'event' : 'events'} coming up`}</H2>
+                <span className="text-xs text-subtle">Community events · not verified</span>
+              </div>
+              <Link to={picked === 'All' ? '/calendar' : `/calendar?type=${encodeURIComponent(picked)}`} className="flex min-h-9 flex-none items-center text-[13px] no-underline">By date ›</Link>
+            </div>
+            {eventsShown.map((e) => <CommunityEventCard key={e.id} e={e} going={goingCounts[e.id] ?? 0} />)}
+          </section>
+        )}
+
+        {!loading && filtering && shown.length === 0 && eventsShown.length === 0 && (
+          <EmptyState title={emptyTitle} action={<button type="button" onClick={clearAll} className="flex min-h-11 items-center text-sm font-semibold text-gold-soft">Show everything</button>}>
+            {places.length ? 'Nothing coming up matches these choices yet. The spaces below do.' : 'Try another type, a shorter search, or Show everything.'}
+          </EmptyState>
+        )}
 
         {!filtering && !loading && shown.length === 0 && (sought.length > 0 ? (
           <section className="flex flex-col gap-3">
@@ -206,7 +242,7 @@ export default function Discover() {
               <Link to="/events/new" className="flex min-h-9 flex-none items-center text-[13px] no-underline">+ Share</Link>
             </div>
             {events.length > 0
-              ? <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">{events.filter((e) => shown.length > 0 || !sought.includes(e)).slice(0, 12).map((e) => <CommunityEventCard key={e.id} e={e} wide={false} going={goingCounts[e.id] ?? 0} />)}</div>
+              ? <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">{nextOfEach(events.filter((e) => (shown.length > 0 || !sought.includes(e)) && !forYou.some((p) => p.e === e))).slice(0, 12).map((e) => <CommunityEventCard key={e.id} e={e} wide={false} going={goingCounts[e.id] ?? 0} />)}</div>
               : <RowLink to="/events/new" title="Seen a poster for a gathering?" sub="Share yoga, breathwork, sound healing, dance and circles happening near you." />}
           </section>
         )}

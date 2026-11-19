@@ -190,11 +190,11 @@ function SeekerWelcome() {
       )}
       {step === 2 && (
         <>
-          <Title sub="Tap everything that calls to you. Discover will show what's aligned first.">What are you <Glow>seeking</Glow>?</Title>
+          <Title sub="Tap everything that calls to you. Xanadu will match you with what fits.">What are you <Glow>seeking</Glow>?</Title>
           <PracticePicker label="Practices" options={SEEKER_ALIGN} value={prefs} onChange={setPrefs} />
           <TextArea label="In your own words (optional)" value={seeking} onChange={setSeeking} rows={5}
             placeholder="e.g. I'd love a month-long volunteer exchange near the ocean, helping in the garden or kitchen, with daily yoga and time to surf." />
-          <p className="m-0 rounded-xl bg-plum px-3.5 py-3 text-[13px] leading-normal text-muted">Xanadu's AI reads what you write and matches you with the spaces and experiences that fit best. You can change it any time from your profile.</p>
+          <p className="m-0 rounded-xl bg-plum px-3.5 py-3 text-[13px] leading-normal text-muted">Xanadu will match you with the events, spaces and experiences that fit best. You can change this any time from your profile.</p>
         </>
       )}
     </Wizard>

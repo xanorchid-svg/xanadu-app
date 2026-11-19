@@ -34,7 +34,7 @@ export const CATEGORIES: { label: string; tags: string[]; practices?: string[]; 
   { label: 'Meditation', tags: ['Meditation'], practices: ['Meditation'] },
   { label: 'Breathwork', tags: ['Breathwork'], practices: ['Breathwork'] },
   { label: 'Sound healing', tags: ['Sound healing', 'Kirtan'], practices: ['Sound', 'Kirtan'] },
-  { label: 'Dance & movement', tags: ['Dance', 'Ecstatic dance', 'Embodiment'], practices: ['Ecstatic dance'] },
+  { label: 'Dance & movement', tags: ['Dance', 'Ecstatic dance'], practices: ['Ecstatic dance'] },
   { label: 'Cacao & ceremony', tags: ['Cacao'] },
   { label: 'Circles', tags: ["Women's circle", "Men's circle", 'Womb work'], practices: ["Women's", "Men's"] },
   { label: 'Healing & bodywork', tags: ['Healing', 'Bodywork', 'Reiki'], practices: ['Bodywork & therapy'] },
@@ -45,13 +45,83 @@ export const CATEGORIES: { label: string; tags: string[]; practices?: string[]; 
   { label: 'Art & creativity', tags: ['Art & creativity'] },
 ]
 
+/**
+ * The words that put an event under each filter. The same list reads a seeker's own words
+ * ("I want yoga and sound baths by the ocean"), so what they ask for and what's on speak one language.
+ * Tags set by the importer or the team still count; these words catch anything the tags missed.
+ */
+const KEYWORDS: Record<string, RegExp> = {
+  'Yoga': /\b(yoga|yin|vinyasa|hatha|ashtanga|asanas?|nidra|kundalini|acro ?yoga)\b/,
+  'Meditation': /\b(meditat\w*|mindful\w*|vipassana|silent|silence|stillness|contemplat\w*|koans?|nidra)\b/,
+  'Breathwork': /\b(breath\w*|pranayama|holotropic|wim hof)\b/,
+  'Sound healing': /\b(sound|sound ?baths?|singing bowls?|bowls|gongs?|kirtan|mantras?|chant\w*|voices?|singing|frequenc\w*|cymatic\w*)\b/,
+  'Dance & movement': /\b(danc\w*|ecstatic|embodi\w*|somatic\w*|5 ?rhythms|contact improv|qi ?gong|tai chi|(conscious|free|authentic) movement|movement (practice|medicine))\b/,
+  'Cacao & ceremony': /\b(cacao|ceremon\w*|rituals?|full moon|new moon|temazcal|plant medicine)\b/,
+  'Circles': /\b(women'?s|men'?s|womens|mens|sisterhood|brotherhood|goddess\w*|feminine|masculine|womb|red tent|red temple)\b/,
+  'Healing & bodywork': /\b(heal\w*|bodywork|massage|reiki|acupuncture|craniosacral|constellations?|therap\w*|detox|cleanse|water ?fast\w*|fasting|recovery)\b/,
+  'Workshops & trainings': /\b(workshops?|trainings?|teacher training|certifications?|courses?|masterclass|ytt)\b/,
+  'Retreats': /\b(retreats?|residenc\w*|residential|(four|five|six|seven|eight|nine|ten|[4-9]|[1-9]\d)[- ]day)\b/,
+  'Kids & family': /\b(kids?|children|families|parents?|all ages|ages \d+|toddlers?|teens?|family (day|workshop|yoga|friendly))\b/,
+  'Nature & adventure': /\b(hikes?|hiking|trails?|surf\w*|swim\w*|ocean|jungle|rivers?|riverbanks?|waterfalls?|snorkel\w*|kayak\w*|paddle\w*|plant walk|nature|outdoors?|permaculture|garden\w*)\b/,
+  'Art & creativity': /\b(art|arts|artist\w*|paint\w*|pottery|ceramic\w*|clay|craft\w*|drawing|instruments?|creativ\w*|writing|drama|theatre|theater|photograph\w*)\b/,
+}
+
+/** Lower-case text with "sound healing" read as sound, not general healing. */
+const prep = (s: string) => ` ${s.toLowerCase().replace(/’/g, "'").replace(/sound[ -]heal\w*/g, 'sound bath').replace(/\bthe art of\b/g, 'the way of')} `
+
+/** Every filter a piece of text speaks to. */
+export function categoriesIn(text: string): string[] {
+  const t = prep(text)
+  return CATEGORIES.map((c) => c.label).filter((l) => KEYWORDS[l]?.test(t))
+}
+
+type Sortable = { tags?: string[]; practices?: string[]; format?: string; title?: string; description?: string }
+const cache = new WeakMap<object, Set<string>>()
+
+/** The filters an event or experience belongs to: its tags, practices and format, plus what its title and description say. */
+export function categoriesOf(e: Sortable): Set<string> {
+  const hit = cache.get(e)
+  if (hit) return hit
+  const out = new Set<string>()
+  for (const c of CATEGORIES) {
+    if ((e.tags ?? []).some((t) => c.tags.includes(t)) || (e.practices ?? []).some((p) => c.practices?.includes(p))
+      || (!!e.format && !!c.formats?.includes(e.format))) out.add(c.label)
+  }
+  for (const l of categoriesIn(`${e.title ?? ''}. ${e.description ?? ''}`)) out.add(l)
+  cache.set(e, out)
+  return out
+}
+
 /** Does a community event or experience belong under this filter? */
-export function inCategory(e: { tags?: string[]; practices?: string[]; format?: string }, label: string) {
-  const c = CATEGORIES.find((x) => x.label === label)
-  if (!c) return true
-  return (e.tags ?? []).some((t) => c.tags.includes(t))
-    || (e.practices ?? []).some((p) => c.practices?.includes(p))
-    || (!!e.format && !!c.formats?.includes(e.format))
+export function inCategory(e: Sortable, label: string) {
+  if (!CATEGORIES.some((x) => x.label === label)) return true
+  return categoriesOf(e).has(label)
+}
+
+/** Events that repeat (a weekly sound bath) show once in rails and lists of picks: the next one. */
+export function nextOfEach<T extends { title: string; start_date: string | null }>(list: T[]): T[] {
+  const seen = new Set<string>()
+  return list.filter((e) => { const k = e.title.trim().toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true })
+}
+
+/**
+ * Xanadu's match between a seeker and the events on: what they told us (their practices, their own words
+ * and the keywords picked up from them) read through the same filters as the events.
+ * Returns upcoming events that share at least one, best fit first, with the filters they share.
+ */
+export function matchEvents(events: CommunityEvent[], seeker: { prefs?: string[]; seeking?: string; keywords?: string[] }) {
+  const wants = new Set(categoriesIn([...(seeker.prefs ?? []), seeker.seeking ?? '', ...(seeker.keywords ?? [])].join('. ')))
+  if (!wants.size) return { wants: [] as string[], picks: [] as { e: CommunityEvent; shared: string[] }[] }
+  const picks = events
+    .map((e) => ({ e, shared: [...categoriesOf(e)].filter((l) => wants.has(l)) }))
+    .filter((x) => x.shared.length > 0)
+    // more shared filters first, then the sooner one
+    .sort((a, b) => b.shared.length - a.shared.length || (a.e.start_date ?? '').localeCompare(b.e.start_date ?? ''))
+  const seen = new Set<string>()
+  return {
+    wants: [...wants],
+    picks: picks.filter(({ e }) => { const k = e.title.trim().toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true }),
+  }
 }
 
 const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }

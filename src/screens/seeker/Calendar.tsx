@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Chip, EmptyState, H1, Page, Screen, SeekerTabs, Segmented } from '../../components/ui'
 import { IconBack, IconCalendar, IconNext } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
@@ -40,15 +40,17 @@ const overlaps = (e: Item, a: string, b: string) => !!e.start_date && e.start_da
  */
 export default function Calendar() {
   const today = useMemo(() => iso(new Date()), [])
+  const [params] = useSearchParams()
   const [view, setView] = useState<View>('Month')
   const [cursor, setCursor] = useState(today) // the day the period is anchored on
   const [from, setFrom] = useState(today)
-  const [to, setTo] = useState('') // '' = a single day
+  // opens on the next two weeks: the question most people bring ("what's on soon?")
+  const [to, setTo] = useState(() => iso(add(at(today), 13))) // '' = a single day
   const [picking, setPicking] = useState(false) // a first date was just tapped: the next later tap ends the range
   const [place, setPlace] = useState('Everywhere')
   const [flex, setFlex] = useState<Flex>(0)
-  const [cat, setCat] = useState('All')
-  const [quick, setQuick] = useState<Quick>('')
+  const [cat, setCat] = useState(() => { const t = params.get('type') ?? ''; return CATEGORIES.some((c) => c.label === t) ? t : 'All' })
+  const [quick, setQuick] = useState<Quick>('Next 2 weeks')
   const { listings, loading } = useListings()
   const { events } = useCommunityEvents()
 
@@ -151,15 +153,7 @@ export default function Calendar() {
         {loading ? <span className="text-[13px] text-subtle">Finding experiences…</span>
           : view === 'Week' ? <WeekAgenda cursor={c} list={dated} onDay={(d) => { setView('Day'); setCursor(d); setFrom(d); setTo('') }} empty={empty} />
             : (
-              <>
-                <div className="flex flex-col gap-2">
-                  <span className="text-xs tracking-[0.14em] text-subtle uppercase">Flexible?</span>
-                  <div className="flex flex-wrap gap-2">
-                    {FLEX.map(([k, label]) => <Chip key={k} solid on={flex === k} onClick={() => setFlex(k)}>{label}</Chip>)}
-                  </div>
-                </div>
-                <Picked from={view === 'Day' ? cursor : from} to={view === 'Day' ? '' : to} flex={flex} list={dated} empty={empty} onClear={to ? () => { setTo(''); setQuick('') } : undefined} />
-              </>
+              <Picked from={view === 'Day' ? cursor : from} to={view === 'Day' ? '' : to} flex={flex} setFlex={setFlex} list={dated} empty={empty} onClear={to ? () => { setTo(''); setQuick('') } : undefined} />
             )}
         {!loading && <FoundingInvite />}
       </Page>
@@ -248,7 +242,7 @@ function WeekAgenda({ cursor, list, onDay, empty }: { cursor: Date; list: Item[]
 }
 
 /** Month and Day views: what's on the chosen day or range. */
-function Picked({ from, to, flex, list, empty, onClear }: { from: string; to: string; flex: Flex; list: Item[]; empty: ReactNode; onClear?: () => void }) {
+function Picked({ from, to, flex, setFlex, list, empty, onClear }: { from: string; to: string; flex: Flex; setFlex: (f: Flex) => void; list: Item[]; empty: ReactNode; onClear?: () => void }) {
   const end = to || from
   const on = list.filter((e) => overlaps(e, from, end))
   // flexible: also anything starting or running within the window around the chosen dates
@@ -262,10 +256,19 @@ function Picked({ from, to, flex, list, empty, onClear }: { from: string; to: st
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between">
-        <span className="text-xs tracking-[0.14em] text-subtle uppercase">{label}</span>
+        <span className="text-xs tracking-[0.14em] text-subtle uppercase">{`${label} · ${on.length} on`}</span>
         {onClear && <button type="button" onClick={onClear} className="min-h-9 text-[13px] text-gold-soft">Clear range</button>}
       </div>
       {on.length ? on.map((e) => <ItemCard key={e.id} e={e} />) : !near.length ? empty : <span className="text-[13px] text-subtle">Nothing on these exact dates.</span>}
+      {/* Flexible only comes up when it helps: few or no results, or already widened */}
+      {(flex > 0 || on.length < 3) && (
+        <div className="flex flex-col gap-2 pt-1">
+          <span className="text-xs tracking-[0.14em] text-subtle uppercase">{flex ? 'Widened search' : 'Flexible with dates?'}</span>
+          <div className="flex flex-wrap gap-2">
+            {FLEX.map(([k, l]) => <Chip key={k} solid on={flex === k} onClick={() => setFlex(k)}>{l}</Chip>)}
+          </div>
+        </div>
+      )}
       {near.length > 0 && (
         <section className="mt-2 flex flex-col gap-2.5">
           <span className="text-xs tracking-[0.14em] text-subtle uppercase">{`Also nearby · within ${FLEX.find(([k]) => k === flex)![1].replace('± ', '')}`}</span>
