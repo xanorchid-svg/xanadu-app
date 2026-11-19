@@ -15,7 +15,7 @@ const ago = (iso: string) => {
 }
 const ICON: Record<string, string> = {
   approved: '✦', changes: '✎', declined: '✉', offering_live: '✦', offering_changes: '✎', team_message: '✉',
-  message: '✉', community_request: '☺', community_accepted: '☺', match: '✧',
+  message: '✉', community_request: '☺', community_accepted: '☺', match: '✧', event_going: '✦',
 }
 
 /** /notifications: everything Xanadu has told you, plus how you'd like to hear about it. */
