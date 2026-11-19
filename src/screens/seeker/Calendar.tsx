@@ -7,6 +7,7 @@ import CommunityEventCard from '../../components/CommunityEventCard'
 import FoundingInvite from '../../components/FoundingInvite'
 import { CATEGORIES, inCategory, typesLabel, useCommunityEvents, type CommunityEvent } from '../../events'
 import TypePicker from '../../components/TypePicker'
+import { specialBetween, specialOn, type SpecialDay } from '../../specialDays'
 import { useListings, type Listing } from '../../store'
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -33,6 +34,10 @@ const isCommunity = (e: Item): e is CommunityEvent => 'submitted_by' in e && 'ta
 const timeOf = (e: Item) => (isCommunity(e) ? e.start_time : '')
 /** Overlaps these dates? */
 const overlaps = (e: Item, a: string, b: string) => !!e.start_date && e.start_date <= b && (e.end_date || e.start_date) >= a
+
+/** Moons and the sky in violet, holidays in gold, celebrations in teal. */
+const tagCls = (x: SpecialDay) => x.kind === 'moon' || x.kind === 'sky' ? 'border-iri-violet/40 bg-iri-violet/10 text-ink'
+  : x.kind === 'holiday' ? 'border-gold/40 bg-gold/10 text-gold-pale' : 'border-iri-teal/40 bg-iri-teal/10 text-ink'
 
 type Quick = '' | 'Coming up' | 'Today' | 'Tomorrow' | 'This weekend' | 'This week' | 'Next 2 weeks' | 'This month'
 const QUICK: Quick[] = ['Coming up', 'Today', 'Tomorrow', 'This weekend', 'This week', 'Next 2 weeks', 'This month']
@@ -96,6 +101,7 @@ export default function Calendar() {
     byDay.set(d, [...(byDay.get(d) ?? []), e])
   }
   const days = [...byDay.keys()].sort()
+  const specials = specialBetween(from, to)
   const dayLabel = (d: string) => (d === today ? `Today · ${fmt(d, { weekday: 'short', month: 'short', day: 'numeric' })}`
     : d === shift(today, 1) ? `Tomorrow · ${fmt(d, { weekday: 'short', month: 'short', day: 'numeric' })}`
       : fmt(d, { weekday: 'long', month: 'short', day: 'numeric' }))
@@ -141,6 +147,18 @@ export default function Calendar() {
           </button>
         </div>
 
+        {/* special days in these dates: moons, eclipses, solstices, holidays. Tap one to see that day */}
+        {specials.length > 0 && (
+          <div className="-mx-5 -mt-2 flex gap-1.5 overflow-x-auto px-5 pb-0.5" role="list" aria-label="Special days">
+            {specials.map((x) => (
+              <button key={x.date + x.label} type="button" role="listitem" onClick={() => { setFrom(x.date); setTo(x.date); setQuick(''); setPicking(false) }}
+                className={`flex min-h-8 flex-none items-center gap-1.5 rounded-full border px-3 text-[12px] ${tagCls(x)}`}>
+                <span aria-hidden>{x.icon}</span>{x.label}<span className="opacity-60">{from === to ? '' : ` · ${fmt(x.date, { weekday: 'short', day: 'numeric' })}`}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         {picking && (
           <DatePicker today={today} from={from} to={to} dated={dated}
             onDone={(a, b) => { setFrom(a); setTo(b); setQuick(''); setPicking(false) }} />
@@ -150,7 +168,10 @@ export default function Calendar() {
           <div className="flex flex-col gap-5">
             {days.map((d) => (
               <section key={d} className="flex flex-col gap-2.5">
-                <span className="text-xs tracking-[0.14em] text-subtle uppercase">{dayLabel(d)}</span>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span className="text-xs tracking-[0.14em] text-subtle uppercase">{dayLabel(d)}</span>
+                  {specialOn(d).map((x) => <span key={x.label} className={`rounded-full border px-2 py-0.5 text-[11px] ${tagCls(x)}`}>{`${x.icon} ${x.label}`}</span>)}
+                </div>
                 {byDay.get(d)!.map((e) => (e.start_date! < from
                   ? <div key={e.id} className="flex flex-col gap-1"><span className="pl-1 text-[12px] text-gold-soft">{`Already started · runs until ${fmt(e.end_date || e.start_date!, { month: 'short', day: 'numeric' })}`}</span>{card(e)}</div>
                   : card(e)))}
@@ -231,11 +252,15 @@ function DatePicker({ today, from, to, dated, onDone }: { today: string; from: s
             const ends = id === a || id === b
             const between = a !== b && id > a && id < b
             const n = past ? 0 : busy(id)
+            const sp = inMonth ? specialOn(id) : []
             return (
               <button key={id} type="button" disabled={past} onClick={() => tap(id)} aria-pressed={ends}
-                aria-label={`${d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}${n ? `, ${n} on` : ''}`}
+                aria-label={`${d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}${sp.length ? `, ${sp.map((x) => x.label).join(', ')}` : ''}${n ? `, ${n} on` : ''}`}
                 className={`flex h-11 flex-col items-center justify-center gap-0.5 text-[14px] disabled:opacity-30 ${between ? 'bg-iri-violet/15' : ''} ${id === a && a !== b ? 'rounded-l-[12px] bg-iri-violet/15' : ''} ${id === b && a !== b ? 'rounded-r-[12px] bg-iri-violet/15' : ''}`}>
-                <span className={`flex h-8 w-8 items-center justify-center rounded-full ${ends ? 'bg-iri font-semibold text-navy' : id === today ? 'ring-1 ring-gold/70 text-ink' : inMonth ? 'text-text' : 'text-faint'}`}>{d.getDate()}</span>
+                <span className={`relative flex h-8 w-8 items-center justify-center rounded-full ${ends ? 'bg-iri font-semibold text-navy' : id === today ? 'ring-1 ring-gold/70 text-ink' : inMonth ? 'text-text' : 'text-faint'}`}>
+                  {d.getDate()}
+                  {sp[0] && <span aria-hidden className="absolute -top-1.5 -right-2 text-[10px] leading-none">{sp[0].icon}</span>}
+                </span>
                 <span className="flex h-[5px] gap-[3px]">
                   {Array.from({ length: Math.min(3, n) }, (_, i) => <span key={i} className="h-[5px] w-[5px] rounded-full bg-iri-strong" />)}
                 </span>
@@ -247,7 +272,7 @@ function DatePicker({ today, from, to, dated, onDone }: { today: string; from: s
       <span className="text-[12px] text-gold-soft">
         {mode === 'One day' ? 'Tap a day to see what’s on.' : start ? `From ${fmt(start, { weekday: 'short', month: 'short', day: 'numeric' })}. Now tap the last day.` : 'Tap the first day, then the last day.'}
       </span>
-      <span className="text-[11px] text-faint">Dots show days with something on.</span>
+      <span className="text-[11px] text-faint">Dots show days with something on. 🌕 full moon · 🌑 new moon · 🇨🇷 holiday.</span>
     </div>
   )
 }
