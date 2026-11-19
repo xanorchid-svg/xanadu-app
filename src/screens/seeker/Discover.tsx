@@ -52,7 +52,8 @@ function SpaceRow({ s, wide = false }: { s: PublicSpace; wide?: boolean }) {
 }
 
 export default function Discover() {
-  const [picked, setPicked] = useState<string>('All')
+  const [picked, setPicked] = useState<string[]>([]) // none = All; several = any of them
+  const toggleType = (t: string) => setPicked((p) => t === 'All' ? [] : p.includes(t) ? p.filter((x) => x !== t) : [...p, t])
   const [query, setQuery] = useState('')
   const [f, setF] = useFilters()
   const [sheet, setSheet] = useState(false)
@@ -80,7 +81,7 @@ export default function Discover() {
   const textOf = (e: Listing) => `${e.title} ${formatLabel(e.format)} ${e.practices.join(' ')} ${e.description} ${e.space?.name ?? ''} ${placeLabel(e.space ?? {})}`.toLowerCase()
   const spaceText = (s: PublicSpace) => `${s.name} ${placeLabel(s)} ${s.about} ${s.practices.join(' ')}`.toLowerCase()
 
-  const fits = (x: Parameters<typeof inCategory>[0]) => picked === 'All' || inCategory(x, picked)
+  const fits = (x: Parameters<typeof inCategory>[0]) => !picked.length || picked.some((t) => inCategory(x, t))
   const shown = sortListings(listings.filter((e) => passes(e, f) && fits(e) && (!q || textOf(e).includes(q))), f, prefs, scores)
   const places = spaces.filter((s) => spacePasses(s, f) && fits({ practices: s.practices, title: s.name, description: s.about }) && (!q || spaceText(s).includes(q)))
   // community events answer the same chips and search
@@ -94,12 +95,12 @@ export default function Discover() {
   const forYou = picks.slice(0, 8)
   const dests = destinations(listings, spaces)
   const nFilters = activeCount(f)
-  const filtering = picked !== 'All' || !!q || nFilters > 0
+  const filtering = picked.length > 0 || !!q || nFilters > 0
   const where = f.region || f.country || (dests.length === 1 ? dests[0].country : 'Everywhere')
   const volunteering = f.work === 'volunteer'
 
-  const clearAll = () => { setPicked('All'); setQuery(''); setF({ ...NO_FILTERS, sort: f.sort }) }
-  const emptyTitle = q ? `Nothing matches "${query.trim()}" yet` : picked === 'All' && !nFilters ? 'The first experiences are on their way' : 'Nothing matches these filters yet'
+  const clearAll = () => { setPicked([]); setQuery(''); setF({ ...NO_FILTERS, sort: f.sort }) }
+  const emptyTitle = q ? `Nothing matches "${query.trim()}" yet` : !picked.length && !nFilters ? 'The first experiences are on their way' : 'Nothing matches these filters yet'
 
   return (
     <Screen footer={<SeekerTabs />}>
@@ -130,7 +131,7 @@ export default function Discover() {
         </div>
 
         <div className="-mx-5 flex gap-2 overflow-x-auto px-5">
-          {TYPES.map((p) => <Chip key={p} solid on={picked === p} dim={!typeHas(p)} onClick={() => setPicked(p)}>{p}</Chip>)}
+          {TYPES.map((p) => <Chip key={p} solid on={p === 'All' ? !picked.length : picked.includes(p)} dim={!typeHas(p)} onClick={() => toggleType(p)}>{p}</Chip>)}
         </div>
         {filtering && <button type="button" onClick={clearAll} className="-mt-3 min-h-9 self-start text-[13px] text-gold-soft">Clear search and filters</button>}
 
@@ -198,7 +199,7 @@ export default function Discover() {
                 <H2>{`${eventsShown.length} ${eventsShown.length === 1 ? 'event' : 'events'} coming up`}</H2>
                 <span className="text-xs text-subtle">Community events · not verified</span>
               </div>
-              <Link to={picked === 'All' ? '/calendar' : `/calendar?type=${encodeURIComponent(picked)}`} className="flex min-h-9 flex-none items-center text-[13px] no-underline">By date ›</Link>
+              <Link to={!picked.length ? '/calendar' : `/calendar?type=${encodeURIComponent(picked.join(','))}`} className="flex min-h-9 flex-none items-center text-[13px] no-underline">By date ›</Link>
             </div>
             {eventsShown.map((e) => <CommunityEventCard key={e.id} e={e} going={goingCounts[e.id] ?? 0} />)}
           </section>

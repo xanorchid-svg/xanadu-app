@@ -115,15 +115,17 @@ const FACILITATOR_TOOL = {
 }
 
 // Community events: what Xanadu's community calendar is for (Xan, Oct 21)
-const EVENT_TAGS = ['Yoga', 'Breathwork', 'Meditation', 'Sound healing', 'Dance', 'Ecstatic dance', 'Healing', 'Embodiment', 'Womb work',
-  "Women's circle", "Men's circle", 'Kirtan', 'Cacao', 'Reiki', 'Bodywork', 'Workshop', 'Retreat', 'Kids & family', 'Nature & adventure', 'Art & creativity']
+const EVENT_TAGS = ['Yoga', 'Acro', 'Breathwork', 'Meditation', 'Sound healing', 'Music', 'Dance', 'Ecstatic dance', 'Healing', 'Embodiment', 'Womb work',
+  "Women's circle", "Men's circle", 'Family constellations', 'Kirtan', 'Cacao', 'Reiki', 'Bodywork', 'Workshop', 'Retreat', 'Community gathering',
+  'Kids & family', 'Nature & adventure', 'Art & creativity']
 const EVENT_TOOL = {
   name: 'fill_event',
   description: 'Read a community event (a poster, flyer or message) and fill in its details. Leave a field empty when the source does not say it.',
   input_schema: {
     type: 'object',
     properties: {
-      aligned: { type: 'boolean', description: 'True if this is a wellness, healing, spiritual, movement or embodiment gathering: yoga, breathwork, meditation, sound healing, dance or ecstatic dance, healing, womb or embodiment work, circles, kirtan, cacao, reiki, bodywork, retreats, conscious kids and family learning, nature outings, art and creative workshops, and similar. False for parties, nightlife, sports, markets, business ads, rentals, plant-medicine or psychedelic ceremonies, or anything else.' },
+      aligned: { type: 'boolean', description: 'True if this is a wellness, healing, spiritual, movement or embodiment gathering: yoga, breathwork, meditation, sound healing, dance or ecstatic dance, healing, womb or embodiment work, circles, kirtan, cacao, reiki, bodywork, retreats, acro, music and drum circles, family constellations, conscious kids and family learning, nature outings, art and creative workshops, community gatherings (community dinners, potlucks, bonfires, socials, community parties open to all), and similar. False for bars, nightclubs, sports, markets, business ads, rentals, plant-medicine or psychedelic ceremonies, or anything else.' },
+      party: { type: 'boolean', description: 'True if this is a party or party-style night event (the Xanadu team reviews these before they go on the calendar).' },
       title: str('Name of the event'),
       description: str('2 to 4 plain sentences on what happens and who it is for, based only on the source. No health or outcome promises.'),
       start_date: str('YYYY-MM-DD. If the year is missing, use the next upcoming date after today. If it repeats weekly, the next date.'),

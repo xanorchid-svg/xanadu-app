@@ -3,7 +3,7 @@
  */
 
 /** What a Seeker can say they're seeking (sign-up and profile). */
-export const SEEKER_ALIGN = ['Yoga', 'Breathwork', 'Meditation', 'Sound', 'Ecstatic dance', 'Kirtan', 'Bodywork & therapy', 'Trainings', "Women's retreats", "Men's retreats", 'Permaculture', 'Plant medicine', 'Residencies', 'Recovery programs']
+export const SEEKER_ALIGN = ['Yoga', 'Breathwork', 'Meditation', 'Sound', 'Music', 'Ecstatic dance', 'Acro', 'Kirtan', 'Bodywork & therapy', 'Family constellations', 'Trainings', "Women's retreats", "Men's retreats", 'Community gatherings', 'Permaculture', 'Plant medicine', 'Residencies', 'Recovery programs']
 
 /**
  * Way of living. Seekers say how they want to take part; spaces say what they welcome.
