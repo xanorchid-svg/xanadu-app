@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Chip, EmptyState, Glow, H1, H2, Page, PrimaryButton, RowLink, Screen, SeekerTabs } from '../../components/ui'
+import { Chip, EmptyState, Glow, H1, H2, Page, RowLink, Screen, SeekerTabs } from '../../components/ui'
 import { LandChip } from '../../components/Lifestyle'
-import { IconSearch, IconStar } from '../../components/icons'
+import { IconSearch } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
 import FilterSheet from '../../components/FilterSheet'
 import { CONTACT_EMAIL, formatLabel, LANDSCAPES, placeLabel, PRACTICES } from '../../data'
@@ -13,7 +13,17 @@ import { activeCount, destinations, NO_FILTERS, passes, sortListings, spacePasse
 import { Bell } from '../../components/Bell'
 import ApplicationBanner from '../../components/ApplicationBanner'
 import CommunityEventCard from '../../components/CommunityEventCard'
-import { useCommunityEvents } from '../../events'
+import { useCommunityEvents, useGoingCounts, useToReview, type CommunityEvent } from '../../events'
+import { ReviewSheet } from '../../components/EventGoing'
+
+const isoDay = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+/** "6:30 pm" → minutes after midnight (unknown times sort last). */
+const minutes = (t: string) => {
+  const m = t.trim().toLowerCase().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/)
+  if (!m) return 24 * 60
+  let h = Number(m[1]) % 12; if (m[3] === 'pm') h += 12
+  return h * 60 + Number(m[2] ?? 0)
+}
 
 /** Does a practice chip match this experience or space? ("Trainings" also matches the Training format.) */
 const fits = (picked: string, practices: string[], format?: string) =>
@@ -47,11 +57,21 @@ export default function Discover() {
   const [query, setQuery] = useState('')
   const [f, setF] = useFilters()
   const [sheet, setSheet] = useState(false)
-  const { profile, updateProfile } = useAuth()
-  const notified = profile?.launch_notify ?? false
+  const { profile } = useAuth()
   const { matches } = useMatches(6)
   const scores = useMatchScores()
   const { events } = useCommunityEvents()
+  const goingCounts = useGoingCounts(events.map((e) => e.id))
+  const { toReview, reload: reloadToReview } = useToReview()
+  const [reviewing, setReviewing] = useState<CommunityEvent | null>(null)
+  // Most sought after: what's on today (or this week, if today is quiet), most "going" first
+  const today = isoDay(new Date()), weekEnd = isoDay(new Date(Date.now() + 6 * 86400000))
+  const on = (e: CommunityEvent, a: string, b: string) => !!e.start_date && e.start_date <= b && (e.end_date || e.start_date) >= a
+  const rank = (a: CommunityEvent, b: CommunityEvent) => (goingCounts[b.id] ?? 0) - (goingCounts[a.id] ?? 0)
+    || (a.start_date ?? '').localeCompare(b.start_date ?? '') || minutes(a.start_time) - minutes(b.start_time)
+  const todays = events.filter((e) => on(e, today, today)).sort(rank)
+  const soughtToday = todays.length >= 3
+  const sought = (soughtToday ? todays : events.filter((e) => on(e, today, weekEnd)).sort(rank)).slice(0, 6)
   const { listings, loading } = useListings()
   const { spaces } = useSpaces()
   const lifestyle = profile?.lifestyle ?? []
@@ -85,6 +105,21 @@ export default function Discover() {
         </div>
 
         <ApplicationBanner />
+
+        {toReview.length > 0 && (
+          <section className="ring-iri flex flex-col gap-2.5 rounded-[20px] bg-plum/60 p-4">
+            <span className="text-xs tracking-[0.14em] text-gold-soft uppercase">How was it?</span>
+            {toReview.slice(0, 3).map((e) => (
+              <button key={e.id} type="button" onClick={() => setReviewing(e)} className="flex items-center gap-3 text-left">
+                <span className="h-12 w-12 flex-none overflow-hidden rounded-xl bg-portal">{e.photo_url && <img decoding="async" loading="lazy" src={e.photo_url} alt="" className="h-full w-full object-cover" />}</span>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate text-[15px] font-semibold text-ink">{e.title}</span>
+                  <span className="text-[12px] text-subtle">Rate the space and the facilitator ›</span>
+                </span>
+              </button>
+            ))}
+          </section>
+        )}
 
         <div className="flex gap-2">
           <label className="flex min-h-12 min-w-0 flex-1 items-center gap-2.5 rounded-[14px] border border-line bg-surface-2 px-4 text-subtle">
@@ -154,13 +189,22 @@ export default function Discover() {
             <EmptyState title={emptyTitle} action={<button type="button" onClick={clearAll} className="flex min-h-11 items-center text-sm font-semibold text-gold-soft">Show everything</button>}>
               {places.length ? 'No experiences match these choices yet. The spaces below do.' : 'Try another practice, date or price.'}
             </EmptyState>
-          ) : (
-            <EmptyState icon={<span className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/50"><IconStar /></span>}
-              title={emptyTitle}
-              action={<PrimaryButton done={notified} onClick={() => updateProfile({ launch_notify: true })} className="mt-1">{notified ? "We'll let you know ✓" : 'Notify me when they open'}</PrimaryButton>}>
-              We're welcoming our founding retreat spaces and facilitators around the world. Their experiences will appear here as they join.
-            </EmptyState>
-          )}
+          ) : null}
+
+        {!filtering && !loading && shown.length === 0 && (sought.length > 0 ? (
+          <section className="flex flex-col gap-3">
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex flex-col gap-0.5">
+                <H2>{soughtToday ? 'Most sought after today' : 'Most sought after this week'}</H2>
+                <span className="text-xs text-subtle">What the community is going to · community events, not verified</span>
+              </div>
+              <Link to="/calendar" className="flex min-h-9 flex-none items-center text-[13px] no-underline">Calendar ›</Link>
+            </div>
+            {sought.map((e) => <CommunityEventCard key={e.id} e={e} going={goingCounts[e.id] ?? 0} />)}
+          </section>
+        ) : (
+          <RowLink to="/calendar" title="See what’s on" sub="Classes, circles, ceremonies and retreats near you, day by day." />
+        ))}
 
         {places.length > 0 && (
           <section className="flex flex-col gap-3">
@@ -179,7 +223,7 @@ export default function Discover() {
               <Link to="/events/new" className="flex min-h-9 flex-none items-center text-[13px] no-underline">+ Share</Link>
             </div>
             {events.length > 0
-              ? <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">{events.slice(0, 12).map((e) => <CommunityEventCard key={e.id} e={e} wide={false} />)}</div>
+              ? <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">{events.filter((e) => shown.length > 0 || !sought.includes(e)).slice(0, 12).map((e) => <CommunityEventCard key={e.id} e={e} wide={false} going={goingCounts[e.id] ?? 0} />)}</div>
               : <RowLink to="/events/new" title="Seen a poster for a gathering?" sub="Share yoga, breathwork, sound healing, dance and circles happening near you." />}
           </section>
         )}
@@ -191,6 +235,7 @@ export default function Discover() {
         </section>
       </Page>
 
+      {reviewing && <ReviewSheet e={reviewing} onClose={() => setReviewing(null)} onDone={() => { setReviewing(null); reloadToReview() }} />}
       {sheet && <FilterSheet value={f} onClose={() => setSheet(false)} onApply={(next) => { setF(next); setSheet(false) }}
         listings={listings} spaces={spaces} places={dests} />}
     </Screen>

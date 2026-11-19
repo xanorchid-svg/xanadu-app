@@ -162,8 +162,8 @@ export default function SpaceProfile() {
           </div>
         </section>
 
-        <Reviews categories={['Space', 'Food', 'Hospitality', 'Location']}
-          emptyText="Guests can review your space after an experience they booked through Xanadu. You'll be able to reply publicly to each one." />
+        <Reviews kind="space" id={space.id || undefined}
+          emptyText="Seekers who go to gatherings at your space can review it afterwards. Reviews appear here once your space is welcomed into Xanadu." />
 
         <section className="flex flex-col gap-2.5">
           <div className="flex items-baseline justify-between"><h2 className={h2}>Aligned facilitators</h2><span className="text-xs text-subtle">Only you see this</span></div>

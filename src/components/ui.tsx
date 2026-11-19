@@ -1,5 +1,6 @@
 import { useUnreadDot } from '../threads'
 import { useAuth } from '../auth'
+import { useMemberReviews, type ReviewTarget } from '../events'
 import type { ReactNode } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { IconBack, IconCalendar, IconChat, IconCompass, IconHome, IconPeople, IconPin, IconPlus, IconUser } from './icons'
@@ -225,30 +226,55 @@ export function Checklist({ title, items, done }: { title: string; items: { id: 
   )
 }
 
-/** Review summary + empty state, shared by space and facilitator profiles. */
-export function Reviews({ categories, emptyText }: { categories: string[]; emptyText: string }) {
+/**
+ * Reviews on a space or Facilitator page: 0–5 stars and comments from seekers who went to their events.
+ * They only appear once the space or Facilitator has been approved on Xanadu (the database enforces this).
+ */
+export function Reviews({ kind, id, emptyText }: { kind: ReviewTarget; id?: string; emptyText: string }) {
+  const s = useMemberReviews(kind, id)
+  const count = s?.count ?? 0
+  const avg = s?.average ?? null
+  const fmtDate = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
   return (
     <section id="reviews" className="flex flex-col gap-3">
       <div className="flex flex-col gap-0.5">
         <h2 className="m-0 font-display text-[22px] font-semibold text-ink">Reviews</h2>
-        <span className="text-xs text-subtle">Only guests who booked through Xanadu can leave a review</span>
+        <span className="text-xs text-subtle">From seekers who went to their gatherings</span>
       </div>
       <div className="flex items-center gap-4 rounded-[18px] bg-plum p-4">
         <div className="flex w-23 flex-none flex-col items-center gap-0.5">
-          <span className="font-display text-[40px] leading-none text-faint">–</span>
-          <span className="text-[13px] tracking-[2px] text-slate" aria-hidden>★★★★★</span>
-          <span className="text-xs text-subtle">0 reviews</span>
+          <span className={`font-display text-[40px] leading-none ${count ? 'text-ink' : 'text-faint'}`}>{count && avg !== null ? Number(avg).toFixed(1) : '–'}</span>
+          <span className="text-[13px] tracking-[2px]" aria-label={count && avg !== null ? `${avg} out of 5` : 'No ratings yet'}>
+            {[1, 2, 3, 4, 5].map((n) => <span key={n} className={count && avg !== null && n <= Math.round(Number(avg)) ? 'text-gold-soft' : 'text-slate'}>★</span>)}
+          </span>
+          <span className="text-xs text-subtle">{`${count} ${count === 1 ? 'review' : 'reviews'}`}</span>
         </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          {categories.map((c) => (
-            <div key={c} className="flex items-center gap-2">
-              <span className="w-[88px] flex-none text-xs text-muted">{c}</span>
-              <span className="h-[5px] flex-1 rounded-full bg-plum-line" />
-            </div>
-          ))}
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+          {[5, 4, 3, 2, 1, 0].map((n) => {
+            const k = s?.dist?.[String(n)] ?? 0
+            return (
+              <div key={n} className="flex items-center gap-2">
+                <span className="w-6 flex-none text-right text-xs text-muted">{n}★</span>
+                <span className="h-[5px] flex-1 overflow-hidden rounded-full bg-plum-line"><span className="block h-full rounded-full bg-gold-soft" style={{ width: count ? `${(k / count) * 100}%` : '0%' }} /></span>
+              </div>
+            )
+          })}
         </div>
       </div>
-      <EmptyState title="No reviews yet">{emptyText}</EmptyState>
+      {count === 0 ? <EmptyState title="No reviews yet">{emptyText}</EmptyState> : (
+        <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
+          {s!.reviews.map((r, i) => (
+            <li key={i} className="flex flex-col gap-1.5 rounded-[16px] bg-surface p-3.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[14px] font-semibold text-ink">{r.first_name}</span>
+                <span className="text-[13px] tracking-[1px]" aria-label={`${r.rating} out of 5`}>{[1, 2, 3, 4, 5].map((n) => <span key={n} className={n <= r.rating ? 'text-gold-soft' : 'text-slate'}>★</span>)}</span>
+              </div>
+              {r.comment && <p className="m-0 text-[14px] leading-relaxed whitespace-pre-line text-muted">{r.comment}</p>}
+              <span className="text-[12px] text-subtle">{`${r.event_title} · ${fmtDate(r.start_date ? r.start_date + 'T12:00:00' : r.created_at)}`}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   )
 }

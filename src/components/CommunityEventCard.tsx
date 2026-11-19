@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { whenLabel, type CommunityEvent } from '../events'
 
 /** A community event in a list: clearly marked as shared by a member and not verified by Xanadu. */
-export default function CommunityEventCard({ e, wide = true }: { e: CommunityEvent; wide?: boolean }) {
+export default function CommunityEventCard({ e, wide = true, going = 0 }: { e: CommunityEvent; wide?: boolean; going?: number }) {
   const where = [e.venue, e.town].filter(Boolean).join(' · ')
   if (!wide) return (
     <Link to={`/event/${e.id}`} className="flex w-[200px] flex-none flex-col overflow-hidden rounded-[18px] border border-dashed border-line-2 bg-surface/60 text-text no-underline">
@@ -11,6 +11,7 @@ export default function CommunityEventCard({ e, wide = true }: { e: CommunityEve
         <span className="text-[11px] tracking-[0.06em] text-iri-teal uppercase">Community event</span>
         <span className="line-clamp-2 text-[15px] font-semibold leading-snug text-ink">{e.title || 'Untitled event'}</span>
         <span className="truncate text-xs text-subtle">{whenLabel(e)}</span>
+        {going > 0 && <span className="text-xs text-gold-soft">{`${going} going`}</span>}
       </div>
     </Link>
   )
@@ -23,7 +24,7 @@ export default function CommunityEventCard({ e, wide = true }: { e: CommunityEve
         <span className="text-xs text-iri-teal">{['Community event', e.tags[0]].filter(Boolean).join(' · ')}</span>
         <span className="truncate text-[15px] font-semibold text-ink">{e.title || 'Untitled event'}</span>
         <span className="truncate text-[13px] text-subtle">{[where, whenLabel(e)].filter(Boolean).join(' · ')}</span>
-        <span className="text-[12px] text-faint">Shared by a member · not verified</span>
+        <span className="text-[12px] text-faint">{going > 0 ? <span className="text-gold-soft">{`${going} going · `}</span> : null}Community event · not verified</span>
       </div>
     </Link>
   )

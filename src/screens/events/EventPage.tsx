@@ -5,6 +5,7 @@ import { IconBack } from '../../components/icons'
 import { Loading, useAuth } from '../../auth'
 import { ReportSheet } from '../../components/Report'
 import FoundingInvite from '../../components/FoundingInvite'
+import EventGoing from '../../components/EventGoing'
 import { contactLink, deleteSharedEvent, fetchCommunityEvent, safeLink, whenLabel, type CommunityEvent } from '../../events'
 
 /** A community event: what a member shared, clearly marked as not verified by Xanadu. */
@@ -86,6 +87,8 @@ export default function EventPage() {
             {link && <a href={link} target="_blank" rel="noreferrer noopener" className="flex min-h-[52px] items-center justify-center rounded-2xl border border-line-2 text-[15px] text-text no-underline">More info</a>}
           </div>
         )}
+
+        {e.status === 'live' && <EventGoing e={e} />}
 
         {e.description && <p className="m-0 text-[15px] leading-relaxed whitespace-pre-line text-muted">{e.description}</p>}
 

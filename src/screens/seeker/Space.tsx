@@ -136,7 +136,7 @@ export default function Space() {
             : <span className="text-[13px] leading-normal text-subtle">No experiences scheduled yet.</span>}
           {isSeeker && <Link to={ask(`Hi! I have a question about ${space.name}: `)} className="flex min-h-12 items-center justify-center rounded-2xl border border-line-2 text-[15px] text-text no-underline">Ask the Xanadu team</Link>}
         </section>
-        <Reviews categories={['Space', 'Food', 'Hospitality', 'Location']} emptyText="Guests who book through Xanadu can review this space after their stay." />
+        <Reviews kind="space" id={space.id} emptyText="Seekers who go to gatherings here can review this space afterwards." />
         {!own && (reported
           ? <p className="m-0 text-center text-[13px] text-subtle">Thank you. Our team will look into it.</p>
           : <button type="button" onClick={() => setReporting(true)} className="min-h-11 self-center text-[13px] text-subtle underline-offset-2 hover:underline">Report this space</button>)}

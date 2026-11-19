@@ -1,3 +1,4 @@
+import { useAuth } from '../../auth'
 import { useState } from 'react'
 import { RolesCard } from '../../components/Roles'
 import { FacilitatorTabs, Reviews, Screen } from '../../components/ui'
@@ -12,6 +13,7 @@ const FAC_PRACTICES = PRACTICES.filter((p) => p !== 'Trainings' && p !== 'Reside
 
 export default function FacilitatorProfile() {
   const [profile, save] = useFacilitatorProfile()
+  const { session } = useAuth()
   const [view, setView] = useState<(typeof VIEWS)[number]>('My profile')
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<FP>(profile)
@@ -144,10 +146,10 @@ export default function FacilitatorProfile() {
           </section>
         )}
 
-        <Reviews categories={['Guidance', 'Safety & care', 'Presence', 'Clarity']}
+        <Reviews kind="facilitator" id={session?.user.id}
           emptyText={own
-            ? "Seekers can review you after an experience they booked through Xanadu. You'll be able to reply publicly to each one."
-            : 'Reviews from Seekers who booked through Xanadu will appear here.'} />
+            ? 'Seekers who go to your gatherings can review you afterwards. Reviews appear here once you’re welcomed into Xanadu.'
+            : 'Reviews from Seekers who went to their gatherings will appear here.'} />
 
         <section className="flex flex-col gap-2.5">
           <h2 className={h2}>Holds space at</h2>

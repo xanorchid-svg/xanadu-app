@@ -4,6 +4,7 @@ import { Field, inputCls } from './ui'
 import { IconSearch } from './icons'
 import { placeLabel } from '../data'
 import { useGuides, useSpaces, type Guide, type PublicSpace } from '../store'
+import { useMemberReviews } from '../events'
 
 /**
  * Who's in an experience: the Facilitator leading it and where it's held.
@@ -136,6 +137,7 @@ export function VenuePicker({ value, onChange }: { value: Venue; onChange: (v: V
 export function LedBy({ guide, canMessage, offeringId }: { guide: Guide; canMessage: boolean; offeringId: string }) {
   const [more, setMore] = useState(false)
   const where = placeLabel({ town: guide.town, region: guide.region })
+  const rev = useMemberReviews('facilitator', guide.id)
   return (
     <section className="flex flex-col gap-3 rounded-[18px] bg-surface p-3.5">
       <div className="flex items-center gap-3">
@@ -144,8 +146,10 @@ export function LedBy({ guide, canMessage, offeringId }: { guide: Guide; canMess
           <span className="text-xs text-subtle">Led by</span>
           <span className="truncate text-[16px] font-semibold text-ink">{guide.name}</span>
           <span className="truncate text-xs text-subtle">{[guide.practices.slice(0, 3).join(' · '), where].filter(Boolean).join(' · ')}</span>
+          {rev && rev.count > 0 && rev.average !== null && <span className="text-xs text-gold-soft">{`★ ${Number(rev.average).toFixed(1)} · ${rev.count} ${rev.count === 1 ? 'review' : 'reviews'}`}</span>}
         </div>
       </div>
+      {rev && rev.reviews[0]?.comment && <p className="m-0 rounded-[12px] bg-surface-2 px-3 py-2 text-[13px] leading-relaxed text-muted">{`“${rev.reviews[0].comment.slice(0, 180)}${rev.reviews[0].comment.length > 180 ? '…' : ''}” · ${rev.reviews[0].first_name}`}</p>}
       {guide.about && (
         <button type="button" onClick={() => setMore((m) => !m)} className="text-left">
           <p className={`m-0 text-[14px] leading-relaxed whitespace-pre-line text-muted ${more ? '' : 'line-clamp-3'}`}>{guide.about}</p>

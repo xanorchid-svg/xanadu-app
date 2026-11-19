@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { day, useTeamQuery } from '../lib/data'
 import { Answers, Drawer, Search, Tabs, useToast } from '../parts'
@@ -8,6 +8,7 @@ type Ev = {
   id: string; title: string; description: string; start_date: string | null; end_date: string | null
   start_time: string; end_time: string; venue: string; town: string; price_note: string; contact: string; link: string
   tags: string[]; photo_url: string; aligned: boolean | null; status: 'pending' | 'live' | 'declined'
+  space_id: string | null; facilitator_id: string | null
   created_at: string; submitted_by_name: string | null; submitted_by_email: string | null
 }
 type Tab = 'pending' | 'live' | 'declined'
@@ -105,9 +106,61 @@ export default function CommunityEvents() {
             ['About', open.description],
             ['Shared by', `${open.submitted_by_name || 'A member'}${open.submitted_by_email ? ` · ${open.submitted_by_email}` : ''}`],
           ]} />
+          <LinkPicker e={open} onSaved={(space_id, facilitator_id) => {
+            list.setData((d) => d?.map((x) => (x.id === open.id ? { ...x, space_id, facilitator_id } : x)) ?? null)
+            setOpen({ ...open, space_id, facilitator_id }); toast.show('Linked. Reviews from this event will show on their page once they’re approved.')
+          }} />
         </Drawer>
       )}
       {toast.node}
+    </div>
+  )
+}
+
+type Opt = { id: string; name: string; town: string; approved: boolean }
+/**
+ * Connect an event to the Xanadu space and/or Facilitator who runs it. Seekers' reviews of the event then
+ * appear on that space's or Facilitator's page, but only once they've applied and been approved.
+ */
+function LinkPicker({ e, onSaved }: { e: Ev; onSaved: (space: string | null, facilitator: string | null) => void }) {
+  const [opts, setOpts] = useState<{ spaces: Opt[]; facilitators: Opt[] } | null>(null)
+  const [space, setSpace] = useState(e.space_id ?? '')
+  const [guide, setGuide] = useState(e.facilitator_id ?? '')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  useEffect(() => { supabase.rpc('team_link_options').then(({ data }) => setOpts((data as { spaces: Opt[]; facilitators: Opt[] } | null) ?? { spaces: [], facilitators: [] })) }, [])
+  useEffect(() => { setSpace(e.space_id ?? ''); setGuide(e.facilitator_id ?? '') }, [e.id, e.space_id, e.facilitator_id])
+  const changed = space !== (e.space_id ?? '') || guide !== (e.facilitator_id ?? '')
+  const save = async () => {
+    setBusy(true); setErr('')
+    const { error } = await supabase.rpc('team_link_community_event', { p_event: e.id, p_space: space || null, p_facilitator: guide || null })
+    setBusy(false)
+    if (error) setErr('That didn’t save. Please try again.'); else onSaved(space || null, guide || null)
+  }
+  const label = (o: Opt) => `${o.name || 'Unnamed'}${o.town ? ` · ${o.town}` : ''}${o.approved ? '' : ' (not approved yet)'}`
+  const sel = 'h-10 w-full rounded-lg bg-surface px-3 text-[14px] text-text ring-1 ring-line'
+  return (
+    <div className="mt-5 flex flex-col gap-2.5 rounded-xl bg-surface/60 p-4 ring-1 ring-line">
+      <p className="text-[13px] font-semibold text-text">Link to Xanadu members</p>
+      <p className="text-[12.5px] leading-relaxed text-faint">Who runs this event on Xanadu. Seekers who went can review it, and those reviews appear on the linked space and Facilitator pages once they’re approved.</p>
+      {!opts ? <Spinner /> : (
+        <>
+          <label className="flex flex-col gap-1 text-[12px] text-subtle">Space
+            <select value={space} onChange={(ev) => setSpace(ev.target.value)} className={sel}>
+              <option value="">Not on Xanadu yet</option>
+              {opts.spaces.map((o) => <option key={o.id} value={o.id}>{label(o)}</option>)}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-[12px] text-subtle">Facilitator
+            <select value={guide} onChange={(ev) => setGuide(ev.target.value)} className={sel}>
+              <option value="">Not on Xanadu yet</option>
+              {opts.facilitators.map((o) => <option key={o.id} value={o.id}>{label(o)}</option>)}
+            </select>
+          </label>
+          {changed && <Button className="h-9 self-start" onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save link'}</Button>}
+          {err && <p className="text-[13px] text-rose">{err}</p>}
+        </>
+      )}
     </div>
   )
 }
