@@ -144,7 +144,7 @@ export default function Status() {
     <Screen footer={footer}>
       <div className="flex flex-col gap-6 px-5 pt-safe pb-8">
         {onSeeker && <Link to="/discover" className="-ml-1 self-start text-[14px] text-subtle no-underline">‹ Discover</Link>}
-        <img src="/logo-emblem-light.png" alt="" className="mt-2 w-24 self-center opacity-90" />
+        <img src="/logo-emblem-light.webp" alt="" className="mt-2 w-24 self-center opacity-90" />
         <div className="flex flex-col gap-2 text-center">
           <span className="text-xs tracking-[0.2em] text-gold-soft uppercase">{kicker}</span>
           <h1 className="m-0 font-display text-[34px] leading-[1.08] font-medium text-ink">{title}</h1>

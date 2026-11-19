@@ -164,3 +164,8 @@ revoke execute on function public.event_attendees(uuid) from anon;
 revoke execute on function public.member_reviews(text, uuid) from anon;
 revoke execute on function public.team_link_community_event(uuid, uuid, uuid) from anon;
 revoke execute on function public.team_link_options() from anon;
+
+-- Hardening (Nov 19): has_role isn't for signed-out visitors; index for reviews by member
+revoke execute on function public.has_role(uuid, text) from anon, public;
+grant execute on function public.has_role(uuid, text) to authenticated;
+create index if not exists event_reviews_user_idx on public.event_reviews(user_id);

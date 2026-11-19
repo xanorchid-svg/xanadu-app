@@ -75,7 +75,7 @@ export default function Messages() {
 
         {/* the Xanadu team is always at the top */}
         <Link to="/messages/team" className="flex min-h-[72px] items-center gap-3 rounded-[18px] bg-plum/60 px-3.5 py-3 text-text no-underline ring-iri">
-          <span className="flex h-12 w-12 flex-none items-center justify-center overflow-hidden rounded-full bg-ivory"><img decoding="async" loading="lazy" src="/xanadu-mark.png" alt="" className="h-9 w-auto" /></span>
+          <span className="flex h-12 w-12 flex-none items-center justify-center overflow-hidden rounded-full bg-ivory"><img decoding="async" loading="lazy" src="/xanadu-mark.webp" alt="" className="h-9 w-auto" /></span>
           <span className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span className="flex justify-between gap-2"><span className="text-[15px] font-semibold text-ink">Xanadu team</span><span className="text-xs text-subtle">{lastTeam ? when(lastTeam.created_at) : ''}</span></span>
             <span className={`truncate text-[13px] ${teamUnread ? 'font-semibold text-text' : 'text-subtle'}`}>{lastTeam ? `${lastTeam.from_team ? '' : 'You: '}${lastTeam.body}` : 'Questions, spot requests and help'}</span>

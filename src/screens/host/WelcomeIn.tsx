@@ -50,7 +50,7 @@ export default function WelcomeIn() {
   return (
     <div className="flex h-full flex-col">
       <main className="xa-page flex flex-1 flex-col gap-7 overflow-y-auto px-5 pt-safe pb-6">
-        <img src="/logo-emblem-light.png" alt="" className="mt-8 w-32 self-center opacity-95" />
+        <img src="/logo-emblem-light.webp" alt="" className="mt-8 w-32 self-center opacity-95" />
         <div className="flex flex-col gap-2.5 text-center">
           <span className="text-xs tracking-[0.2em] text-gold-soft uppercase">{w.kicker}</span>
           <h1 className="m-0 font-display text-[38px] leading-[1.05] font-medium text-ink">Welcome to <span className="whitespace-nowrap"><Glow>Xanadu</Glow> ✦</span></h1>

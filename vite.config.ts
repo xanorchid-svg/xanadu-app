@@ -24,7 +24,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       // phone notifications: push and tap handlers live in public/push-sw.js
       workbox: { importScripts: ['push-sw.js'], navigateFallbackDenylist: [/^\/push-sw\.js$/] },
-      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'xanadu-logo.png', 'xanadu-mark.png', 'logo-static.png', 'logo-orbit-outer.png', 'logo-orbit-inner.png', 'logo-nucleus.png', 'logo-wordmark.png', 'logo-wordmark-clean.png', 'logo-emblem-light.png', 'logo-xanadu-text.png'],
+      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'xanadu-logo.png', 'xanadu-mark.webp', 'logo-static.webp', 'logo-orbit-outer.webp', 'logo-orbit-inner.webp', 'logo-nucleus.webp', 'logo-wordmark.webp', 'logo-wordmark-clean.webp', 'logo-emblem-light.webp', 'logo-xanadu-text.png'],
       manifest: {
         name: 'Xanadu — A network for awakening places',
         short_name: 'Xanadu',

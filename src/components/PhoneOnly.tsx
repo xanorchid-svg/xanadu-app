@@ -31,7 +31,7 @@ export default function PhoneOnly({ children }: { children: ReactNode }) {
   if (!blocked) return <>{children}</>
   return (
     <div className="relative z-[1] flex h-full flex-col items-center justify-center px-8 text-center">
-      <img src="/logo-emblem-light.png" alt="" className="mb-8 w-40 opacity-90" />
+      <img src="/logo-emblem-light.webp" alt="" className="mb-8 w-40 opacity-90" />
       <h1 className="font-display text-[34px] leading-tight text-ink">Xanadu lives on <Glow>your phone</Glow>.</h1>
       <p className="mt-3 max-w-[300px] text-[15px] leading-relaxed text-subtle">Scan the code with your phone's camera to open it there.</p>
       <div className="mt-8 rounded-2xl bg-[#F6F1E8] p-3 ring-iri">

@@ -130,7 +130,7 @@ export function useAuth() {
 export function Loading({ label = 'Opening Xanadu…' }: { label?: string }) {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4 bg-navy">
-      <img decoding="async" src="/xanadu-mark.png" alt="" className="h-20 w-auto animate-pulse opacity-80" />
+      <img decoding="async" src="/xanadu-mark.webp" alt="" className="h-20 w-auto animate-pulse opacity-80" />
       <span className="text-sm text-subtle">{label}</span>
     </div>
   )
