@@ -123,7 +123,7 @@ const EVENT_TOOL = {
   input_schema: {
     type: 'object',
     properties: {
-      aligned: { type: 'boolean', description: 'True if this is a wellness, healing, spiritual, movement or embodiment gathering: yoga, breathwork, meditation, sound healing, dance or ecstatic dance, healing, womb or embodiment work, circles, kirtan, cacao, reiki, bodywork, retreats and similar. False for parties, sports, markets, kids classes, business ads, rentals or anything else.' },
+      aligned: { type: 'boolean', description: 'True if this is a wellness, healing, spiritual, movement or embodiment gathering: yoga, breathwork, meditation, sound healing, dance or ecstatic dance, healing, womb or embodiment work, circles, kirtan, cacao, reiki, bodywork, retreats, conscious kids and family learning, nature outings, art and creative workshops, and similar. False for parties, nightlife, sports, markets, business ads, rentals, plant-medicine or psychedelic ceremonies, or anything else.' },
       title: str('Name of the event'),
       description: str('2 to 4 plain sentences on what happens and who it is for, based only on the source. No health or outcome promises.'),
       start_date: str('YYYY-MM-DD. If the year is missing, use the next upcoming date after today. If it repeats weekly, the next date.'),
