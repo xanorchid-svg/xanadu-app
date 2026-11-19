@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../auth'
+import { JoinSheet } from './Guest'
 
 type Kind = 'claim' | 'remove'
 
@@ -40,7 +41,8 @@ export default function EventClaim({ eventId, title }: { eventId: string; title:
           </p>
         )}
       </div>
-      {open && <ClaimSheet kind={open} eventId={eventId} title={title} onClose={() => setOpen(null)} onDone={(k) => { setSent((s) => [...s, k]); setOpen(null) }} />}
+      {open && !session && <JoinSheet title={open === 'claim' ? 'Is this your event?' : 'Want it taken down?'} body={open === 'claim' ? 'Sign in or join free to claim it. Events are claimed by verified Facilitators and Containers, so you’ll apply in a few minutes and we link it to you once you’re approved.' : 'Sign in or join free and ask us to remove it. The team will take it down.'} onClose={() => setOpen(null)} />}
+      {open && session && <ClaimSheet kind={open} eventId={eventId} title={title} onClose={() => setOpen(null)} onDone={(k) => { setSent((s) => [...s, k]); setOpen(null) }} />}
     </>
   )
 }

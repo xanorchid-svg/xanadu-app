@@ -5,6 +5,8 @@ import { IconBack, IconCalendar, IconNext } from '../../components/icons'
 import ExperienceCard from '../../components/ExperienceCard'
 import CommunityEventCard from '../../components/CommunityEventCard'
 import FoundingInvite from '../../components/FoundingInvite'
+import { GuestBar, GuestInvite, MembersLink } from '../../components/Guest'
+import { useAuth } from '../../auth'
 import { CATEGORIES, inCategory, typesLabel, useCommunityEvents, type CommunityEvent } from '../../events'
 import TypePicker from '../../components/TypePicker'
 import { specialBetween, specialOn, type SpecialDay } from '../../specialDays'
@@ -60,6 +62,8 @@ export default function Calendar() {
   const [picking, setPicking] = useState(false)
   const { listings, loading } = useListings()
   const { events } = useCommunityEvents()
+  const { session } = useAuth()
+  const guest = !session
 
   const countries = Array.from(new Set(listings.map((e) => e.space?.country.trim()).filter(Boolean) as string[])).sort()
   const all: Item[] = [
@@ -108,11 +112,13 @@ export default function Calendar() {
   const card = (e: Item) => (isCommunity(e) ? <CommunityEventCard key={e.id} e={e} /> : <ExperienceCard key={e.id} e={e} />)
 
   return (
-    <Screen footer={<SeekerTabs />}>
+    <Screen footer={guest ? <GuestBar /> : <SeekerTabs />}>
       <Page className="gap-4">
         <div className="flex items-end justify-between gap-3">
           <H1>Calendar</H1>
-          <Link to="/events/new" className="mb-1 flex min-h-10 flex-none items-center rounded-full border border-line-2 px-3.5 text-[13px] text-text no-underline">+ Share an event</Link>
+          {guest
+            ? <MembersLink to="/events/new" title="Join free to share an event" body="Members share the gatherings they love, and the community calendar grows from there." className="mb-1 flex min-h-10 flex-none items-center rounded-full border border-line-2 px-3.5 text-[13px] text-text">+ Share an event</MembersLink>
+            : <Link to="/events/new" className="mb-1 flex min-h-10 flex-none items-center rounded-full border border-line-2 px-3.5 text-[13px] text-text no-underline">+ Share an event</Link>}
         </div>
 
         <div className="flex flex-col gap-2">
@@ -198,12 +204,19 @@ export default function Calendar() {
         )}
 
         {!loading && (
+          guest ? (
+            <MembersLink to="/sessions" title="Sessions are for members" body="Massage, guidance, private classes, private chefs and more, with practitioners Xanadu has welcomed. Join free to see them." className="flex flex-col gap-0.5 rounded-[18px] bg-surface px-4 py-3.5 text-text">
+              <span className="text-[15px] font-semibold text-ink">Looking for one-on-one? ›</span>
+              <span className="text-[13px] text-subtle">Massage, guidance, private classes and more. Join free to see Sessions.</span>
+            </MembersLink>
+          ) : (
           <Link to="/sessions" className="flex flex-col gap-0.5 rounded-[18px] bg-surface px-4 py-3.5 text-text no-underline">
             <span className="text-[15px] font-semibold text-ink">Looking for one-on-one? ›</span>
             <span className="text-[13px] text-subtle">Massage, guidance, private classes and more, with practitioners Xanadu has welcomed.</span>
-          </Link>
+          </Link>)
         )}
         {!loading && <FoundingInvite />}
+        {guest && <GuestInvite />}
       </Page>
     </Screen>
   )

@@ -437,7 +437,7 @@ export function ApplicationUpdate() {
 export default function Welcome() {
   const { session, profile, loading } = useAuth()
   if (loading) return <Loading />
-  if (!session) return <Navigate to="/" replace />
+  if (!session) return <Navigate to="/?mode=signin" replace />
   if (!profile) return <Loading label="Setting up your account…" />
   if (profile.onboarded) return <Navigate to={HOME[profile.role]} replace />
   return profile.role === 'container' ? <ContainerWelcome /> : profile.role === 'facilitator' ? <FacilitatorWelcome /> : <SeekerWelcome />

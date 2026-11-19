@@ -7,6 +7,7 @@ import { ReportSheet } from '../../components/Report'
 import FoundingInvite from '../../components/FoundingInvite'
 import EventGoing from '../../components/EventGoing'
 import EventClaim from '../../components/EventClaim'
+import { GuestGoing, GuestInvite } from '../../components/Guest'
 import { contactLink, deleteSharedEvent, fetchCommunityEvent, safeLink, whenLabel, type CommunityEvent } from '../../events'
 
 /** A community event: what a member shared, clearly marked as not verified by Xanadu. */
@@ -90,7 +91,7 @@ export default function EventPage() {
           </div>
         )}
 
-        {e.status === 'live' && <EventGoing e={e} />}
+        {e.status === 'live' && (session ? <EventGoing e={e} /> : <GuestGoing eventId={e.id} over={!!e.start_date && (e.end_date || e.start_date) < new Date().toISOString().slice(0, 10)} />)}
 
         {e.description && <p className="m-0 text-[15px] leading-relaxed whitespace-pre-line text-muted">{e.description}</p>}
 
@@ -100,8 +101,9 @@ export default function EventPage() {
         {mine
           ? <button type="button" onClick={remove} className="min-h-11 self-center text-[13px] text-subtle">Remove this event</button>
           : reported ? <p className="m-0 text-center text-[13px] text-subtle">Thank you. Our team will look into it.</p>
-            : e.submitted_by && <button type="button" onClick={() => setReporting(true)} className="min-h-11 self-center text-[13px] text-subtle underline-offset-2 hover:underline">Report this event</button>}
+            : session && e.submitted_by && <button type="button" onClick={() => setReporting(true)} className="min-h-11 self-center text-[13px] text-subtle underline-offset-2 hover:underline">Report this event</button>}
       </div>
+      {!session && <GuestInvite countView />}
       {reporting && e.submitted_by && <ReportSheet memberId={e.submitted_by} name={e.title} context="community_event" contextId={e.id} onClose={() => setReporting(false)}
         onDone={() => { setReporting(false); setReported(true) }} />}
     </Screen>

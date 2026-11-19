@@ -150,11 +150,13 @@ export function takeReturn(fallback: string) {
 }
 
 /** Guards a page: must be signed in, set up, and the right kind of member. */
-export function RequireRole({ role, children }: { role: DbRole | 'any'; children: ReactNode }) {
+export function RequireRole({ role, children, guests = false }: { role: DbRole | 'any'; children: ReactNode; guests?: boolean }) {
   const { session, profile, loading } = useAuth()
   const location = useLocation()
   if (loading) return <Loading />
-  if (!session) { rememberReturn(location.pathname + location.search); return <Navigate to="/" replace /> }
+  // the Calendar and event pages are open to visitors without an account; everything else asks them to sign in
+  if (!session && guests) return <>{children}</>
+  if (!session) { rememberReturn(location.pathname + location.search); return <Navigate to="/?mode=signin" replace /> }
   if (!profile) return <Loading label="Setting up your account…" />
   if (!profile.onboarded) return <Navigate to="/welcome" replace />
   if (role !== 'any' && profile.role !== role) return <Navigate to={HOME[profile.role]} replace />

@@ -61,6 +61,11 @@ export default function Intro() {
   const [providers, setProviders] = useState({ google: false, apple: false })
   useEffect(() => { enabledProviders().then(setProviders) }, [])
 
+  // Visitors without an account land on the Calendar; the sign-in and sign-up screens open with ?mode=
+  useEffect(() => {
+    if (!loading && !session && !params.get('mode') && !params.get('role')) navigate('/calendar', { replace: true })
+  }, [loading, session, params, navigate])
+
   // Already signed in: go home (or finish setting up)
   useEffect(() => {
     if (loading || !session || !profile) return

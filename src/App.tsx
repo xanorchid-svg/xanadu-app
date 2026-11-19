@@ -106,10 +106,10 @@ export default function App() {
           <Route path="/welcome" element={<Welcome />} />
 
           <Route path="/discover" element={<RequireRole role="seeker"><Discover /></RequireRole>} />
-          <Route path="/calendar" element={<RequireRole role="seeker"><Calendar /></RequireRole>} />
+          <Route path="/calendar" element={<RequireRole role="seeker" guests><Calendar /></RequireRole>} />
           <Route path="/experience/:id" element={<RequireRole role="any"><Experience /></RequireRole>} />
           <Route path="/space/:id" element={<RequireRole role="any"><Space /></RequireRole>} />
-          <Route path="/event/:id" element={<RequireRole role="any"><EventPage /></RequireRole>} />
+          <Route path="/event/:id" element={<RequireRole role="any" guests><EventPage /></RequireRole>} />
           <Route path="/sessions" element={<RequireRole role="any"><Sessions /></RequireRole>} />
           <Route path="/service/:id" element={<RequireRole role="any"><ServicePage /></RequireRole>} />
           <Route path="/events/new" element={<RequireRole role="any"><ShareEvent /></RequireRole>} />

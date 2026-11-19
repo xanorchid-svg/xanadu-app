@@ -19,7 +19,7 @@ export default function ResetPassword() {
       <div className="flex h-full flex-col items-center justify-center gap-4 bg-navy px-8 text-center">
         <h1 className="m-0 font-display text-3xl font-medium text-ink">This link has expired</h1>
         <p className="m-0 text-sm text-muted">Go back and tap Forgot? again to get a fresh link.</p>
-        <button type="button" onClick={() => navigate('/')} className="min-h-12 rounded-2xl bg-iri px-6 font-semibold text-navy">Back to sign in</button>
+        <button type="button" onClick={() => navigate('/?mode=signin')} className="min-h-12 rounded-2xl bg-iri px-6 font-semibold text-navy">Back to sign in</button>
       </div>
     )
   }
