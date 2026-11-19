@@ -11,8 +11,8 @@ type Ev = {
   space_id: string | null; facilitator_id: string | null
   created_at: string; submitted_by_name: string | null; submitted_by_email: string | null
 }
-type Tab = 'pending' | 'live' | 'declined'
-const TABS = [{ key: 'pending', label: 'To review' }, { key: 'live', label: 'On the calendar' }, { key: 'declined', label: 'Not added' }] as const
+type Tab = 'pending' | 'live' | 'declined' | 'claims'
+const TABS = [{ key: 'pending', label: 'To review' }, { key: 'live', label: 'On the calendar' }, { key: 'declined', label: 'Not added' }, { key: 'claims', label: 'Claims' }] as const
 
 const when = (e: Ev) => {
   if (!e.start_date) return 'No date'
@@ -27,12 +27,14 @@ export default function CommunityEvents() {
   const [q, setQ] = useState('')
   const [open, setOpen] = useState<Ev | null>(null)
   const toast = useToast()
+  const claims = useTeamQuery<Claim[]>('team_list_event_claims')
 
   const counts = useMemo(() => {
-    const c = { pending: 0, live: 0, declined: 0 } as Record<Tab, number>
+    const c = { pending: 0, live: 0, declined: 0, claims: 0 } as Record<Tab, number>
     ;(list.data ?? []).forEach((e) => { c[e.status]++ })
+    c.claims = (claims.data ?? []).filter((x) => x.status === 'open').length
     return c
-  }, [list.data])
+  }, [list.data, claims.data])
   const shown = useMemo(() => {
     const s = q.trim().toLowerCase()
     return (list.data ?? []).filter((e) => e.status === tab && (!s || [e.title, e.venue, e.town, e.submitted_by_name, ...e.tags].some((v) => v?.toLowerCase().includes(s))))
@@ -53,6 +55,8 @@ export default function CommunityEvents() {
       <p className="mb-4 max-w-2xl text-[14px] leading-relaxed text-subtle">Shared by members from posters and group chats. Approving one puts it on the app’s Calendar and Discover as a community event, marked “not verified by Xanadu”.</p>
       <div className="mb-5"><Tabs tabs={TABS} value={tab} onChange={setTab} counts={counts} /></div>
 
+      {tab === 'claims' && <ClaimsList q={claims} toast={toast.show} onRemoved={(id) => list.setData((d) => d?.map((x) => (x.id === id ? { ...x, status: 'declined' } : x)) ?? null)} />}
+      {tab !== 'claims' && <>
       {list.error && <p className="text-[14px] text-rose">{list.error}</p>}
       {!list.data && !list.error && <div className="grid place-items-center py-16"><Spinner /></div>}
       {list.data && shown.length === 0 && <EmptyState title={tab === 'pending' ? 'Nothing to review' : 'Nothing here'} body="When members share an event in the app, it appears here for a quick look." />}
@@ -84,6 +88,7 @@ export default function CommunityEvents() {
           </ul>
         </Card>
       )}
+      </>}
 
       {open && (
         <Drawer label={open.title} title={open.title} onClose={() => setOpen(null)}
@@ -162,5 +167,63 @@ function LinkPicker({ e, onSaved }: { e: Ev; onSaved: (space: string | null, fac
         </>
       )}
     </div>
+  )
+}
+
+type Claim = {
+  id: string; kind: 'claim' | 'remove'; note: string; status: 'open' | 'done' | 'declined'; created_at: string
+  event_id: string; event_title: string; event_date: string | null; event_photo: string
+  user_id: string; user_name: string | null; user_email: string | null
+  facilitator_status: string | null; container_status: string | null; space_name: string | null
+}
+
+/**
+ * Organizers who said "this is mine" or "please take it down" on an event shared from the community.
+ * A claim can only be approved once the member is an approved Facilitator or Container: approving links
+ * the event to them. Approving a removal takes the event off the calendar.
+ */
+function ClaimsList({ q, toast, onRemoved }: { q: ReturnType<typeof useTeamQuery<Claim[]>>; toast: (m: string) => void; onRemoved: (eventId: string) => void }) {
+  const [busy, setBusy] = useState('')
+  const decide = async (c: Claim, decision: 'approve' | 'decline') => {
+    setBusy(c.id)
+    const { error } = await supabase.rpc('team_resolve_event_claim', { p_claim: c.id, p_decision: decision })
+    setBusy('')
+    if (error) { toast(error.message.includes('application') ? 'Approve their Facilitator or Container application first.' : 'That didn’t work. Please try again.'); return }
+    q.setData((d) => d?.map((x) => (x.id === c.id ? { ...x, status: decision === 'approve' ? 'done' : 'declined' } : x)) ?? null)
+    if (decision === 'approve' && c.kind === 'remove') onRemoved(c.event_id)
+    toast(decision === 'decline' ? 'Declined' : c.kind === 'claim' ? 'Linked to them. They’ve been told.' : 'Taken off the calendar. They’ve been told.')
+  }
+  const host = (c: Claim) => {
+    const r = [c.facilitator_status && `Facilitator: ${c.facilitator_status}`, c.container_status && `Container: ${c.container_status}${c.space_name ? ` (${c.space_name})` : ''}`].filter(Boolean)
+    return r.length ? r.join(' · ') : 'Seeker only, hasn’t applied'
+  }
+  if (q.error) return <p className="text-[14px] text-rose">{q.error}</p>
+  if (!q.data) return <div className="grid place-items-center py-16"><Spinner /></div>
+  if (!q.data.length) return <EmptyState title="No claims yet" body="When an organizer taps “Is this yours? Claim it” or asks for removal on an event, it appears here." />
+  return (
+    <Card>
+      <ul className="divide-y divide-line">
+        {q.data.map((c) => {
+          const ready = c.kind === 'remove' || c.facilitator_status === 'approved' || c.container_status === 'approved'
+          return (
+            <li key={c.id} className="flex flex-wrap items-center gap-3.5 px-4 py-3.5 sm:px-5">
+              <div className="size-14 flex-none overflow-hidden rounded-xl bg-surface">{c.event_photo && <img src={c.event_photo} alt="" className="size-full object-cover" loading="lazy" />}</div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[15px] font-semibold text-text">{c.kind === 'claim' ? 'Claim' : 'Remove'} · {c.event_title}</p>
+                <p className="truncate text-[12.5px] text-faint">{c.user_name || 'A member'}{c.user_email ? ` · ${c.user_email}` : ''} · {day(c.created_at)}</p>
+                <p className="text-[12.5px] text-subtle">{c.kind === 'claim' ? host(c) : 'Asked to take it down'}{c.note ? ` · “${c.note}”` : ''}</p>
+              </div>
+              {c.status === 'open' ? (
+                <div className="flex gap-2">
+                  <Button variant="quiet" className="h-9" disabled={busy === c.id} onClick={() => decide(c, 'decline')}>Decline</Button>
+                  <Button className="h-9" disabled={busy === c.id || !ready} title={ready ? '' : 'Approve their application first (Applications)'} onClick={() => decide(c, 'approve')}>
+                    {c.kind === 'claim' ? (ready ? 'Link to them' : 'Waiting on application') : 'Remove event'}</Button>
+                </div>
+              ) : <span className="text-[12.5px] text-faint">{c.status === 'done' ? 'Done' : 'Declined'}</span>}
+            </li>
+          )
+        })}
+      </ul>
+    </Card>
   )
 }

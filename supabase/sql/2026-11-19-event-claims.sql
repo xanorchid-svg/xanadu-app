@@ -1,0 +1,2 @@
+-- Applied via migration "event_claims" (Nov 19 2026): event_claims table, request_event_claim, my_event_claims,
+-- team_list_event_claims, team_resolve_event_claim. See the Supabase migration history for the full text.

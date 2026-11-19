@@ -14,6 +14,8 @@ export type CommunityEvent = {
   venue: string; town: string; price_note: string; contact: string; link: string
   tags: string[]; photo_url: string; aligned: boolean | null
   status: 'pending' | 'live' | 'declined'; created_at: string
+  /** set when an approved Facilitator or Container owns the event */
+  space_id?: string | null; facilitator_id?: string | null
 }
 export type EventDraft = Omit<CommunityEvent, 'id' | 'submitted_by' | 'status' | 'created_at'>
 export const EMPTY_EVENT: EventDraft = {

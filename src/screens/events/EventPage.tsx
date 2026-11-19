@@ -6,6 +6,7 @@ import { Loading, useAuth } from '../../auth'
 import { ReportSheet } from '../../components/Report'
 import FoundingInvite from '../../components/FoundingInvite'
 import EventGoing from '../../components/EventGoing'
+import EventClaim from '../../components/EventClaim'
 import { contactLink, deleteSharedEvent, fetchCommunityEvent, safeLink, whenLabel, type CommunityEvent } from '../../events'
 
 /** A community event: what a member shared, clearly marked as not verified by Xanadu. */
@@ -65,11 +66,12 @@ export default function EventPage() {
           <h1 className="m-0 font-display text-[34px] leading-[1.05] font-medium text-ink">{e.title}</h1>
         </div>
 
+        {!mine && e.status === 'live' && !e.facilitator_id && !e.space_id ? <EventClaim eventId={e.id} title={e.title} /> : (
         <div className="rounded-xl ring-rainbow px-3.5 py-3 text-[13px] leading-normal text-subtle">
           {mine && e.status !== 'live'
             ? e.status === 'pending' ? 'You shared this. It’s with the Xanadu team and not on the calendar yet.' : 'You shared this. The team didn’t add it to the calendar.'
-            : 'Shared by a member of the community. Not verified by Xanadu: check the details with the organizer before you go.'}
-        </div>
+            : e.facilitator_id || e.space_id ? '✦ Hosted by a Xanadu-verified member.' : 'Shared by a member of the community. Not verified by Xanadu: check the details with the organizer before you go.'}
+        </div>)}
 
         <dl className="m-0 flex flex-col gap-3">
           {rows.map(([k, v]) => (
