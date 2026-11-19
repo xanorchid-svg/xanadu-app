@@ -123,6 +123,16 @@ button { font: inherit; }
     -webkit-mask-composite: xor; mask-composite: exclude;
   }
 }
+/* Soft rainbow outline (replaces dashed borders): translucent, still */
+@utility ring-rainbow {
+  position: relative;
+  &::before {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none; opacity: .55;
+    background: linear-gradient(115deg, #f4a3a8, #f6c98b, #f3e6a0, #9fd8b8, #8fc7e8, #b9a6ec, #e8a6d6);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+  }
+}
 /* Photo placeholder: a soft portal of colour instead of a flat block */
 @utility bg-portal {
   background:

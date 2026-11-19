@@ -52,7 +52,7 @@ export function AvatarPicker({ photo, onChange, size = 104, label = 'Add photo' 
   return (
     <div className="flex flex-col items-center gap-1.5">
       <button type="button" onClick={open} aria-label={photo ? 'Change photo' : label}
-        className="relative flex items-center justify-center overflow-hidden rounded-full border border-dashed border-slate text-[13px] text-subtle"
+        className="relative flex items-center justify-center overflow-hidden rounded-full ring-rainbow text-[13px] text-subtle"
         style={{ width: size, height: size }}>
         {photo ? <img decoding="async" src={photo} alt="" className="h-full w-full object-cover" /> : label}
         {photo && <span className="absolute inset-x-0 bottom-0 bg-navy/70 py-1 text-[11px] text-text">Change</span>}
@@ -79,7 +79,7 @@ export function PhotoGallery({ photos, onChange, max = 8 }: { photos: string[]; 
           </div>
         ))}
         {photos.length < max && (
-          <button type="button" onClick={open} className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-slate text-xs text-subtle">
+          <button type="button" onClick={open} className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl ring-rainbow text-xs text-subtle">
             <IconPhoto />Add
           </button>
         )}

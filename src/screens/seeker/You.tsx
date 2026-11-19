@@ -1,16 +1,17 @@
 import { useState } from 'react'
 import { RolesCard } from '../../components/Roles'
 import { Link } from 'react-router-dom'
-import { Chip, EmptyState, H2, Page, PrimaryButton, Screen, SeekerTabs, Segmented } from '../../components/ui'
+import { EmptyState, H2, Page, PrimaryButton, Screen, SeekerTabs, Segmented } from '../../components/ui'
 import { IconChart, IconSettings } from '../../components/icons'
-import { CONTACT_EMAIL, SEEKER_ALIGN as ALIGN } from '../../data'
+import { CONTACT_EMAIL } from '../../data'
+import TypePicker from '../../components/TypePicker'
 import { refreshMatches, useMyKeywords } from '../../matching'
 import { AvatarPicker, EditFooter, SignOutButton, TextArea, TextField } from '../../components/edit'
 import { useAuth } from '../../auth'
 import { useSeekerProfile, type SeekerProfile } from '../../store'
 import { LifestylePicker } from '../../components/Lifestyle'
 import CommunityEventCard from '../../components/CommunityEventCard'
-import { useMyGoing, whenLabel } from '../../events'
+import { alignedTypes, useMyGoing, whenLabel } from '../../events'
 
 const JOURNEY_TABS = ['Upcoming', 'Past'] as const
 
@@ -28,7 +29,7 @@ export default function You() {
   const [keywords, setKeywords] = useMyKeywords()
   const [words, setWords] = useState(me.seeking)
   const [wordsState, setWordsState] = useState<'idle' | 'saving' | 'saved'>('idle')
-  const prefs = me.prefs
+  const prefs = alignedTypes(me.prefs)
   const saveWords = async () => {
     setWordsState('saving'); setError('')
     const err = await save({ ...me, seeking: words })
@@ -37,7 +38,6 @@ export default function You() {
     if (kw) setKeywords(kw)
     setWordsState('saved')
   }
-  const toggle = (p: string) => save({ ...me, prefs: prefs.includes(p) ? prefs.filter((x) => x !== p) : [...prefs, p] })
   const set = <K extends keyof SeekerProfile>(k: K, v: SeekerProfile[K]) => setDraft((d) => ({ ...d, [k]: v }))
 
   if (editing) {
@@ -102,7 +102,7 @@ export default function You() {
 
         <section className="flex flex-col gap-3">
           <div className="flex items-baseline justify-between"><H2 className="text-[22px]">Your alignment</H2><span className="text-xs text-subtle">Tap all that call to you</span></div>
-          <div className="flex flex-wrap gap-2">{ALIGN.map((p) => <Chip key={p} on={prefs.includes(p)} onClick={() => toggle(p)}>{p}</Chip>)}</div>
+          <TypePicker value={prefs} onChange={(v) => save({ ...me, prefs: v })} inset={false} showAll={false} />
           <p className="m-0 text-[13px] text-subtle">{prefs.length ? 'Xanadu will match you with events and places for these.' : 'Pick a few practices and Xanadu will match you with what fits.'}</p>
         </section>
 

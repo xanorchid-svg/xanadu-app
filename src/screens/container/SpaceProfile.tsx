@@ -95,7 +95,7 @@ export default function SpaceProfile() {
 
   return (
     <Screen footer={<ContainerTabs />}>
-      <div className={`relative flex h-[260px] flex-col justify-between px-4 pt-safe pb-4 ${cover ? '' : 'border-b border-dashed border-line-2 bg-surface-2'}`}>
+      <div className={`relative flex h-[260px] flex-col justify-between px-4 pt-safe pb-4 ${cover ? '' : 'border-b [border-image:linear-gradient(90deg,#f4a3a8,#f6c98b,#9fd8b8,#8fc7e8,#b9a6ec)_1] [border-bottom-color:transparent] bg-surface-2'}`}>
         {cover && <img decoding="async" src={cover} alt="" className="absolute inset-0 h-full w-full object-cover" />}
         <div className="relative flex justify-end gap-2">
           <button type="button" onClick={share} className="min-h-10 rounded-full bg-navy/75 px-3.5 text-[13px] text-text">Share</button>
@@ -178,7 +178,7 @@ export default function SpaceProfile() {
               <StatusPill status={o.status} />
             </Link>
           ))}
-          <Link to="/container/new" className="flex items-center justify-between rounded-[14px] border border-dashed border-line-2 p-3.5 text-text no-underline">
+          <Link to="/container/new" className="flex items-center justify-between rounded-[14px] ring-rainbow p-3.5 text-text no-underline">
             <span className="text-sm text-muted">{offerings.length ? 'Create another offering' : 'No offerings yet · Create one'}</span><span className="text-gold-soft">›</span>
           </Link>
         </section>

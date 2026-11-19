@@ -7,7 +7,8 @@ import { LifestylePicker } from '../components/Lifestyle'
 import { cancelAddRole } from '../components/Roles'
 import { ImportCard, mergeSpace, type SpaceImport } from '../components/Import'
 import { HOME, Loading, hostState, takeReturn, useAuth, type DbRole } from '../auth'
-import { PRACTICES, SEEKER_ALIGN } from '../data'
+import { PRACTICES } from '../data'
+import TypePicker from '../components/TypePicker'
 import { refreshMatches } from '../matching'
 import { EMPTY_SPACE, savePrivateDetails, uploadPhotos, useSpaceProfile, type Reference, type SpaceProfile, type Training } from '../store'
 import { friendlyError, supabase } from '../lib/supabase'
@@ -191,7 +192,7 @@ function SeekerWelcome() {
       {step === 2 && (
         <>
           <Title sub="Tap everything that calls to you. Xanadu will match you with what fits.">What are you <Glow>seeking</Glow>?</Title>
-          <PracticePicker label="Practices" options={SEEKER_ALIGN} value={prefs} onChange={setPrefs} />
+          <TypePicker value={prefs} onChange={setPrefs} inset={false} showAll={false} />
           <TextArea label="In your own words (optional)" value={seeking} onChange={setSeeking} rows={5}
             placeholder="e.g. I'd love a month-long volunteer exchange near the ocean, helping in the garden or kitchen, with daily yoga and time to surf." />
           <p className="m-0 rounded-xl bg-plum px-3.5 py-3 text-[13px] leading-normal text-muted">Xanadu will match you with the events, spaces and experiences that fit best. You can change this any time from your profile.</p>
@@ -381,7 +382,7 @@ function FacilitatorWelcome({ update = false }: { update?: boolean }) {
               </div>
             </div>
           ))}
-          <button type="button" onClick={() => setTrainings((ts) => [...ts, { title: '', school: '', year: '' }])} className="min-h-12 rounded-[14px] border border-dashed border-slate text-sm text-gold-pale">+ Add another training</button>
+          <button type="button" onClick={() => setTrainings((ts) => [...ts, { title: '', school: '', year: '' }])} className="min-h-12 rounded-[14px] ring-rainbow text-sm text-gold-pale">+ Add another training</button>
         </>
       )}
       {step === 3 && (
@@ -395,7 +396,7 @@ function FacilitatorWelcome({ update = false }: { update?: boolean }) {
               <TextField label="Email or phone" value={r.contact} onChange={(v) => ref(i, 'contact', v)} />
             </div>
           ))}
-          {refs.length < 3 && <button type="button" onClick={() => setRefs((rs) => [...rs, { name: '', contact: '' }])} className="min-h-12 rounded-[14px] border border-dashed border-slate text-sm text-gold-pale">{`+ Add reference (${refs.length} of 3)`}</button>}
+          {refs.length < 3 && <button type="button" onClick={() => setRefs((rs) => [...rs, { name: '', contact: '' }])} className="min-h-12 rounded-[14px] ring-rainbow text-sm text-gold-pale">{`+ Add reference (${refs.length} of 3)`}</button>}
           <Field label="Insurance (optional)"><input value={insurance} onChange={(e) => setInsurance(e.target.value)} placeholder="Provider and policy, if you have it" className={inputCls} /></Field>
           <Agreement checked={agreed} onChange={setAgreed} />
           <AiNotice />

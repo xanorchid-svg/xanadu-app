@@ -74,7 +74,7 @@ export function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boo
 
 export function EmptyState({ icon, title, children, action }: { icon?: ReactNode; title: string; children?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-[22px] border border-dashed border-line-2 px-5 py-8 text-center">
+    <div className="flex flex-col items-center gap-3 rounded-[22px] ring-rainbow px-5 py-8 text-center">
       {icon && <div className="text-gold-soft">{icon}</div>}
       <p className="m-0 font-display text-[24px] leading-tight text-ink">{title}</p>
       {children && <p className="m-0 text-sm leading-relaxed text-muted">{children}</p>}

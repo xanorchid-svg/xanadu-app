@@ -304,7 +304,7 @@ export default function ManageOffering() {
               )
             })}
             {!sessions.length && <span className="text-[13px] text-subtle">{`Nothing planned for Day ${day} yet.`}</span>}
-            <div className="flex flex-col gap-2.5 rounded-2xl border border-dashed border-slate p-3.5">
+            <div className="flex flex-col gap-2.5 rounded-2xl ring-rainbow p-3.5">
               <div className="grid grid-cols-[96px_1fr] gap-2.5">
                 <Field label="Time"><input type="time" value={time} onChange={(e) => setTime(e.target.value)} className={`${inputCls} px-2.5 text-sm [color-scheme:dark]`} /></Field>
                 <Field label="What's happening"><input value={what} onChange={(e) => setWhat(e.target.value)} placeholder="e.g. Opening circle" className={inputCls} /></Field>
@@ -337,7 +337,7 @@ export default function ManageOffering() {
               )
             })}
             {!outings.length && <span className="text-[13px] leading-normal text-subtle">Add optional trips like a hike or surf lesson. Guests opt in, and you'll see who's going.</span>}
-            <div className="flex flex-col gap-2.5 rounded-2xl border border-dashed border-slate p-3.5">
+            <div className="flex flex-col gap-2.5 rounded-2xl ring-rainbow p-3.5">
               <div className="grid grid-cols-[96px_1fr] gap-2.5">
                 <Field label="Day">
                   <select value={outingDay} onChange={(e) => setOutingDay(e.target.value)} className={`${inputCls} px-2.5 text-sm`}>

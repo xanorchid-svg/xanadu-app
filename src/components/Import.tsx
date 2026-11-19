@@ -118,7 +118,7 @@ export function ImportCard<F extends SpaceImport | OfferingImport>({ kind, onFil
           {busy === 'read' ? 'Reading…' : 'Read it'}
         </button>
       </form>
-      <button type="button" disabled={!!busy} onClick={() => file.current?.click()} className="min-h-11 rounded-xl border border-dashed border-slate text-[14px] text-gold-pale">
+      <button type="button" disabled={!!busy} onClick={() => file.current?.click()} className="min-h-11 rounded-xl ring-rainbow text-[14px] text-gold-pale">
         {kind === 'space' ? 'Or upload a flyer or screenshot' : 'Or upload the flyer'}
       </button>
       <input ref={file} type="file" accept="image/*" hidden onChange={(e) => { fromFlyer(e.target.files?.[0]); e.target.value = '' }} />

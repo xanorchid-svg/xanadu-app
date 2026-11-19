@@ -8,8 +8,8 @@ import { FAMILIES } from '../events'
  * whole family or narrow to one or two. Several families and types can be on at once; "All" clears.
  * The value is always the list of chosen types.
  */
-export default function TypePicker({ value, onChange, has, inset = true }: {
-  value: string[]; onChange: (v: string[]) => void; has?: (type: string) => boolean; inset?: boolean
+export default function TypePicker({ value, onChange, has, inset = true, showAll = true }: {
+  value: string[]; onChange: (v: string[]) => void; has?: (type: string) => boolean; inset?: boolean; showAll?: boolean
 }) {
   const [open, setOpen] = useState<string | null>(() => FAMILIES.find((f) => f.types.some((t) => value.includes(t)))?.label ?? null)
   const fam = FAMILIES.find((f) => f.label === open)
@@ -32,7 +32,7 @@ export default function TypePicker({ value, onChange, has, inset = true }: {
   return (
     <div className="flex flex-col gap-2">
       <div className={row} role="group" aria-label="What you're looking for">
-        <Chip on={!value.length} onClick={() => { onChange([]); setOpen(null) }}>All</Chip>
+        {showAll && <Chip on={!value.length} onClick={() => { onChange([]); setOpen(null) }}>All</Chip>}
         {FAMILIES.map((f) => {
           const n = f.types.filter((t) => value.includes(t)).length
           return (

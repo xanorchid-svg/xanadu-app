@@ -63,10 +63,10 @@ export default function FacilitatorProfile() {
               </div>
             ))}
             <button type="button" onClick={() => set('trainings', [...draft.trainings, { title: '', school: '', year: '' }])}
-              className="min-h-12 rounded-[14px] border border-dashed border-slate text-sm text-gold-pale">+ Add training</button>
+              className="min-h-12 rounded-[14px] ring-rainbow text-sm text-gold-pale">+ Add training</button>
           </section>
 
-          <section className="flex flex-col gap-3 rounded-[18px] border border-dashed border-slate p-4">
+          <section className="flex flex-col gap-3 rounded-[18px] ring-rainbow p-4">
             <div className="flex items-baseline justify-between"><h2 className={h2}>Private to Xanadu</h2><span className="text-xs text-subtle">Not shown publicly</span></div>
             {draft.references.map((r, i) => (
               <div key={i} className="flex flex-col gap-2.5 border-b border-[#1F2B3E] pb-3">
@@ -78,7 +78,7 @@ export default function FacilitatorProfile() {
             ))}
             {draft.references.length < 3 && (
               <button type="button" onClick={() => set('references', [...draft.references, { name: '', contact: '' }])}
-                className="min-h-12 rounded-[14px] border border-dashed border-slate text-sm text-gold-pale">{`+ Add reference (${draft.references.length} of 3)`}</button>
+                className="min-h-12 rounded-[14px] ring-rainbow text-sm text-gold-pale">{`+ Add reference (${draft.references.length} of 3)`}</button>
             )}
             <TextField label="Insurance (optional)" value={draft.insurance} onChange={(v) => set('insurance', v)} placeholder="Provider and policy, if you have it" />
           </section>
@@ -130,7 +130,7 @@ export default function FacilitatorProfile() {
               <span className="flex-none text-xs text-subtle">In review</span>
             </div>
           )) : (
-            <div className="flex items-center justify-between gap-2.5 rounded-[14px] border border-dashed border-line-2 p-3.5">
+            <div className="flex items-center justify-between gap-2.5 rounded-[14px] ring-rainbow p-3.5">
               <span className="flex flex-col gap-0.5"><span className="text-[15px] font-semibold text-ink">[Certification or training]</span><span className="text-xs text-subtle">[School] · [Year]</span></span>
               <span className="text-xs text-subtle">Not added</span>
             </div>
@@ -138,7 +138,7 @@ export default function FacilitatorProfile() {
         </section>
 
         {own && (
-          <section className="flex flex-col gap-2.5 rounded-[18px] border border-dashed border-slate p-4">
+          <section className="flex flex-col gap-2.5 rounded-[18px] ring-rainbow p-4">
             <div className="flex items-baseline justify-between"><h2 className={h2}>Private to Xanadu</h2><span className="text-xs text-subtle">Not shown publicly</span></div>
             <div className={privRow}>References <span className="text-[13px] text-gold-pale">{`${profile.references.length} of 3 added`}</span></div>
             <div className={privRow}>Insurance <span className="text-[13px] text-subtle">{profile.insurance.trim() ? 'Added' : 'Optional · add later'}</span></div>

@@ -37,7 +37,7 @@ export default function ContainerHome() {
             <div className="mt-1"><Badge>Founding Container</Badge></div>
           </div>
           <div className="flex flex-none items-center gap-2"><Bell />
-          <Link to="/container/space" aria-label="Your space profile" className="flex h-12 w-12 flex-none items-center justify-center overflow-hidden rounded-[14px] border border-dashed border-slate text-xl text-subtle no-underline">{space.photos[0] ? <img decoding="async" src={space.photos[0]} alt="" className="h-full w-full object-cover" /> : '+'}</Link></div>
+          <Link to="/container/space" aria-label="Your space profile" className="flex h-12 w-12 flex-none items-center justify-center overflow-hidden rounded-[14px] ring-rainbow text-xl text-subtle no-underline">{space.photos[0] ? <img decoding="async" src={space.photos[0]} alt="" className="h-full w-full object-cover" /> : '+'}</Link></div>
         </div>
 
         <ApplicationBanner />

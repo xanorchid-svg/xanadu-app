@@ -71,7 +71,7 @@ export default function Notifications() {
 
         {/* the list */}
         {!loading && items.length === 0 && (
-          <div className="flex flex-col items-center gap-2 rounded-[20px] border border-dashed border-line-2 px-6 py-10 text-center">
+          <div className="flex flex-col items-center gap-2 rounded-[20px] ring-rainbow px-6 py-10 text-center">
             <span className="text-2xl text-gold-soft" aria-hidden>✧</span>
             <p className="m-0 font-display text-[22px] text-ink">Nothing yet</p>
             <p className="m-0 text-[14px] leading-relaxed text-subtle">Approvals, messages, Community requests and new matches will appear here.</p>

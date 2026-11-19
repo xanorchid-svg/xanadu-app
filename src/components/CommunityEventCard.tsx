@@ -6,7 +6,7 @@ export default function CommunityEventCard({ e, wide = true, going = 0, note = '
   const kind = [...categoriesOf(e)][0] ?? ''
   const where = [e.venue, e.town].filter(Boolean).join(' · ')
   if (!wide) return (
-    <Link to={`/event/${e.id}`} className="flex w-[200px] flex-none flex-col overflow-hidden rounded-[18px] border border-dashed border-line-2 bg-surface/60 text-text no-underline">
+    <Link to={`/event/${e.id}`} className="flex w-[200px] flex-none flex-col overflow-hidden rounded-[18px] ring-rainbow bg-surface/60 text-text no-underline">
       <div className="h-[110px] bg-portal">{e.photo_url && <img decoding="async" loading="lazy" src={e.photo_url} alt="" className="h-full w-full object-cover" />}</div>
       <div className="flex flex-col gap-0.5 p-3">
         <span className="truncate text-[11px] tracking-[0.06em] text-iri-teal uppercase">{kind || 'Community event'}</span>
@@ -17,7 +17,7 @@ export default function CommunityEventCard({ e, wide = true, going = 0, note = '
     </Link>
   )
   return (
-    <Link to={`/event/${e.id}`} className="flex items-center gap-3.5 rounded-[18px] border border-dashed border-line-2 bg-surface/60 p-2.5 text-text no-underline">
+    <Link to={`/event/${e.id}`} className="flex items-center gap-3.5 rounded-[18px] ring-rainbow bg-surface/60 p-2.5 text-text no-underline">
       <div className="h-[76px] w-[76px] flex-none overflow-hidden rounded-[14px] bg-portal">
         {e.photo_url && <img decoding="async" loading="lazy" src={e.photo_url} alt="" className="h-full w-full object-cover" />}
       </div>

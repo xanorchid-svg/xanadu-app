@@ -97,7 +97,7 @@ export function VenuePicker({ value, onChange }: { value: Venue; onChange: (v: V
   )
 
   if (outside) return (
-    <div className="flex flex-col gap-3 rounded-[18px] border border-dashed border-slate p-3.5">
+    <div className="flex flex-col gap-3 rounded-[18px] ring-rainbow p-3.5">
       <div className="flex items-center justify-between">
         <span className="text-[15px] font-semibold text-ink">Somewhere not on Xanadu yet</span>
         <button type="button" onClick={() => { setOutside(false); onChange(NO_VENUE) }} className="min-h-10 text-[13px] text-subtle">Pick a Xanadu space</button>

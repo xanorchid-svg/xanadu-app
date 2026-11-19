@@ -65,7 +65,7 @@ export default function EventPage() {
           <h1 className="m-0 font-display text-[34px] leading-[1.05] font-medium text-ink">{e.title}</h1>
         </div>
 
-        <div className="rounded-xl border border-dashed border-line-2 px-3.5 py-3 text-[13px] leading-normal text-subtle">
+        <div className="rounded-xl ring-rainbow px-3.5 py-3 text-[13px] leading-normal text-subtle">
           {mine && e.status !== 'live'
             ? e.status === 'pending' ? 'You shared this. It’s with the Xanadu team and not on the calendar yet.' : 'You shared this. The team didn’t add it to the calendar.'
             : 'Shared by a member of the community. Not verified by Xanadu: check the details with the organizer before you go.'}

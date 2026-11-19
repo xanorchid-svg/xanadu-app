@@ -114,7 +114,7 @@ export default function ShareEvent() {
 
             {/* 1. the poster or the message */}
             <button type="button" onClick={() => file.current?.click()}
-              className="relative flex min-h-[150px] items-center justify-center overflow-hidden rounded-[18px] border border-dashed border-slate bg-surface/50 text-[14px] text-subtle">
+              className="relative flex min-h-[150px] items-center justify-center overflow-hidden rounded-[18px] ring-rainbow bg-surface/50 text-[14px] text-subtle">
               {poster ? <img decoding="async" src={poster} alt="The poster" className="max-h-[320px] w-full object-contain" /> : <span className="flex flex-col items-center gap-1"><span className="text-2xl">＋</span>Choose a photo or screenshot of the poster</span>}
               {poster && <span className="absolute right-2 bottom-2 rounded-full bg-navy/80 px-3 py-1 text-[12px] text-text">Change</span>}
             </button>

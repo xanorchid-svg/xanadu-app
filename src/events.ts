@@ -411,3 +411,14 @@ export function typesLabel(types: string[]): string {
   for (const f of FAMILIES) if (f.types.every((t) => left.has(t))) { out.push(f.label); f.types.forEach((t) => left.delete(t)) }
   return [...out, ...left].join(', ')
 }
+
+/**
+ * A seeker's alignment as the same types used in "I'm looking for". Older profiles saved free practice names
+ * ("Sound", "Bodywork & therapy"); those are read through the keyword vocabulary so nothing they chose is lost.
+ */
+export function alignedTypes(prefs: string[]): string[] {
+  const labels = new Set(CATEGORIES.map((c) => c.label))
+  const out = new Set(prefs.filter((p) => labels.has(p)))
+  for (const p of prefs) if (!labels.has(p)) categoriesIn(p).forEach((l) => out.add(l))
+  return CATEGORIES.map((c) => c.label).filter((l) => out.has(l))
+}
