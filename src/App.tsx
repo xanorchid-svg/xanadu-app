@@ -5,6 +5,7 @@ import AuthCallback from './screens/AuthCallback'
 import Intro from './screens/Intro'
 import { listenForAppLinks } from './lib/native'
 import PhoneOnly from './components/PhoneOnly'
+import ReviewPrompt from './components/ReviewPrompt'
 
 // Each screen is its own small file, loaded the first time it's opened (and kept offline by the app's service worker)
 const ResetPassword = lazy(() => import('./screens/ResetPassword'))
@@ -139,6 +140,7 @@ export default function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <ReviewPrompt />
         </Suspense>
         </div>
         </PhoneOnly>

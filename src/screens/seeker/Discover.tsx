@@ -13,8 +13,7 @@ import { activeCount, destinations, NO_FILTERS, passes, sortListings, spacePasse
 import { Bell } from '../../components/Bell'
 import ApplicationBanner from '../../components/ApplicationBanner'
 import CommunityEventCard from '../../components/CommunityEventCard'
-import { useCommunityEvents, useGoingCounts, useToReview, type CommunityEvent } from '../../events'
-import { ReviewSheet } from '../../components/EventGoing'
+import { useCommunityEvents, useGoingCounts, type CommunityEvent } from '../../events'
 
 const isoDay = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 /** "6:30 pm" → minutes after midnight (unknown times sort last). */
@@ -62,8 +61,6 @@ export default function Discover() {
   const scores = useMatchScores()
   const { events } = useCommunityEvents()
   const goingCounts = useGoingCounts(events.map((e) => e.id))
-  const { toReview, reload: reloadToReview } = useToReview()
-  const [reviewing, setReviewing] = useState<CommunityEvent | null>(null)
   // Most sought after: what's on today (or this week, if today is quiet), most "going" first
   const today = isoDay(new Date()), weekEnd = isoDay(new Date(Date.now() + 6 * 86400000))
   const on = (e: CommunityEvent, a: string, b: string) => !!e.start_date && e.start_date <= b && (e.end_date || e.start_date) >= a
@@ -106,20 +103,6 @@ export default function Discover() {
 
         <ApplicationBanner />
 
-        {toReview.length > 0 && (
-          <section className="ring-iri flex flex-col gap-2.5 rounded-[20px] bg-plum/60 p-4">
-            <span className="text-xs tracking-[0.14em] text-gold-soft uppercase">How was it?</span>
-            {toReview.slice(0, 3).map((e) => (
-              <button key={e.id} type="button" onClick={() => setReviewing(e)} className="flex items-center gap-3 text-left">
-                <span className="h-12 w-12 flex-none overflow-hidden rounded-xl bg-portal">{e.photo_url && <img decoding="async" loading="lazy" src={e.photo_url} alt="" className="h-full w-full object-cover" />}</span>
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate text-[15px] font-semibold text-ink">{e.title}</span>
-                  <span className="text-[12px] text-subtle">Rate the space and the facilitator ›</span>
-                </span>
-              </button>
-            ))}
-          </section>
-        )}
 
         <div className="flex gap-2">
           <label className="flex min-h-12 min-w-0 flex-1 items-center gap-2.5 rounded-[14px] border border-line bg-surface-2 px-4 text-subtle">
@@ -235,7 +218,6 @@ export default function Discover() {
         </section>
       </Page>
 
-      {reviewing && <ReviewSheet e={reviewing} onClose={() => setReviewing(null)} onDone={() => { setReviewing(null); reloadToReview() }} />}
       {sheet && <FilterSheet value={f} onClose={() => setSheet(false)} onApply={(next) => { setF(next); setSheet(false) }}
         listings={listings} spaces={spaces} places={dests} />}
     </Screen>
