@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Chip, EmptyState, H1, Page, Screen, SeekerTabs, Segmented } from '../../components/ui'
 import { IconBack, IconCalendar, IconNext } from '../../components/icons'
@@ -11,6 +11,8 @@ import { CATEGORIES, inCategory, typesLabel, useCommunityEvents, type CommunityE
 import TypePicker from '../../components/TypePicker'
 import { specialBetween, specialOn, type SpecialDay } from '../../specialDays'
 import { useListings, type Listing } from '../../store'
+import type { Pin } from '../../components/EventMap'
+import { fmtMiles, miles, ORIGINS, spotOf, useMyLocation, type Origin, type Spot } from '../../places'
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 const at = (s: string) => new Date(s + 'T12:00:00')
@@ -33,6 +35,8 @@ const minutes = (t = '') => {
 /** Reviewed experiences and community events share the calendar. */
 type Item = Listing | CommunityEvent
 const isCommunity = (e: Item): e is CommunityEvent => 'submitted_by' in e && 'tags' in e
+/** The venue to name a pin by: its own name when we know the spot, otherwise the area. */
+const placeName = (e: Item, s: Spot) => (s.exact ? (isCommunity(e) ? e.venue : e.space?.name || e.venue_name) : '') || s.label
 const timeOf = (e: Item) => (isCommunity(e) ? e.start_time : '')
 /** Overlaps these dates? */
 const overlaps = (e: Item, a: string, b: string) => !!e.start_date && e.start_date <= b && (e.end_date || e.start_date) >= a
@@ -44,6 +48,10 @@ const tagCls = (x: SpecialDay) => x.kind === 'moon' || x.kind === 'sky' ? 'borde
 type Quick = '' | 'Coming up' | 'Today' | 'Tomorrow' | 'This weekend' | 'This week' | 'Next 2 weeks' | 'This month'
 const QUICK: Quick[] = ['Coming up', 'Today', 'Tomorrow', 'This weekend', 'This week', 'Next 2 weeks', 'This month']
 type Mode = 'One day' | 'Date range'
+/** How far: any distance, or within this many miles. */
+const EventMap = lazy(() => import('../../components/EventMap'))
+const RADII = [1, 3, 5, 10, 25] as const
+const spotKey = (s: Spot) => `${s.lat.toFixed(4)},${s.lng.toFixed(4)}`
 
 /**
  * What's on, as a list by day. Opens on today and the next three days.
@@ -60,6 +68,11 @@ export default function Calendar() {
   const [cats, setCats] = useState<string[]>(() => (params.get('type') ?? '').split(',').filter((t) => CATEGORIES.some((c) => c.label === t)))
   const [place, setPlace] = useState('Everywhere')
   const [picking, setPicking] = useState(false)
+  const [radius, setRadius] = useState<number | null>(null)
+  const [fromKey, setFromKey] = useState('guiones')
+  const [view, setView] = useState<'List' | 'Map'>(() => (params.get('view') === 'map' ? 'Map' : 'List'))
+  const [pin, setPin] = useState<string | null>(null)
+  const loc = useMyLocation()
   const { listings, loading } = useListings()
   const { events } = useCommunityEvents()
   const { session } = useAuth()
@@ -70,7 +83,14 @@ export default function Calendar() {
     ...listings.filter((e) => e.start_date && (place === 'Everywhere' || e.space?.country === place)),
     ...events.filter((e) => e.start_date),
   ].sort((a, b) => (a.start_date ?? '').localeCompare(b.start_date ?? '') || minutes(timeOf(a)) - minutes(timeOf(b)))
-  const dated = cats.length ? all.filter((e) => cats.some((c) => inCategory(e, c))) : all
+  const typed = cats.length ? all.filter((e) => cats.some((c) => inCategory(e, c))) : all
+  // where each is held, and how far that is from the chosen spot
+  const origin: Origin = (fromKey === 'me' && loc.me) || ORIGINS.find((o) => o.key === fromKey) || ORIGINS[0]
+  const spots = useMemo(() => new Map(all.map((e) => [e.id, spotOf(e)] as const)), [all.map((e) => e.id).join()]) // eslint-disable-line react-hooks/exhaustive-deps
+  const far = (e: Item) => { const s = spots.get(e.id); return s ? miles(origin, s) : null }
+  const dated = radius ? typed.filter((e) => { const d = far(e); return d !== null && d <= radius }) : typed
+  const unplaced = radius ? typed.filter((e) => !spots.get(e.id)).length : 0
+  const nearMe = async () => { if (await loc.ask()) { setFromKey('me'); if (!radius) setRadius(5) } }
   const has = (label: string) => all.some((e) => inCategory(e, label))
 
   /** Quick periods: one tap for the common questions ("what's on this weekend?"). */
@@ -109,7 +129,36 @@ export default function Calendar() {
   const dayLabel = (d: string) => (d === today ? `Today · ${fmt(d, { weekday: 'short', month: 'short', day: 'numeric' })}`
     : d === shift(today, 1) ? `Tomorrow · ${fmt(d, { weekday: 'short', month: 'short', day: 'numeric' })}`
       : fmt(d, { weekday: 'long', month: 'short', day: 'numeric' }))
-  const card = (e: Item) => (isCommunity(e) ? <CommunityEventCard key={e.id} e={e} /> : <ExperienceCard key={e.id} e={e} />)
+  const bare = (e: Item) => (isCommunity(e) ? <CommunityEventCard key={e.id} e={e} /> : <ExperienceCard key={e.id} e={e} />)
+  const card = (e: Item) => {
+    const s = spots.get(e.id), d = far(e)
+    if (!radius || !s || d === null) return bare(e)
+    return (
+      <div key={e.id} className="flex flex-col gap-1">
+        <span className="pl-1 text-[12px] text-gold-soft">{`${fmtMiles(d)}${d >= 0.15 ? ` from ${origin.key === 'me' ? 'you' : origin.label}` : ''} · ${s.label}`}</span>
+        {bare(e)}
+      </div>
+    )
+  }
+
+  // the map: one pin per place, for what's on in the chosen dates
+  const pins: Pin[] = []
+  const atPin = new Map<string, Item[]>()
+  for (const e of on) {
+    const s = spots.get(e.id)
+    if (!s) continue
+    const k = spotKey(s)
+    if (!atPin.has(k)) { atPin.set(k, []); pins.push({ key: k, spot: s, count: 0, title: '' }) }
+    atPin.get(k)!.push(e)
+  }
+  for (const p of pins) {
+    const list = atPin.get(p.key)!
+    p.count = list.length
+    p.title = list.length === 1 ? list[0].title : `${list.length} · ${placeName(list[0], p.spot)}`
+  }
+  const offMap = on.filter((e) => !spots.get(e.id)).length
+  const pinned = pin ? atPin.get(pin) ?? [] : []
+  const pinnedSpot = pin ? pins.find((p) => p.key === pin)?.spot : undefined
 
   return (
     <Screen footer={guest ? <GuestBar /> : <SeekerTabs />}>
@@ -136,6 +185,26 @@ export default function Calendar() {
           </div>
         </div>
 
+        <div className="flex flex-col gap-2">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-xs tracking-[0.14em] text-subtle uppercase">How far</span>
+            {radius && <span className="text-[12px] text-faint">{`Within ${radius} mi of ${origin.key === 'me' ? 'you' : origin.label}`}</span>}
+          </div>
+          <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-0.5" role="group" aria-label="Choose a distance">
+            <Chip solid on={!radius} onClick={() => setRadius(null)}>Any distance</Chip>
+            {RADII.map((r) => <Chip key={r} solid on={radius === r} onClick={() => setRadius(r)}>{`${r} mi`}</Chip>)}
+          </div>
+          {radius && (
+            <div className="-mx-5 flex items-center gap-2 overflow-x-auto px-5 pb-0.5" role="group" aria-label="Measure from">
+              <span className="flex-none text-[12px] text-subtle">From</span>
+              <Chip on={fromKey === 'me' && !!loc.me} onClick={nearMe}>{loc.state === 'asking' ? 'Finding you…' : '📍 Near me'}</Chip>
+              {ORIGINS.map((o) => <Chip key={o.key} on={fromKey === o.key} onClick={() => setFromKey(o.key)}>{o.label}</Chip>)}
+            </div>
+          )}
+          {loc.state === 'denied' && <span className="text-[12px] text-gold-soft">Location is off for Xanadu. Allow it in your phone settings, or measure from a part of Nosara.</span>}
+          {loc.state === 'error' && <span className="text-[12px] text-gold-soft">We couldn’t find you just now. Measure from a part of Nosara instead.</span>}
+        </div>
+
         {countries.length > 1 && (
           <div className="-mx-5 flex gap-2 overflow-x-auto px-5">
             {['Everywhere', ...countries].map((r) => <Chip key={r} solid on={place === r} onClick={() => setPlace(r)}>{r}</Chip>)}
@@ -152,6 +221,8 @@ export default function Calendar() {
             <IconCalendar size={16} />{picking ? 'Close' : 'Pick dates'}
           </button>
         </div>
+
+        <Segmented options={['List', 'Map'] as const} value={view} onChange={(v) => { setView(v); setPin(null) }} label="Show as a list or on a map" />
 
         {/* special days in these dates: moons, eclipses, solstices, holidays. Tap one to see that day */}
         {specials.length > 0 && (
@@ -170,7 +241,34 @@ export default function Calendar() {
             onDone={(a, b) => { setFrom(a); setTo(b); setQuick(''); setPicking(false) }} />
         )}
 
-        {loading ? null : days.length > 0 ? (
+        {!loading && view === 'Map' && (
+          <div className="flex flex-col gap-3">
+            <Suspense fallback={<div className="h-[58vh] min-h-[320px] w-full animate-pulse rounded-[20px] bg-surface" />}>
+              <EventMap pins={pins} picked={pin} onPick={setPin} origin={radius || (fromKey === 'me' && loc.me) ? origin : null} radius={radius} />
+            </Suspense>
+            <span className="text-[12px] text-faint">
+              {pins.length ? `${on.length - offMap} on at ${pins.length} ${pins.length === 1 ? 'place' : 'places'}. Tap a pin to see what’s there.` : 'Nothing on the map for these dates. Try a longer period or another type.'}
+              {offMap > 0 && ` ${offMap} more ${offMap === 1 ? 'has' : 'have'} no location yet.`}
+              {' '}Dashed pins show the area; the host shares the exact spot.
+            </span>
+            {pinnedSpot && pinned.length > 0 && (
+              <section className="flex flex-col gap-2.5">
+                <div className="flex flex-col">
+                  <span className="font-display text-[20px] leading-tight text-ink">{placeName(pinned[0], pinnedSpot)}</span>
+                  <span className="text-[12px] text-subtle">{[pinnedSpot.exact ? pinnedSpot.label : `Around ${pinnedSpot.label}`, `${fmtMiles(miles(origin, pinnedSpot))} from ${origin.key === 'me' ? 'you' : origin.label}`].join(' · ')}</span>
+                </div>
+                {pinned.map((e) => (
+                  <div key={e.id} className="flex flex-col gap-1">
+                    <span className="pl-1 text-[12px] text-gold-soft">{fmt(e.start_date! < from ? from : e.start_date!, { weekday: 'short', month: 'short', day: 'numeric' })}{timeOf(e) ? ` · ${timeOf(e)}` : ''}</span>
+                    {bare(e)}
+                  </div>
+                ))}
+              </section>
+            )}
+          </div>
+        )}
+
+        {loading || view === 'Map' ? null : days.length > 0 ? (
           <div className="flex flex-col gap-5">
             {days.map((d) => (
               <section key={d} className="flex flex-col gap-2.5">
@@ -185,13 +283,17 @@ export default function Calendar() {
             ))}
           </div>
         ) : (
-          <EmptyState icon={<IconCalendar size={36} />} title={cats.length ? `No ${typesLabel(cats).toLowerCase()} on these dates` : 'Nothing on these dates'}
+          <EmptyState icon={<IconCalendar size={36} />} title={cats.length ? `No ${typesLabel(cats).toLowerCase()} on these dates` : radius ? `Nothing within ${radius} mi on these dates` : 'Nothing on these dates'}
             action={<button type="button" onClick={() => setPicking(true)} className="flex min-h-11 items-center text-sm font-semibold text-gold-soft">Pick other dates</button>}>
             {all.length ? 'Try a longer period, another type, or see what’s coming up next below.' : 'When spaces and Facilitators publish classes, circles and retreats, they’ll show up here by day. Seen a poster for something nearby? Share it.'}
           </EmptyState>
         )}
 
-        {!loading && next.length > 0 && (
+        {!loading && view === 'List' && unplaced > 0 && (
+          <button type="button" onClick={() => setRadius(null)} className="-mt-1 self-start text-[13px] text-gold-soft">{`${unplaced} more ${unplaced === 1 ? 'has' : 'have'} no location yet · show any distance`}</button>
+        )}
+
+        {!loading && view === 'List' && next.length > 0 && (
           <section className="mt-1 flex flex-col gap-2.5">
             <span className="text-xs tracking-[0.14em] text-subtle uppercase">Coming up after</span>
             {next.map((e) => (

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { RolesCard } from '../../components/Roles'
 import { Link } from 'react-router-dom'
-import { EmptyState, H2, Page, PrimaryButton, Screen, SeekerTabs, Segmented } from '../../components/ui'
-import { IconChart, IconSettings } from '../../components/icons'
+import { EmptyState, H2, Page, Screen, SeekerTabs, Segmented } from '../../components/ui'
+import { IconSettings } from '../../components/icons'
 import { CONTACT_EMAIL } from '../../data'
 import TypePicker from '../../components/TypePicker'
 import { refreshMatches, useMyKeywords } from '../../matching'
@@ -19,9 +19,8 @@ export default function You() {
   const [me, save] = useSeekerProfile()
   const [tab, setTab] = useState<(typeof JOURNEY_TABS)[number]>('Upcoming')
   const going = useMyGoing()
-  const { profile, session, updateProfile } = useAuth()
+  const { session } = useAuth()
   const joined = new Date(session?.user.created_at ?? Date.now()).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-  const chart = profile?.chart_early ?? false
   const [busy, setBusy] = useState(false)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<SeekerProfile>(me)
@@ -123,13 +122,6 @@ export default function You() {
           )}
         </section>
 
-
-        <section className="flex flex-col gap-2.5 rounded-[20px] border border-plum-line bg-[#1A1528] p-[18px]">
-          <div className="flex items-center gap-2.5 text-gold-soft"><IconChart /><span className="text-[11px] tracking-[0.16em] uppercase">Coming soon</span></div>
-          <h2 className="m-0 font-display text-2xl font-medium text-ink">Experiences aligned to your chart</h2>
-          <p className="m-0 text-sm leading-relaxed text-muted">Add your birth details and we'll suggest places and practices using astrocartography.</p>
-          <PrimaryButton done={chart} onClick={() => updateProfile({ chart_early: true })} className="min-h-11 self-start px-[18px] text-sm">{chart ? 'On the early list ✓' : 'Join early access'}</PrimaryButton>
-        </section>
 
         <section className="flex flex-col">
           <H2 className="mb-1.5 text-[22px]">Account</H2>
