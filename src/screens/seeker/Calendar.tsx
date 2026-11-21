@@ -72,6 +72,15 @@ export default function Calendar() {
   const [fromKey, setFromKey] = useState('guiones')
   const [view, setView] = useState<'List' | 'Map'>(() => (params.get('view') === 'map' ? 'Map' : 'List'))
   const [pin, setPin] = useState<string | null>(null)
+  const [big, setBig] = useState(false)
+  useEffect(() => { // full-screen map: hold the page still, Esc closes
+    if (!big) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const key = (ev: KeyboardEvent) => { if (ev.key === 'Escape') setBig(false) }
+    window.addEventListener('keydown', key)
+    return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', key) }
+  }, [big])
   const loc = useMyLocation()
   const { listings, loading } = useListings()
   const { events } = useCommunityEvents()
@@ -165,6 +174,34 @@ export default function Calendar() {
   const offMap = on.filter((e) => !spots.get(e.id)).length
   const pinned = pin ? atPin.get(pin) ?? [] : []
   const pinnedSpot = pin ? pins.find((p) => p.key === pin)?.spot : undefined
+  const mapProps = {
+    pins, picked: pin, onPick: setPin, origin: radius || origin.key === 'me' ? origin : null, radius,
+    onLocate: loc.supported ? nearMe : undefined, locating: loc.state === 'asking',
+  }
+  // what's at the picked pin: a swipeable strip right under the map, so you never lose the map
+  const placeStrip = pinnedSpot && pinned.length > 0 ? (
+    <section className="flex flex-col gap-2">
+      <div className="flex items-end justify-between gap-3">
+        <div className="flex min-w-0 flex-col">
+          <span className="truncate font-display text-[19px] leading-tight text-ink">{placeName(pinned[0], pinnedSpot)}</span>
+          <span className="truncate text-[12px] text-subtle">{[pinnedSpot.exact ? pinnedSpot.label : `Around ${pinnedSpot.label}`, `${fmtMiles(miles(origin, pinnedSpot))} from ${fromLabel}`, `${pinned.length} on`].join(' · ')}</span>
+        </div>
+        <a href={`https://www.google.com/maps/dir/?api=1&destination=${pinnedSpot.lat},${pinnedSpot.lng}`} target="_blank" rel="noreferrer"
+          className="flex min-h-9 flex-none items-center rounded-full border border-line-2 px-3 text-[12px] text-text no-underline">Directions</a>
+      </div>
+      <div className="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-1">
+        {pinned.map((e) => {
+          const date = `${fmt(e.start_date! < from ? from : e.start_date!, { weekday: 'short', month: 'short', day: 'numeric' })}${timeOf(e) ? ` · ${timeOf(e)}` : ''}`
+          return (
+            <div key={e.id} className="snap-start">
+              {isCommunity(e) ? <CommunityEventCard e={e} wide={false} note={date} />
+                : <div className="w-[300px]"><ExperienceCard e={e} /></div>}
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  ) : null
 
   return (
     <Screen footer={guest ? <GuestBar /> : <SeekerTabs />}>
@@ -263,29 +300,41 @@ export default function Calendar() {
 
         {!loading && view === 'Map' && (
           <div className="flex flex-col gap-3">
-            <Suspense fallback={<div className="h-[58vh] min-h-[320px] w-full animate-pulse rounded-[20px] bg-surface" />}>
-              <EventMap pins={pins} picked={pin} onPick={setPin} origin={radius || origin.key === 'me' ? origin : null} radius={radius}
-                onLocate={loc.supported ? nearMe : undefined} locating={loc.state === 'asking'} />
-            </Suspense>
-            <span className="text-[12px] text-faint">
-              {pins.length ? `${on.length - offMap} on at ${pins.length} ${pins.length === 1 ? 'place' : 'places'}. Tap a pin to see what’s there.` : 'Nothing on the map for these dates. Try a longer period or another type.'}
-              {offMap > 0 && ` ${offMap} more ${offMap === 1 ? 'has' : 'have'} no location yet.`}
-              {' '}Pinch out for San Juanillo and beyond. Dashed pins show the area; the host shares the exact spot.
-            </span>
-            {pinnedSpot && pinned.length > 0 && (
-              <section className="flex flex-col gap-2.5">
-                <div className="flex flex-col">
-                  <span className="font-display text-[20px] leading-tight text-ink">{placeName(pinned[0], pinnedSpot)}</span>
-                  <span className="text-[12px] text-subtle">{[pinnedSpot.exact ? pinnedSpot.label : `Around ${pinnedSpot.label}`, `${fmtMiles(miles(origin, pinnedSpot))} from ${fromLabel}`].join(' · ')}</span>
-                </div>
-                {pinned.map((e) => (
-                  <div key={e.id} className="flex flex-col gap-1">
-                    <span className="pl-1 text-[12px] text-gold-soft">{fmt(e.start_date! < from ? from : e.start_date!, { weekday: 'short', month: 'short', day: 'numeric' })}{timeOf(e) ? ` · ${timeOf(e)}` : ''}</span>
-                    {bare(e)}
-                  </div>
-                ))}
-              </section>
+            {!big && (
+              <div className="relative">
+                <Suspense fallback={<div className="h-[300px] w-full animate-pulse rounded-[20px] bg-surface" />}>
+                  <EventMap {...mapProps} mode="inline" className="h-[300px]" />
+                </Suspense>
+                <button type="button" onClick={() => setBig(true)} aria-label="Open the map full screen"
+                  className="absolute top-3 right-3 z-[500] flex min-h-9 items-center gap-1.5 rounded-full border border-line-2 bg-navy/90 px-3 text-[13px] text-text shadow-lg backdrop-blur">⤢ Expand</button>
+              </div>
             )}
+            {placeStrip}
+            <span className="text-[12px] text-faint">
+              {pins.length ? `${on.length - offMap} on at ${pins.length} ${pins.length === 1 ? 'place' : 'places'}. Tap a pin to see what’s there; pinch to zoom, or Expand to explore.` : 'Nothing on the map for these dates. Try a longer period or another type.'}
+              {offMap > 0 && ` ${offMap} more ${offMap === 1 ? 'has' : 'have'} no location yet.`}
+              {' '}Dashed pins show the area; the host shares the exact spot.
+            </span>
+          </div>
+        )}
+
+        {big && (
+          <div className="fixed inset-0 z-[60] flex flex-col bg-navy" role="dialog" aria-modal="true" aria-label="Map of what’s on">
+            <div className="flex items-center justify-between gap-3 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-3">
+              <div className="flex min-w-0 flex-col">
+                <span className="truncate font-display text-[20px] leading-tight text-ink">{period}</span>
+                <span className="text-[12px] text-subtle">{`${on.length - offMap} on at ${pins.length} ${pins.length === 1 ? 'place' : 'places'}`}</span>
+              </div>
+              <button type="button" onClick={() => setBig(false)} className="flex min-h-10 flex-none items-center rounded-full border border-line-2 px-4 text-[13px] text-text">Done</button>
+            </div>
+            <div className="relative min-h-0 flex-1">
+              <Suspense fallback={<div className="h-full w-full animate-pulse bg-surface" />}>
+                <EventMap {...mapProps} mode="full" />
+              </Suspense>
+            </div>
+            <div className="px-4 pt-3 pb-[max(14px,env(safe-area-inset-bottom))]">
+              {placeStrip ?? <span className="text-[13px] text-subtle">Tap a pin to see what’s on there.</span>}
+            </div>
           </div>
         )}
 

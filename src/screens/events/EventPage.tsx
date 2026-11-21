@@ -8,6 +8,8 @@ import FoundingInvite from '../../components/FoundingInvite'
 import EventGoing from '../../components/EventGoing'
 import EventClaim from '../../components/EventClaim'
 import { GuestGoing, GuestInvite } from '../../components/Guest'
+import PlaceMap from '../../components/PlaceMap'
+import { locate } from '../../places'
 import { contactLink, deleteSharedEvent, fetchCommunityEvent, safeLink, whenLabel, type CommunityEvent } from '../../events'
 
 /** A community event: what a member shared, clearly marked as not verified by Xanadu. */
@@ -82,6 +84,8 @@ export default function EventPage() {
             </div>
           ))}
         </dl>
+
+        <PlaceMap spot={locate(e.venue, e.town)} name={e.venue} />
 
         {(contact || link) && (
           <div className="flex flex-col gap-2">

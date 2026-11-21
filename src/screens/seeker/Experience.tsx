@@ -8,6 +8,8 @@ import { supabase } from '../../lib/supabase'
 import { formatLabel, placeLabel } from '../../data'
 import { fetchGuide, leaveOffering, useSaved, type Guide, type Offering, type PublicSpace } from '../../store'
 import { LedBy, OutsideVenue } from '../../components/People'
+import PlaceMap from '../../components/PlaceMap'
+import { locate } from '../../places'
 import { ReportSheet } from '../../components/Report'
 
 type Row = Offering & { owner_id: string }
@@ -168,6 +170,7 @@ export default function Experience() {
         )}
         {!space && o.venue_name && <OutsideVenue name={o.venue_name} place={o.venue_place ?? ''} />}
         {!space && !o.venue_name && !o.space_id && o.facilitator_id && <OutsideVenue name="" place="" />}
+        <PlaceMap spot={space ? locate(space.name, [space.town, space.region].join(' ')) : locate(o.venue_name ?? '', o.venue_place ?? '')} name={space?.name ?? o.venue_name ?? ''} />
         {space && !part && (isSeeker || (profile?.role === 'facilitator' && profile.status === 'approved')) && (
           <Link to={`/messages/new?to=${space.owner_id}&space=${space.id}&offering=${o.id}`}
             className="-mt-2 flex min-h-12 items-center justify-center rounded-2xl border border-line-2 text-[15px] text-text no-underline">{`Message ${space.name}`}</Link>

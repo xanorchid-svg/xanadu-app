@@ -11,8 +11,10 @@ export type Pin = { key: string; spot: Spot; count: number; title: string }
  * Venues we know sit on their own point; area-only places (private homes, "address on RSVP") get a soft ring instead.
  * Tapping a pin calls onPick so the page can list what's there.
  */
-export default function EventMap({ pins, picked, onPick, origin, radius, onLocate, locating = false }: {
-  pins: Pin[]; picked: string | null; onPick: (key: string | null) => void
+export default function EventMap({ pins, picked = null, onPick = () => {}, origin, radius, onLocate, locating = false, mode = 'inline', className = '' }: {
+  pins: Pin[]; picked?: string | null; onPick?: (key: string | null) => void
+  /** inline: in the page (one finger scrolls the page on phones, two fingers move the map) · full: full screen · mini: one place, no gestures */
+  mode?: 'inline' | 'full' | 'mini'; className?: string
   origin?: { lat: number; lng: number; label: string } | null; radius?: number | null
   /** "Find me": asks for the location (first time) or centers on it */
   onLocate?: () => void; locating?: boolean
@@ -27,13 +29,20 @@ export default function EventMap({ pins, picked, onPick, origin, radius, onLocat
 
   useEffect(() => {
     if (!box.current || map.current) return
-    const m = L.map(box.current, { zoomControl: false, attributionControl: true, center: [NOSARA_CENTER.lat, NOSARA_CENTER.lng], zoom: 13 })
+    const touch = L.Browser.mobile || L.Browser.touch
+    const m = L.map(box.current, {
+      zoomControl: false, attributionControl: true, center: [NOSARA_CENTER.lat, NOSARA_CENTER.lng], zoom: 13,
+      // in the page, a one-finger swipe should scroll the page, not grab the map
+      dragging: mode === 'full' || (mode === 'inline' && !touch), scrollWheelZoom: mode === 'full',
+      touchZoom: mode !== 'mini', doubleClickZoom: mode !== 'mini', boxZoom: false, keyboard: mode !== 'mini',
+    })
+    // on phones the in-page map moves with a two-finger pinch; Expand opens it full screen for free roaming
     // OpenStreetMap's free tiles, tinted navy in index.css (.xmap .leaflet-tile-pane)
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(m)
-    L.control.zoom({ position: 'bottomright' }).addTo(m)
+    if (mode !== 'mini') L.control.zoom({ position: 'bottomright' }).addTo(m)
     m.attributionControl.setPrefix(false)
     m.on('click', () => pick.current(null))
     layer.current = L.layerGroup().addTo(m)
@@ -72,7 +81,7 @@ export default function EventMap({ pins, picked, onPick, origin, radius, onLocat
           iconSize: [size, size], iconAnchor: [size / 2, size / 2],
         }),
       })
-      mk.on('click', (ev) => { L.DomEvent.stopPropagation(ev); pick.current(p.key) })
+      if (mode !== 'mini') mk.on('click', (ev) => { L.DomEvent.stopPropagation(ev); pick.current(p.key) })
       mk.addTo(g)
       pts.push([p.spot.lat, p.spot.lng])
     }
@@ -85,7 +94,7 @@ export default function EventMap({ pins, picked, onPick, origin, radius, onLocat
       if (origin && !radius && origin.label === 'You' && miles(NOSARA_CENTER, origin) <= 6) core.push([origin.lat, origin.lng])
       const use = core.length ? core : pts
       if (use.length > 1) m.fitBounds(L.latLngBounds(use), { padding: [28, 28], maxZoom: 15 })
-      else if (use.length === 1) m.setView(use[0], 14)
+      else if (use.length === 1) m.setView(use[0], mode === 'mini' ? 15 : 14)
     }
     refit.current()
   }, [pins, picked, origin, radius, fitKey])
@@ -102,11 +111,11 @@ export default function EventMap({ pins, picked, onPick, origin, radius, onLocat
     else onLocate?.()
   }
   return (
-    <div className="relative">
-      <div ref={box} className="xmap h-[58vh] min-h-[320px] w-full overflow-hidden rounded-[20px] bg-surface" role="application" aria-label="Map of where events are held" />
-      {onLocate && (
+    <div className={`relative ${mode === 'full' ? 'h-full' : ''}`}>
+      <div ref={box} className={`xmap w-full overflow-hidden bg-surface ${mode === 'full' ? 'h-full' : 'rounded-[20px]'} ${className}`} role="application" aria-label="Map of where events are held" />
+      {onLocate && mode !== 'mini' && (
         <button type="button" onClick={locate} disabled={locating} aria-label={you ? 'Center on you' : 'Use my location'}
-          className="absolute bottom-4 left-3 z-[500] flex min-h-10 items-center gap-1.5 rounded-full border border-line-2 bg-navy/90 px-3.5 text-[13px] text-text shadow-lg backdrop-blur disabled:opacity-60">
+          className="absolute bottom-3 left-3 z-[500] flex min-h-10 items-center gap-1.5 rounded-full border border-line-2 bg-navy/90 px-3.5 text-[13px] text-text shadow-lg backdrop-blur disabled:opacity-60">
           <span aria-hidden>📍</span>{locating ? 'Finding you…' : you ? 'You' : 'Use my location'}
         </button>
       )}

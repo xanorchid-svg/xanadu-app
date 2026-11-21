@@ -10,16 +10,17 @@ import { useCallback, useEffect, useState } from 'react'
 export type Spot = { lat: number; lng: number; label: string; exact: boolean }
 
 type Area = { lat: number; lng: number; label: string }
+// area centers from Google Maps (Nov 2026)
 const AREAS: Record<string, Area> = {
-  guionesNorte: { lat: 9.9452, lng: -85.6688, label: 'Guiones Norte' },
-  guiones: { lat: 9.9393, lng: -85.6640, label: 'Playa Guiones' },
-  kSection: { lat: 9.9404, lng: -85.6584, label: 'Section K, Guiones' },
-  guionesSur: { lat: 9.9318, lng: -85.6566, label: 'South Guiones' },
-  pelada: { lat: 9.9543, lng: -85.6733, label: 'Playa Pelada' },
-  town: { lat: 9.9772, lng: -85.6522, label: 'Nosara town' },
-  garza: { lat: 9.9152, lng: -85.6302, label: 'Garza' },
-  sanJuanillo: { lat: 10.0336, lng: -85.7289, label: 'San Juanillo' },
-  rioMontana: { lat: 9.9873, lng: -85.6659, label: 'Río Montaña' },
+  guionesNorte: { lat: 9.9465, lng: -85.6685, label: 'Guiones Norte' },
+  guiones: { lat: 9.9361, lng: -85.6639, label: 'Playa Guiones' },
+  kSection: { lat: 9.9385, lng: -85.6592, label: 'Section K, Guiones' },
+  guionesSur: { lat: 9.9300, lng: -85.6600, label: 'South Guiones' },
+  pelada: { lat: 9.9575, lng: -85.6731, label: 'Playa Pelada' },
+  town: { lat: 9.9800, lng: -85.6530, label: 'Nosara town' },
+  garza: { lat: 9.9096, lng: -85.6432, label: 'Garza' },
+  sanJuanillo: { lat: 10.0346, lng: -85.7391, label: 'San Juanillo' },
+  rioMontana: { lat: 9.9867, lng: -85.6666, label: 'Río Montaña' },
   ostional: { lat: 10.0004, lng: -85.7015, label: 'Ostional' },
   nosara: { lat: 9.9560, lng: -85.6620, label: 'Nosara (spot not listed)' },
   samara: { lat: 9.8818, lng: -85.5289, label: 'Sámara' },
@@ -43,16 +44,26 @@ const AREA_WORDS: [RegExp, keyof typeof AREAS][] = [
   [/\bnosara\b/, 'nosara'],
 ]
 
-/** Regular venues with their own point on the map. */
+/** Regular venues with their own point on the map, from Google Maps (Nov 2026). Most specific first. */
 const VENUES: [RegExp, { lat: number; lng: number }][] = [
-  [/\bnosara retreat center\b/, { lat: 9.98731, lng: -85.66591 }],
-  [/\bbodhi tree\b/, { lat: 9.9426, lng: -85.6583 }],
-  [/\bpacha ?mama\b/, { lat: 10.0205, lng: -85.7085 }],
-  [/\bnanku\b/, { lat: 9.9726, lng: -85.6402 }],
-  [/\bharmony hotel\b/, { lat: 9.9447, lng: -85.6690 }],
-  [/\bolga'?s\b/, { lat: 9.9549, lng: -85.6748 }],
-  [/\bnorth guiones beach\b/, { lat: 9.9457, lng: -85.6712 }],
-  [/\bbakers beach\b/, { lat: 9.9316, lng: -85.6583 }],
+  [/\bharmony co-?op\b|\bla ventanita\b/, { lat: 9.9411, lng: -85.6646 }], // Harmony Co-Op Playground, behind La Ventanita
+  [/\bharmony hotel\b|\bthe harmony\b/, { lat: 9.9430, lng: -85.6666 }],
+  [/\bwild ?child\b/, { lat: 9.9829, lng: -85.6585 }], // Wild Child Playgarden & Wildschooling
+  [/\bnosara retreat center\b/, { lat: 9.9867, lng: -85.6666 }],
+  [/\bbodhi tree\b/, { lat: 9.9409, lng: -85.6603 }],
+  [/\bcasa pacifico\b/, { lat: 9.9378, lng: -85.6586 }],
+  [/\bcasa de las estrellas\b/, { lat: 9.9049, lng: -85.6539 }],
+  [/\bnalu\b/, { lat: 9.9471, lng: -85.6665 }],
+  [/^ norte /, { lat: 9.9487, lng: -85.6704 }], // Norte Nosara
+  [/\bnorte nosara\b/, { lat: 9.9487, lng: -85.6704 }],
+  [/\bnanku\b/, { lat: 9.9923, lng: -85.6451 }],
+  [/\bnosara blue\b/, { lat: 9.9572, lng: -85.6716 }],
+  [/\bhamaca\b/, { lat: 9.9553, lng: -85.6721 }],
+  [/\bolga'?s\b/, { lat: 9.9532, lng: -85.6741 }],
+  [/\bpacha ?mama\b/, { lat: 10.0348, lng: -85.7064 }],
+  [/\beterna\b/, { lat: 10.0388, lng: -85.7364 }],
+  [/\bbakers?'? beach\b/, { lat: 9.9367, lng: -85.6654 }],
+  [/\bnorth guiones beach\b/, { lat: 9.9445, lng: -85.6700 }],
 ]
 
 const PRIVATE = /(shared when|address shared|private (home|space|house)|\bon rsvp\b|when you (book|register|rsvp))/
@@ -66,7 +77,7 @@ export function locate(venue = '', town = ''): Spot | null {
   const areaLabel = area ? AREAS[area].label : ''
   if (!PRIVATE.test(v)) {
     const hit = VENUES.find(([re]) => re.test(v))
-    if (hit) return { ...hit[1], label: areaLabel || 'Nosara', exact: true }
+    if (hit) return { ...hit[1], label: area && area !== 'nosara' ? areaLabel : 'Nosara', exact: true }
   }
   return area ? { ...AREAS[area], exact: false } : null
 }
