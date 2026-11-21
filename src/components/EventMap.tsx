@@ -40,7 +40,7 @@ export default function EventMap({ pins, picked = null, onPick = () => {}, origi
     // OpenStreetMap's free tiles, tinted navy in index.css (.xmap .leaflet-tile-pane)
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      attribution: '© OpenStreetMap', // the credit their terms ask for; plain text so a tap never leaves the app
     }).addTo(m)
     if (mode !== 'mini') L.control.zoom({ position: 'bottomright' }).addTo(m)
     m.attributionControl.setPrefix(false)
