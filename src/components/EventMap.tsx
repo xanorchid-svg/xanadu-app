@@ -24,9 +24,10 @@ export default function EventMap({ pins, picked, onPick, origin, radius }: {
   useEffect(() => {
     if (!box.current || map.current) return
     const m = L.map(box.current, { zoomControl: false, attributionControl: true, center: [NOSARA_CENTER.lat, NOSARA_CENTER.lng], zoom: 13 })
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      subdomains: 'abcd', maxZoom: 19,
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · © <a href="https://carto.com/attributions">CARTO</a>',
+    // OpenStreetMap's free tiles, tinted navy in index.css (.xmap .leaflet-tile-pane)
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(m)
     L.control.zoom({ position: 'bottomright' }).addTo(m)
     m.attributionControl.setPrefix(false)

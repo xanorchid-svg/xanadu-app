@@ -208,3 +208,5 @@ button { font: inherit; }
 .xmap .leaflet-control-zoom a { background: var(--color-surface-2); color: var(--color-ink); border-color: var(--color-line); }
 .xmap .leaflet-control-attribution { background: rgba(16, 27, 44, 0.75); color: var(--color-faint); font-size: 10px; }
 .xmap .leaflet-control-attribution a { color: var(--color-subtle); }
+/* OpenStreetMap is light; invert it into night colors that sit with the navy */
+.xmap .leaflet-tile-pane { filter: invert(1) hue-rotate(195deg) brightness(0.82) contrast(0.92) saturate(0.55); }

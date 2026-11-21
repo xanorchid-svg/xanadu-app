@@ -240,7 +240,7 @@ export function useCommunityEvents() {
   const [events, setEvents] = useState<CommunityEvent[]>([])
   const [loading, setLoading] = useState(true)
   useEffect(() => {
-    if (!session) return
+    // visitors read live events too (RLS: "community events: guests read live")
     let live = true
     supabase.from('community_events').select('*').eq('status', 'live').order('start_date', { ascending: true, nullsFirst: false }).limit(300)
       .then(({ data }) => {
