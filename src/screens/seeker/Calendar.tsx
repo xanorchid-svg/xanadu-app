@@ -192,10 +192,9 @@ export default function Calendar() {
       </div>
       <div className="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-1">
         {pinned.map((e) => {
-          const date = `${fmt(e.start_date! < from ? from : e.start_date!, { weekday: 'short', month: 'short', day: 'numeric' })}${timeOf(e) ? ` · ${timeOf(e)}` : ''}`
           return (
             <div key={e.id} className="snap-start">
-              {isCommunity(e) ? <CommunityEventCard e={e} wide={false} note={date} />
+              {isCommunity(e) ? <CommunityEventCard e={e} wide={false} />
                 : <div className="w-[300px]"><ExperienceCard e={e} /></div>}
             </div>
           )
