@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { NOSARA_CENTER, type Spot } from '../places'
+import { miles, NOSARA_CENTER, type Spot } from '../places'
 
 /** One pin: everything held at the same spot. */
 export type Pin = { key: string; spot: Spot; count: number; title: string }
@@ -77,8 +77,11 @@ export default function EventMap({ pins, picked, onPick, origin, radius }: {
     refit.current = () => {
       if (lastFit.current === fitKey || !m.getSize().y) return
       lastFit.current = fitKey
-      if (pts.length > 1) m.fitBounds(L.latLngBounds(pts), { padding: [28, 28], maxZoom: 15 })
-      else if (pts.length === 1) m.setView(pts[0], 14)
+      // open on the heart of Nosara (Guiones, Pelada, town); farther pins are a pinch away
+      const core = radius ? pts : pts.filter((p) => { const [lat, lng] = p as [number, number]; return miles(NOSARA_CENTER, { lat, lng }) <= 3.5 })
+      const use = core.length ? core : pts
+      if (use.length > 1) m.fitBounds(L.latLngBounds(use), { padding: [28, 28], maxZoom: 15 })
+      else if (use.length === 1) m.setView(use[0], 14)
     }
     refit.current()
   }, [pins, picked, origin, radius, fitKey])

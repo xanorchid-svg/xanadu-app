@@ -249,7 +249,7 @@ export default function Calendar() {
             <span className="text-[12px] text-faint">
               {pins.length ? `${on.length - offMap} on at ${pins.length} ${pins.length === 1 ? 'place' : 'places'}. Tap a pin to see what’s there.` : 'Nothing on the map for these dates. Try a longer period or another type.'}
               {offMap > 0 && ` ${offMap} more ${offMap === 1 ? 'has' : 'have'} no location yet.`}
-              {' '}Dashed pins show the area; the host shares the exact spot.
+              {' '}Pinch out for San Juanillo and beyond. Dashed pins show the area; the host shares the exact spot.
             </span>
             {pinnedSpot && pinned.length > 0 && (
               <section className="flex flex-col gap-2.5">
