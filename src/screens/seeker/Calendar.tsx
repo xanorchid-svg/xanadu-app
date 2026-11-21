@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Chip, EmptyState, H1, Page, Screen, SeekerTabs, Segmented } from '../../components/ui'
 import { IconBack, IconCalendar, IconNext } from '../../components/icons'
@@ -318,7 +319,7 @@ export default function Calendar() {
           </div>
         )}
 
-        {big && (
+        {big && createPortal(
           <div className="fixed inset-0 z-[60] flex flex-col bg-navy" role="dialog" aria-modal="true" aria-label="Map of what’s on">
             <div className="flex items-center justify-between gap-3 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-3">
               <div className="flex min-w-0 flex-col">
@@ -335,7 +336,7 @@ export default function Calendar() {
             <div className="px-4 pt-3 pb-[max(14px,env(safe-area-inset-bottom))]">
               {placeStrip ?? <span className="text-[13px] text-subtle">Tap a pin to see what’s on there.</span>}
             </div>
-          </div>
+          </div>, document.body,
         )}
 
         {loading || view === 'Map' ? null : days.length > 0 ? (

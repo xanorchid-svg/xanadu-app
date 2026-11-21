@@ -210,3 +210,5 @@ button { font: inherit; }
 .xmap .leaflet-control-attribution a { color: var(--color-subtle); }
 /* OpenStreetMap is light; invert it into night colors that sit with the navy */
 .xmap .leaflet-tile-pane { filter: invert(1) hue-rotate(195deg) brightness(0.82) contrast(0.92) saturate(0.55); }
+/* hide hairline seams between tiles (visible once the tiles are tinted) */
+.xmap .leaflet-tile-container img.leaflet-tile { width: 256.6px !important; height: 256.6px !important; }
