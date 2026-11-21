@@ -20,6 +20,8 @@ export default function EventMap({ pins, picked, onPick, origin, radius }: {
   const layer = useRef<L.LayerGroup | null>(null)
   const pick = useRef(onPick)
   pick.current = onPick
+  const lastFit = useRef('')
+  const refit = useRef<() => void>(() => {})
 
   useEffect(() => {
     if (!box.current || map.current) return
@@ -34,12 +36,14 @@ export default function EventMap({ pins, picked, onPick, origin, radius }: {
     m.on('click', () => pick.current(null))
     layer.current = L.layerGroup().addTo(m)
     map.current = m
-    return () => { m.remove(); map.current = null }
+    // the map often mounts before its box has its final size; re-measure and re-fit once it does
+    const ro = new ResizeObserver(() => { m.invalidateSize(); lastFit.current = '' ; refit.current() })
+    ro.observe(box.current)
+    return () => { ro.disconnect(); m.remove(); map.current = null }
   }, [])
 
   // redraw pins, the radius ring and "you" whenever they change; fit the view only when the set of pins changes
   const fitKey = pins.map((p) => p.key).join('|') + `|${origin?.lat},${origin?.lng},${radius ?? ''}`
-  const lastFit = useRef('')
   useEffect(() => {
     const m = map.current, g = layer.current
     if (!m || !g) return
@@ -70,11 +74,13 @@ export default function EventMap({ pins, picked, onPick, origin, radius }: {
       mk.addTo(g)
       pts.push([p.spot.lat, p.spot.lng])
     }
-    if (lastFit.current !== fitKey) {
+    refit.current = () => {
+      if (lastFit.current === fitKey || !m.getSize().y) return
       lastFit.current = fitKey
-      if (pts.length > 1) m.fitBounds(L.latLngBounds(pts), { padding: [36, 36], maxZoom: 15 })
+      if (pts.length > 1) m.fitBounds(L.latLngBounds(pts), { padding: [28, 28], maxZoom: 15 })
       else if (pts.length === 1) m.setView(pts[0], 14)
     }
+    refit.current()
   }, [pins, picked, origin, radius, fitKey])
 
   // a picked pin slides into view
