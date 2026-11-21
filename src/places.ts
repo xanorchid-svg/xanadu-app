@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 /**
  * Where things are held, for the distance filter and the map.
@@ -98,22 +98,56 @@ export const ORIGINS: Origin[] = [
 ]
 export const NOSARA_CENTER = { lat: 9.9600, lng: -85.6650 }
 
+const OK_KEY = 'xanadu.location.ok'      // they said yes once: find them again quietly next time
+const SKIP_KEY = 'xanadu.location.skip'  // they tapped "Not now": don't show the ask again
+const store = { get: (k: string) => { try { return localStorage.getItem(k) } catch { return null } },
+  set: (k: string, v: string | null) => { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v) } catch { /* private mode */ } } }
+
+function getPosition() {
+  return new Promise<GeolocationPosition | GeolocationPositionError>((res) =>
+    navigator.geolocation.getCurrentPosition(res, res, { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }))
+}
+
 /**
- * The phone's location, asked for only when the seeker taps "Near me".
- * It stays on the phone (not saved anywhere) and is rounded to about 100 m.
+ * The phone's location, for distances and the "you" dot on the map.
+ * The phone only asks for permission when the seeker taps "Use my location" (after we've said why).
+ * It stays on the phone (never saved to Xanadu) and is rounded to about 100 m.
+ * Once they've said yes, later visits find them again without asking.
  */
 export function useMyLocation() {
   const [me, setMe] = useState<Origin | null>(null)
   const [state, setState] = useState<'idle' | 'asking' | 'denied' | 'error'>('idle')
+  const [skipped, setSkipped] = useState(() => store.get(SKIP_KEY) === '1')
+  const supported = typeof navigator !== 'undefined' && 'geolocation' in navigator
+
   const ask = useCallback(async () => {
-    if (!('geolocation' in navigator)) { setState('error'); return null }
+    if (!supported) { setState('error'); return null }
     setState('asking')
-    const pos = await new Promise<GeolocationPosition | GeolocationPositionError>((res) =>
-      navigator.geolocation.getCurrentPosition(res, res, { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }))
-    if (!('coords' in pos)) { setState(pos.code === 1 ? 'denied' : 'error'); return null }
+    const pos = await getPosition()
+    if (!('coords' in pos)) {
+      if (pos.code === 1) { setState('denied'); store.set(OK_KEY, null) } else setState('error')
+      return null
+    }
     const o: Origin = { key: 'me', label: 'You', lat: Math.round(pos.coords.latitude * 1000) / 1000, lng: Math.round(pos.coords.longitude * 1000) / 1000 }
-    setMe(o); setState('idle')
+    setMe(o); setState('idle'); store.set(OK_KEY, '1'); store.set(SKIP_KEY, null); setSkipped(false)
     return o
-  }, [])
-  return { me, state, ask }
+  }, [supported])
+
+  // said yes before: find them again, but only if the phone still allows it (never pop the prompt by surprise)
+  useEffect(() => {
+    if (!supported || store.get(OK_KEY) !== '1') return
+    let live = true
+    const go = () => getPosition().then((pos) => {
+      if (!live || !('coords' in pos)) return
+      setMe({ key: 'me', label: 'You', lat: Math.round(pos.coords.latitude * 1000) / 1000, lng: Math.round(pos.coords.longitude * 1000) / 1000 })
+    })
+    const perms = (navigator as Navigator & { permissions?: Permissions }).permissions
+    if (perms?.query) perms.query({ name: 'geolocation' as PermissionName }).then((r) => { if (r.state === 'granted') go() }).catch(go)
+    else go()
+    return () => { live = false }
+  }, [supported])
+
+  const skip = useCallback(() => { store.set(SKIP_KEY, '1'); setSkipped(true) }, [])
+  const forget = useCallback(() => { store.set(OK_KEY, null); setMe(null) }, [])
+  return { me, state, ask, skip, skipped, supported, forget }
 }

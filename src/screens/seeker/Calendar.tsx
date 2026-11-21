@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Chip, EmptyState, H1, Page, Screen, SeekerTabs, Segmented } from '../../components/ui'
 import { IconBack, IconCalendar, IconNext } from '../../components/icons'
@@ -12,7 +12,7 @@ import TypePicker from '../../components/TypePicker'
 import { specialBetween, specialOn, type SpecialDay } from '../../specialDays'
 import { useListings, type Listing } from '../../store'
 import type { Pin } from '../../components/EventMap'
-import { fmtMiles, miles, ORIGINS, spotOf, useMyLocation, type Origin, type Spot } from '../../places'
+import { fmtMiles, miles, NOSARA_CENTER, ORIGINS, spotOf, useMyLocation, type Origin, type Spot } from '../../places'
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 const at = (s: string) => new Date(s + 'T12:00:00')
@@ -90,7 +90,13 @@ export default function Calendar() {
   const far = (e: Item) => { const s = spots.get(e.id); return s ? miles(origin, s) : null }
   const dated = radius ? typed.filter((e) => { const d = far(e); return d !== null && d <= radius }) : typed
   const unplaced = radius ? typed.filter((e) => !spots.get(e.id)).length : 0
-  const nearMe = async () => { if (await loc.ask()) { setFromKey('me'); if (!radius) setRadius(5) } }
+  const nearMe = async () => { if (await loc.ask()) setFromKey('me') }
+  // once we know where they are, measure from them (they can still pick a part of Nosara)
+  // (unless they're far from Nosara, say planning from home: then keep measuring from Guiones)
+  const away = loc.me ? miles(loc.me, NOSARA_CENTER) : 0
+  useEffect(() => { if (loc.me && miles(loc.me, NOSARA_CENTER) <= 30) setFromKey('me') }, [loc.me])
+  const fromLabel = origin.key === 'me' ? 'you' : origin.label
+  const askCard = !loc.me && !loc.skipped && loc.supported && loc.state !== 'denied'
   const has = (label: string) => all.some((e) => inCategory(e, label))
 
   /** Quick periods: one tap for the common questions ("what's on this weekend?"). */
@@ -132,10 +138,10 @@ export default function Calendar() {
   const bare = (e: Item) => (isCommunity(e) ? <CommunityEventCard key={e.id} e={e} /> : <ExperienceCard key={e.id} e={e} />)
   const card = (e: Item) => {
     const s = spots.get(e.id), d = far(e)
-    if (!radius || !s || d === null) return bare(e)
+    if ((!radius && origin.key !== 'me') || !s || d === null) return bare(e)
     return (
       <div key={e.id} className="flex flex-col gap-1">
-        <span className="pl-1 text-[12px] text-gold-soft">{`${fmtMiles(d)}${d >= 0.15 ? ` from ${origin.key === 'me' ? 'you' : origin.label}` : ''} · ${s.label}`}</span>
+        <span className="pl-1 text-[12px] text-gold-soft">{`${fmtMiles(d)}${d >= 0.15 ? ` from ${fromLabel}` : ''} · ${s.label}`}</span>
         {bare(e)}
       </div>
     )
@@ -188,8 +194,22 @@ export default function Calendar() {
         <div className="flex flex-col gap-2">
           <div className="flex items-baseline justify-between gap-3">
             <span className="text-xs tracking-[0.14em] text-subtle uppercase">How far</span>
-            {radius && <span className="text-[12px] text-faint">{`Within ${radius} mi of ${origin.key === 'me' ? 'you' : origin.label}`}</span>}
+            {radius ? <span className="text-[12px] text-faint">{`Within ${radius} mi of ${fromLabel}`}</span>
+              : loc.me ? <span className="text-[12px] text-faint">{away > 30 ? `📍 You’re ${fmtMiles(away)} from Nosara` : '📍 Using your location'}</span> : null}
           </div>
+          {askCard && (
+            <div className="flex flex-col gap-2.5 rounded-[18px] border border-line-2 bg-surface px-4 py-3.5">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[15px] font-semibold text-ink">📍 See what’s near you</span>
+                <span className="text-[13px] leading-snug text-subtle">Allow your location to see how far each event is and where you are on the map. It stays on your phone; Xanadu doesn’t save it.</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={nearMe} disabled={loc.state === 'asking'}
+                  className="min-h-10 rounded-xl bg-iri px-4 text-[13px] font-semibold text-navy disabled:opacity-60">{loc.state === 'asking' ? 'Finding you…' : 'Use my location'}</button>
+                <button type="button" onClick={loc.skip} className="min-h-10 px-3 text-[13px] text-subtle">Not now</button>
+              </div>
+            </div>
+          )}
           <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-0.5" role="group" aria-label="Choose a distance">
             <Chip solid on={!radius} onClick={() => setRadius(null)}>Any distance</Chip>
             {RADII.map((r) => <Chip key={r} solid on={radius === r} onClick={() => setRadius(r)}>{`${r} mi`}</Chip>)}
@@ -197,11 +217,11 @@ export default function Calendar() {
           {radius && (
             <div className="-mx-5 flex items-center gap-2 overflow-x-auto px-5 pb-0.5" role="group" aria-label="Measure from">
               <span className="flex-none text-[12px] text-subtle">From</span>
-              <Chip on={fromKey === 'me' && !!loc.me} onClick={nearMe}>{loc.state === 'asking' ? 'Finding you…' : '📍 Near me'}</Chip>
+              <Chip on={fromKey === 'me' && !!loc.me} onClick={() => (loc.me ? setFromKey('me') : nearMe())}>{loc.state === 'asking' ? 'Finding you…' : loc.me ? '📍 You' : '📍 Use my location'}</Chip>
               {ORIGINS.map((o) => <Chip key={o.key} on={fromKey === o.key} onClick={() => setFromKey(o.key)}>{o.label}</Chip>)}
             </div>
           )}
-          {loc.state === 'denied' && <span className="text-[12px] text-gold-soft">Location is off for Xanadu. Allow it in your phone settings, or measure from a part of Nosara.</span>}
+          {loc.state === 'denied' && <span className="text-[12px] text-gold-soft">Location is off for Xanadu. To turn it on, allow location for Xanadu in your phone’s settings. Meanwhile, distances are measured from a part of Nosara.</span>}
           {loc.state === 'error' && <span className="text-[12px] text-gold-soft">We couldn’t find you just now. Measure from a part of Nosara instead.</span>}
         </div>
 
@@ -244,7 +264,8 @@ export default function Calendar() {
         {!loading && view === 'Map' && (
           <div className="flex flex-col gap-3">
             <Suspense fallback={<div className="h-[58vh] min-h-[320px] w-full animate-pulse rounded-[20px] bg-surface" />}>
-              <EventMap pins={pins} picked={pin} onPick={setPin} origin={radius || (fromKey === 'me' && loc.me) ? origin : null} radius={radius} />
+              <EventMap pins={pins} picked={pin} onPick={setPin} origin={radius || origin.key === 'me' ? origin : null} radius={radius}
+                onLocate={loc.supported ? nearMe : undefined} locating={loc.state === 'asking'} />
             </Suspense>
             <span className="text-[12px] text-faint">
               {pins.length ? `${on.length - offMap} on at ${pins.length} ${pins.length === 1 ? 'place' : 'places'}. Tap a pin to see what’s there.` : 'Nothing on the map for these dates. Try a longer period or another type.'}
@@ -255,7 +276,7 @@ export default function Calendar() {
               <section className="flex flex-col gap-2.5">
                 <div className="flex flex-col">
                   <span className="font-display text-[20px] leading-tight text-ink">{placeName(pinned[0], pinnedSpot)}</span>
-                  <span className="text-[12px] text-subtle">{[pinnedSpot.exact ? pinnedSpot.label : `Around ${pinnedSpot.label}`, `${fmtMiles(miles(origin, pinnedSpot))} from ${origin.key === 'me' ? 'you' : origin.label}`].join(' · ')}</span>
+                  <span className="text-[12px] text-subtle">{[pinnedSpot.exact ? pinnedSpot.label : `Around ${pinnedSpot.label}`, `${fmtMiles(miles(origin, pinnedSpot))} from ${fromLabel}`].join(' · ')}</span>
                 </div>
                 {pinned.map((e) => (
                   <div key={e.id} className="flex flex-col gap-1">

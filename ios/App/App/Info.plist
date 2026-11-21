@@ -40,7 +40,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Xanadu lets you take photos for your profile, your space and your offerings.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Xanadu uses your approximate location (rounded to about 1 km) to show Community members near you, only if you turn this on.</string>
+	<string>Xanadu uses your location to show how far events are and where you are on the map, and, if you turn on Community, members near you. Your exact location isn't saved.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Xanadu lets you choose photos for your profile, your space and your offerings.</string>
 	<key>UIApplicationSceneManifest</key>

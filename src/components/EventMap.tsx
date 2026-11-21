@@ -11,9 +11,11 @@ export type Pin = { key: string; spot: Spot; count: number; title: string }
  * Venues we know sit on their own point; area-only places (private homes, "address on RSVP") get a soft ring instead.
  * Tapping a pin calls onPick so the page can list what's there.
  */
-export default function EventMap({ pins, picked, onPick, origin, radius }: {
+export default function EventMap({ pins, picked, onPick, origin, radius, onLocate, locating = false }: {
   pins: Pin[]; picked: string | null; onPick: (key: string | null) => void
   origin?: { lat: number; lng: number; label: string } | null; radius?: number | null
+  /** "Find me": asks for the location (first time) or centers on it */
+  onLocate?: () => void; locating?: boolean
 }) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<L.Map | null>(null)
@@ -79,6 +81,8 @@ export default function EventMap({ pins, picked, onPick, origin, radius }: {
       lastFit.current = fitKey
       // open on the heart of Nosara (Guiones, Pelada, town); farther pins are a pinch away
       const core = radius ? pts : pts.filter((p) => { const [lat, lng] = p as [number, number]; return miles(NOSARA_CENTER, { lat, lng }) <= 3.5 })
+      // include "you" when you're in Nosara, so the first view shows you and what's around
+      if (origin && !radius && origin.label === 'You' && miles(NOSARA_CENTER, origin) <= 6) core.push([origin.lat, origin.lng])
       const use = core.length ? core : pts
       if (use.length > 1) m.fitBounds(L.latLngBounds(use), { padding: [28, 28], maxZoom: 15 })
       else if (use.length === 1) m.setView(use[0], 14)
@@ -92,5 +96,20 @@ export default function EventMap({ pins, picked, onPick, origin, radius }: {
     if (p && map.current) map.current.panTo([p.spot.lat, p.spot.lng], { animate: true })
   }, [picked]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  return <div ref={box} className="xmap h-[58vh] min-h-[320px] w-full overflow-hidden rounded-[20px] bg-surface" role="application" aria-label="Map of where events are held" />
+  const you = origin?.label === 'You' ? origin : null
+  const locate = () => {
+    if (you && map.current) map.current.setView([you.lat, you.lng], Math.max(map.current.getZoom(), 14), { animate: true })
+    else onLocate?.()
+  }
+  return (
+    <div className="relative">
+      <div ref={box} className="xmap h-[58vh] min-h-[320px] w-full overflow-hidden rounded-[20px] bg-surface" role="application" aria-label="Map of where events are held" />
+      {onLocate && (
+        <button type="button" onClick={locate} disabled={locating} aria-label={you ? 'Center on you' : 'Use my location'}
+          className="absolute bottom-4 left-3 z-[500] flex min-h-10 items-center gap-1.5 rounded-full border border-line-2 bg-navy/90 px-3.5 text-[13px] text-text shadow-lg backdrop-blur disabled:opacity-60">
+          <span aria-hidden>📍</span>{locating ? 'Finding you…' : you ? 'You' : 'Use my location'}
+        </button>
+      )}
+    </div>
+  )
 }
